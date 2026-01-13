@@ -1,18 +1,19 @@
+<!-- omit in toc -->
 # Dynamic Engineering Squad
 Refactoring the Future
 
 > A description of our app (when we come up with it)
 
+<!-- omit in toc -->
 ## Table of Contents
-- [Dynamic Engineering Squad](#dynamic-engineering-squad)
-  - [Table of Contents](#table-of-contents)
-    - [Team Materials](#team-materials)
-  - [Project Ideas](#project-ideas)
-  - [Installation](#installation)
-  - [Usage](#usage)
-  - [Features](#features)
+- [Team Materials](#team-materials)
+- [Project Ideas](#project-ideas)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features)
 
-### Team Materials
+## Team Materials
+- [Our team](team/Contributors.md)
 - [Logo](doc/DESlogo.png)
 - [Letterhead](doc/DES_Letterhead_Template.pdf)
 - [Business Card](doc/business_card.png)
