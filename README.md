@@ -28,7 +28,7 @@ Refactoring the Future
 
 ## Project Ideas
 
-Here are our [project ideas](doc/ProjectIdeas.pdf).
+Here are our [project ideas](doc/ProjectIdeas.md).
 
 ## Installation
 
@@ -41,3 +41,5 @@ TBD
 ## Features
 
 TBD
+
+test erin
