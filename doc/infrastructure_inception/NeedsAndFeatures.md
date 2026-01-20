@@ -10,7 +10,7 @@
 6. Need \- User registration, email/password
 7. Need \- User authentication, so user can log in
 8. Need \- Ability to flag images/accounts
-9. Need \- Ability to flag/report/ban users for inappropriate names and pictures buse
+9. Need \- Ability to flag/report/ban users for inappropriate names and pictures abuse
 10. Need \- Ability for users to earn a reputation based on how credible their posts are
 11. Need \- User Roles (user/moderator/admin)
 
