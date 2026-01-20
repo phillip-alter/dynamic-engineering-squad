@@ -1,6 +1,6 @@
 # Stakeholders and Users
 
-## Product Owner
+## Product Owner/Client
 - Dynamic Engineering Squad
 
 ## Advisor
