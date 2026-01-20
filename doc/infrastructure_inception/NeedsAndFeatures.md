@@ -15,21 +15,29 @@
 11. Need \- User Roles (user/moderator/admin)
 
 
-## List of Features
+## List of Features (with priority)
 
-1. Feature \- Leaderboard of the worst infrastructure damage pics  
-2. Feature \- Leaderboard of highest “point” carriers  
-3. Feature \- Sharing to social media  
-4. Feature \- Naming system
-5. Feature \- “Upvote”/verification system for existing issues  
-6. Feature \- Celebration when infrastructure issue is resolved
-7. Feature \- Connect road cams to view roads/potholes in real time (???)
-8. Feature \- User Accounts with Authentication
-9. Feature \- User roles
-10. Feature \- Feed of latest finds
-11. Feature \- Flagging system to flag inappropriate posts
-12. Feature \- Maps screen to show infrastructure issues near user
-13. Feature \- Submitting an infrastructure issue
+### Core Reporting & Discovery
+1. Submitting an infrastructure issue (photo, location, description) — High  
+2. Feed of latest reported infrastructure issues — Medium  
+3. Maps screen showing infrastructure issues near the user — Medium  
+4. Connect road cameras to view roads/potholes in real time — Low  
+
+### Community & Validation
+5. Upvote / verification system for existing issues — High  
+6. Naming system for reported infrastructure issues — High  
+7. Celebration or visual indicator when an infrastructure issue is resolved — Low  
+8. Flagging system for inappropriate or false posts — Medium  
+
+### User Accounts & Roles
+9. User accounts with authentication — High  
+10. User roles (e.g., reporter, moderator, administrator) — High  
+11. User dashboard showing activity and contributions — Low  
+
+### Gamification & Social
+12. Leaderboard of users with highest contribution points — Medium  
+13. Leaderboard of worst infrastructure damage photos — Low  
+14. Sharing infrastructure issues to social media — Low  
 
 ## What can a user do with it?
 
