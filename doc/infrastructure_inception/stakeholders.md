@@ -42,7 +42,7 @@
 - **Profile Picture**:
      - ![An image of Jimothy Slimm](./images/jimothy_slimm.png)
 
-### User #3: <name>
+### User #3: Maria Gonzales
 - **Age**: 42 
 - **Occupation**: Elementary School Teacher
 - **Location**: Salem, Oregon
