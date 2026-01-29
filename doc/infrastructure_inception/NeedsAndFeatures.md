@@ -15,7 +15,7 @@
 11. Need \- User Roles (user/moderator/admin)
 
 
-## List of Features (with priority)
+## List of Features (with priority High/Medium/Low)
 
 ### Core Reporting & Discovery
 1. Submitting an infrastructure issue (photo, location, description) — High  
@@ -31,8 +31,18 @@
 
 ### User Accounts & Roles
 9. User accounts with authentication — High  
-10. User roles (e.g., reporter, moderator, administrator) — High  
-11. User dashboard showing activity and contributions — Low  
+    - User Registration
+    - User Login
+    - Logging out
+    - Forgotten password
+10. User roles (e.g., reporter, moderator, administrator) — High 
+    - User Roles
+    - Admin banning users
+    - Admin managing user roles
+11. User dashboard showing activity and contributions — Low 
+    - User dashboard creation 
+    - Edit user profile
+    - Upload profile picture
 
 ### Gamification & Social
 12. Leaderboard of users with highest contribution points — Medium  
@@ -86,4 +96,17 @@
 4. The system with clean UI/UX to make sure the reporting process is fast, easy, and enjoyable, not slogging through forms.   
 5. The system must prevent duplicate infrastructure issue reports for the same location. 
 6. The system must be able to flag/report/ban users for inappropriate names or pictures.
+
+### Potential User Stories
+
+- User Registration (4 pts): As a new user, I would like to create a new account with a username, email, and password so I can start submitting reports and earning points.
+- User Login (2 pts): As a registered user, I would like to log in using my credentials so I can access my account and private features.
+- Admin: Ban/Suspend User (4 pts): As an Administrator, I would like to ban a user who abuses the system so I can maintain a safe and clean community.
+- Admin: Manage User Roles (4 pts): As an Administrator, I would like to promote a standard user to a "Moderator" so I can share the workload of verifying infrastructure reports.
+- Route Protection (2 pts): As the Product Owner, I would like to block access to specific pages for non-logged-in users so I can prevent spam and unauthorized submissions.
+- User Dashboard (2 pts): As a competitive user, I would like to view my personal dashboard so I can see my total contribution points and reputation score.
+- Edit User Profile (2 pts): As a user, I would like to update my email address or bio so I can keep my contact info current and express my identity.
+- Upload Profile Picture (2 pts): As a user, I would like to upload a custom avatar image so I can be recognized on the leaderboard.
+- Secure Logout (1 pt): As a user, I would like to log out of the application so I can keep my account safe when I leave a shared computer.
+- View Public Profile (1 pt): As a user, I would like to click on another user's name in the feed so I can see their public stats and avatar.
 

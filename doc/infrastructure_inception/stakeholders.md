@@ -5,14 +5,7 @@
 
 ## Advisor
 - Chris Brooks
-
-## Sponsors
-- Angel en Vestér
-    - Angel is a stakeholder because he finds the app interesting enough to invest into, and sees potential growth in the app. He is personally familiar with infrastructure issues on his drive home, dealing with potholes and broken lights.
-
-## Outside Experts
-- Cesar Cival
-     - Cesar is a stakeholder because he acts as the subject matter expert on city infrastructure and planning. He is a civil engineer who works directly with the muncipalities and knows their processes.
+- Dr. Becka Morgan
 
 ## Developers
 - Julian Aguilar-Tomas
@@ -22,7 +15,7 @@
 
 ## Users
 
-### User #1: Kyle Glass
+### Kyle Glass
 - **Age**: 22
 - **Occupation**: Delivery Driver
 - **Location**: Salem, Oregon
@@ -32,7 +25,7 @@
 - **Profile Picture**:
      - ![An image of Kyle Glass](./images/kyle_glass.jpg)
 
-### User #2: Jimothy Slimm
+### Jimothy Slimm
 - **Age**: 45
 - **Occupation**: Auto Repair Shop Owner
 - **Location**: Independence, Oregon
@@ -41,3 +34,23 @@
 - **Role**: Regular User (Uses the app when issues directly impact his business or customers)
 - **Profile Picture**:
      - ![An image of Jimothy Slimm](./images/jimothy_slimm.png)
+
+### Maria Gonzales
+- **Age**: 42 
+- **Occupation**: Elementary School Teacher
+- **Location**: Salem, Oregon
+- **Tech Proficiency**: Moderate — comfortable using smartphones and common apps, but not highly technical
+- **Background Information**: María has lived in Salem for over 15 years and commutes daily to work. She often notices damaged sidewalks, crosswalks, and potholes near her school that make it unsafe for children and parents. She has tried reporting issues in the past through city websites but found the process confusing and time-consuming. María values community involvement and wants an easy way to report issues and track whether they are being addressed, especially those affecting public safety.
+- **Role**: Reports and verifies infrastructure issues affecting neighborhood safety.
+- **Profile Picture**:
+     - ![An image of <name>](./images/Maria_Gonzales.jpg)
+
+### Denise Green
+- **Age**: 39
+- **Occupation**: City of Salem Infrastructure Employee
+- **Location**: Salem, OR
+- **Tech Proficiency**: Moderate–High (Uses databases, GIS dashboards, ticketing systems, and reporting tools daily)
+**Background Information**: Denise works for the city’s Public Works Department, where she helps manage road maintenance requests, service tickets, and infrastructure planning. Every week, she reviews dozens of citizen complaints about potholes, damaged signage, and unsafe road conditions. Currently, much of this information comes in through disconnected channels—phone calls, emails, and paper reports—making it difficult to prioritize urgent issues or identify recurring problem areas. Denise wants a centralized, data-driven system that allows her to view user-submitted reports in real time, verify conditions, update road status, and track whether maintenance crews have resolved the problem. For her, this app is a tool to improve transparency, efficiency, and public trust.
+- **Role**: Administrative / Operational User (Uses app daily to manage and update city infrastructure data)
+- **Profile Picture**:
+     - ![An image of <Denise>](./images/Denise.png)
