@@ -40,6 +40,9 @@ public class LeaderboardService
         if (name.Length > 64)
             throw new ArgumentException("DisplayName must be 64 characters or fewer", nameof(displayName));
 
+        if (pointsToAdd <=0)
+            throw new ArgumentException("Points must be greater than 0.", nameof(pointsToAdd));    
+
         //Points cannot be negative: enforced by requiring pointsToAdd > 0
         await _repo.UpsertAddPointsAsync(name, pointsToAdd, DateTime.UtcNow);
 

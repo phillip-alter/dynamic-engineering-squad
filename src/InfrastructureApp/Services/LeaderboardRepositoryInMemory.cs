@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Linq;
 using InfrastructureApp.Models;
 
 namespace InfrastructureApp.Services;
@@ -30,29 +31,29 @@ public class LeaderboardRepositoryInMemory : ILeaderboardRepository
     }
 
 
-public Task UpsertAddPointAsync(string displayName, int pointsToAdd, DateTime updatedAtUtc)
+public Task UpsertAddPointsAsync(string displayName, int pointsToAdd, System.DateTime updatedAtUtc)
+{
+    lock (_lock)
     {
-        lock (_lock)
+        if (_entries.TryGetValue(displayName, out var existing))
         {
-            if (_entries.TryGetValue(displayName, out var existing))
-            {
-                existing.ContributionPoints += pointsToAdd;
-                existing.UpdatedAtUtc = updatedAtUtc;
-            }
-            else
-            {
-                _entries[displayName] = new LeaderboardEntry
-                {
-                    DisplayName = displayName,
-                    ContributionPoints = pointsToAdd,
-                    UpdatedAtUtc = updatedAtUtc
-                };
-
-            }
+            existing.ContributionPoints += pointsToAdd;
+            existing.UpdatedAtUtc = updatedAtUtc;
         }
-        return Task.CompletedTask;
+        else
+        {
+            _entries[displayName] = new LeaderboardEntry
+            {
+                DisplayName = displayName,
+                ContributionPoints = pointsToAdd,
+                UpdatedAtUtc = updatedAtUtc
+            };
+        }
     }
 
+    return Task.CompletedTask;
+}
+   
     public Task SeedIfEmptyAsync(IEnumerable<LeaderboardEntry> seedEntries)
     {
         lock (_lock)
