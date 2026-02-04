@@ -1,0 +1,35 @@
+@model InfrastructureApp.ViewModels.LeaderboardIndexViewModel
+
+
+
+<h1>Leaderboard</h1>
+<p>Top @Model.TopN</p>
+
+@if (Model.Entries.Count == 0)
+{
+    <p><em>No contributions yet.</em></p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>User</th>
+                <th>Points</th>
+                <th>Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Entries.Count; i++)
+            {
+                <tr>
+                    <td>@(i + 1)</td>
+                    <td>@Model.Entries[i].UserId</td>
+                    <td>@Model.Entries[i].UserPoints</td>
+                    <td>@Model.Entries[i].UpdatedAtUtc.ToLocalTime().ToString("g")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
