@@ -15,10 +15,12 @@ CREATE TABLE [AspNetUsers] (
     [NormalizedUserName] NVARCHAR(256) NULL,
     [Email] NVARCHAR(256) NULL,
     [NormalizedEmail] NVARCHAR(256) NULL,
+    [EmailConfirmed] BIT NOT NULL,
     [PasswordHash] NVARCHAR(MAX) NULL,
     [SecurityStamp] NVARCHAR(MAX) NULL,
     [ConcurrencyStamp] NVARCHAR(MAX) NULL,
     [PhoneNumber] NVARCHAR(MAX) NULL,
+    [PhoneNumberConfirmed] BIT NOT NULL,
     [TwoFactorEnabled] BIT NOT NULL,
     [LockoutEnd] DATETIMEOFFSET NULL,
     [LockoutEnabled] BIT NOT NULL,
@@ -78,16 +80,16 @@ VALUES
 DECLARE @UserId NVARCHAR(450) = 'user-guid-001';
 
 INSERT INTO [AspNetUsers] (
-    [Id], [UserName], [NormalizedUserName], [Email], [NormalizedEmail], 
-    [PasswordHash], [SecurityStamp], [ConcurrencyStamp], [TwoFactorEnabled], 
+    [Id], [UserName], [NormalizedUserName], [Email], [NormalizedEmail], [EmailConfirmed],
+    [PasswordHash], [SecurityStamp], [ConcurrencyStamp], [TwoFactorEnabled], [PhoneNumberConfirmed],
     [LockoutEnabled], [AccessFailedCount]
 )
 VALUES (
     @UserId, 
     'palter', 'PALTER', 
-    'p.alter@example.com', 'P.ALTER@EXAMPLE.COM', 
+    'p.alter@example.com', 'P.ALTER@EXAMPLE.COM', 0, 
     'AQAAAAEAACcQAAAAEBL6w...YourActualHashHere...', -- totally legit asp.net hash
-    NEWID(), NEWID(), 0, 1, 0
+    NEWID(), NEWID(), 0, 0, 1, 0
 );
 
 -- assign 'user' role to user
