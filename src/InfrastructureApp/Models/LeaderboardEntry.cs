@@ -1,10 +1,10 @@
 
-
-namespace InfrastructureApp.Models;
-
-public class LeaderboardEntry
+namespace InfrastructureApp.Models
 {
-    public string DisplayName { get; set; } = "";
-    public int ContributionPoints { get; set; }
-    public DateTime UpdatedAtUtc { get; set; } = DateTime.UtcNow;
+    public class LeaderboardEntry
+    {
+        public string UserId { get; set; } = string.Empty;
+        public int UserPoints { get; set; }
+        public DateTime UpdatedAtUtc { get; set; }
+    }
 }

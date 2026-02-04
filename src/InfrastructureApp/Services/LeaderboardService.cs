@@ -18,12 +18,12 @@ public class LeaderboardService
         var all = await _repo.GetAllAsync();
 
         //Sort rules:
-        //1. points desc
-        //2. display name asc
+        //1. Userpoints desc
+        //2. UserId asc
         //3. updatedAt desc
         var ordered = all
-            .OrderByDescending(e => e.ContributionPoints)
-            .ThenBy(e => e.DisplayName, StringComparer.OrdinalIgnoreCase)
+            .OrderByDescending(e => e.UserPoints)
+            .ThenBy(e => e.UserId)
             .ThenByDescending(e => e.UpdatedAtUtc)
             .Take(n)
             .ToList()

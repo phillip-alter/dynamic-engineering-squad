@@ -1,25 +1,22 @@
 @model InfrastructureApp.ViewModels.LeaderboardIndexViewModel
 
+
+
 <h1>Leaderboard</h1>
-<p>Highest Contribution Points (Top @Model.TopN)</p>
+<p>Top @Model.TopN</p>
 
-@if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+@if (Model.Entries.Count == 0)
 {
-    <div class="alert alert-danger">@Model.ErrorMessage</div>
-}
-
-@if (Model.Entries.Count == 0){
     <p><em>No contributions yet.</em></p>
 }
-
 else
 {
     <table class="table table-striped">
         <thead>
             <tr>
                 <th>Rank</th>
-                <th>Display Name</th>
-                <th>Constribution Points</th>
+                <th>User</th>
+                <th>Points</th>
                 <th>Updated</th>
             </tr>
         </thead>
@@ -28,39 +25,11 @@ else
             {
                 <tr>
                     <td>@(i + 1)</td>
-                    <td>@Model.Entries[i].DisplayName</td>
-                    <td>@Model.Entries[i].ContributionPoints</td>
-                    <td>@Model.Entries[i].UpdatedAtUtc.ToLocalTime().ToString("g" )/td>
+                    <td>@Model.Entries[i].UserId</td>
+                    <td>@Model.Entries[i].UserPoints</td>
+                    <td>@Model.Entries[i].UpdatedAtUtc.ToLocalTime().ToString("g")</td>
                 </tr>
             }
         </tbody>
     </table>
-}
-
-<hr />
-
-<h3>Add Points</h3>
-
-<form asp-action="Add" method="post">
-    @Html.AntiForgeryToken()
-
-    <div class="mb-3>
-        <label class="form-label" asp-for="FormDisplayName">Display Name</label>
-        <input class="form-control" asp-for="Form.DisplayName" />
-        <span class="text-danger" asp-validation-for="Form.DisplayName"></span>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label" asp-for="Form.Points">Points</label>
-        <input class="form-control" asp-for="Form.Points" type="number" min="1" />
-        <span class="text-danger" asp-validation-for="Form.Points"></span>
-    </div>
-
-    <input type="hidden" name="top" value="@Model.TopN" />
-    <button class="btn btn-primary" type="submit">Add Points</button>
-</form>
-
-@section Scripts 
-{
-    <partial name="_ValidationScriptsPartial" />
 }
