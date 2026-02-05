@@ -38,4 +38,27 @@ public class AccountControllerTests
         var viewResult = result as ViewResult;
         Assert.That(model, Is.EqualTo(viewResult.Model));
     }
+
+    [Test]
+    public async Task RegisterPost_RedirectsToHome_WhenSuccessfullyRegistered()
+    {
+        var model = new RegisterViewModel()
+        {
+            Username = "testuser",
+            Email = "test@test.com",
+            Password = "Password2@"
+        };
+
+        _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<Users>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        var result = await _controller.Register(model);
+
+        var redirect = result as RedirectToActionResult;
+
+        Assert.That(redirect.ActionName, Is.EqualTo("Index"));
+        Assert.That(redirect.ControllerName, Is.EqualTo("Home"));
+    }
+
+
 }
