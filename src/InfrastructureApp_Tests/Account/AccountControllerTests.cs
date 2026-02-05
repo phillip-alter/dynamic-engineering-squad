@@ -28,7 +28,7 @@ public class AccountControllerTests
     }
 
     [Test]
-    public async Task RegisterPort_ReturnsView_WhenModelStateInvalid()
+    public async Task RegisterPost_ReturnsView_WhenModelStateInvalid()
     {
         _controller.ModelState.AddModelError("Email", "Required");
         var model = new RegisterViewModel();
