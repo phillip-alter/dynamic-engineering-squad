@@ -60,5 +60,26 @@ public class AccountControllerTests
         Assert.That(redirect.ControllerName, Is.EqualTo("Home"));
     }
 
+    [Test]
+    public async Task RegisterPost_AddsErrors_WhenIdentityFails()
+    {
+        var model = new RegisterViewModel
+        {
+            Username = "Test",
+            Email = "email@test.com",
+        };
 
+        var identityError = new IdentityError
+        {
+            Description = "Password is too simple."
+        };
+
+        _mockUserManager.Setup(x => x.CreateAsync(It.IsAny<Users>(), It.IsAny<string>()))
+            .ReturnsAsync(IdentityResult.Failed(identityError));
+
+        var result = await _controller.Register(model);
+
+        Assert.That(_controller.ModelState.IsValid, Is.False);
+        Assert.That(_controller.ModelState[string.Empty].Errors[0].ErrorMessage, Is.EqualTo("Password is too simple."));
+    }
 }
