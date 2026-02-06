@@ -1,3 +1,6 @@
+/* =========================
+   Existing base site styles
+   ========================= */
 html {
   font-size: 14px;
 }
@@ -19,6 +22,7 @@ html {
 
 body {
   margin-bottom: 60px;
+   top: 0px !important; /* Added to prevents Google Translate banner from shifting page down */
 }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
@@ -41,36 +45,38 @@ body {
     height: auto;
 }
 
-/* Google Translate widget tweaks for dark navbar */
+
+/* =========================
+   Google Translate styling
+   ========================= */
+
+/* Keeps the translate widget aligned nicely in the navbar */
 #google_translate_element {
-    display: inline-flex;
-    align-items: center;
+  display: inline-flex;
+  align-items: center;
 }
 
 #google_translate_element select {
-    background: #212529;           /* matches bg-dark */
-    color: #f8f9fa;
-    border: 1px solid #6c757d;     /* border-secondary */
-    border-radius: .25rem;
-    padding: .25rem .5rem;
-    font-size: .9rem;
+  background: #212529;       
+  color: #f8f9fa;
+  border: 1px solid #6c757d; 
+  border-radius: .25rem;
+  padding: .25rem .5rem;
+  font-size: .9rem;
 }
 
-/* Hide the Google branding text that sometimes shows up next to dropdown */
+/* Hides Google branding text next to the dropdown */
 #google_translate_element .goog-logo-link,
 #google_translate_element .goog-te-gadget span {
-    display: none !important;
+  display: none !important;
 }
 
+/* Removes leftover gadget text spacing */
 #google_translate_element .goog-te-gadget {
-    color: transparent !important;
+  color: transparent !important;
 }
 
-/* Prevent Google Translate from pushing page down weirdly */
+/* top Google translate banner from showing */
 .goog-te-banner-frame.skiptranslate {
-    display: none !important;
+  display: none !important;
 }
-body {
-    top: 0px !important;
-}
-
