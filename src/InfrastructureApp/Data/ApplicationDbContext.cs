@@ -5,9 +5,7 @@ using InfrastructureApp.Models;
 
 namespace InfrastructureApp.Data
 {
-    //Inheriting from IdentityDbContext<IdentityUser> integrates ASP.NET core identity
-    //Which automatically includes tables for users, roles, claims, logins, etc
-    public class ApplicationDbContext : IdentityDbContext<IdentityUser>
+    public class ApplicationDbContext : IdentityDbContext<Users>
     {
         //Db context options are provided by dependency injection at runtime
         //The base constructor must be called so IdentityDbContext can 

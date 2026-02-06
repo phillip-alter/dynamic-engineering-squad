@@ -8,7 +8,7 @@ using InfrastructureApp.Models;
 using InfrastructureApp.Services;
 using System.Collections.ObjectModel;
 
-namespace InfrastructureApp.Tests.Services
+namespace InfrastructureApp_Tests
 {
     [TestFixture]
     public class LeaderboardServiceTests
