@@ -2,6 +2,16 @@ using InfrastructureApp.Models;
 
 namespace InfrastructureApp.Services;
 
+//LeaderboardService contains the business logic for the leaderboard operations.
+//It will
+//-enforce domain rules
+//-coordinate with the repository for data access
+//-Shield controllers from persistence and ordering details.
+
+
+//Keeping this logic here (instead of controllers or repos)
+//results in a clean separation of concerns and testable behavior.
+
 public class LeaderboardService
 {
     private readonly ILeaderboardRepository _repo;
