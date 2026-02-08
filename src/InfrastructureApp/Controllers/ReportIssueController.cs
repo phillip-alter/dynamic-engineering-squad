@@ -10,7 +10,7 @@ namespace InfrastructureApp.Controllers
 {
     //require login to submit reports
     //can allow anonymous
-    [Authorize]
+    //[Authorize]
     public class ReportIssueController : Controller
     {
         private readonly ApplicationDbContext _db;
@@ -40,6 +40,7 @@ namespace InfrastructureApp.Controllers
 
         //POST /ReportIssue/Create
         [HttpPost]
+        //[Authorize]    submission requires login
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ReportIssueViewModel vm)
         {
@@ -50,11 +51,12 @@ namespace InfrastructureApp.Controllers
             }
 
             //get logged in user Id
-            var userId = _userManager.GetUserId(User);
-            if (string.IsNullOrWhiteSpace(userId))
-            {
-                return Challenge();
-            }
+            // var userId = _userManager.GetUserId(User);
+            // if (string.IsNullOrWhiteSpace(userId))
+            // {
+            //     return Challenge();
+            // }
+            var userId = "ANONYMOUS";
 
             //points rule
             const int pointsForReport = 10;
@@ -117,11 +119,12 @@ namespace InfrastructureApp.Controllers
         }
 
         //GET ReportIssue/Details/5
-        [HttpPost]
+        [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
             var report = await _db.ReportIssue.FirstOrDefaultAsync(r => r.Id == id);
-            
+
             if (report == null)
             {
                 return NotFound();
