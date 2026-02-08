@@ -1,0 +1,49 @@
+@{
+    ViewData["Title"] = "Report Issue";
+}
+
+<div class="container py-4">
+    <div class="text-center mb-4">
+        <h1 class="display-6">Report an Infrastructure Issue</h1>
+        <p class="lead">
+            Submit a pothole, broken sign, damaged sidewalk, streetlight issue, or other public hazard.
+        </p>
+    </div>
+
+    <div class="report-card mb-4">
+        <h2 class="h5">How to submit an issue</h2>
+        <ol class="mb-0">
+            <li>Click <strong>Report an Issue</strong> below.</li>
+            <li>Add a clear description and the location.</li>
+            <li>Add an image.</li>
+            <li>Press <strong>Submit</strong> to finish and earn points.</li>
+        </ol>
+    </div>
+
+    <div class="row g-3 justify-content-center">
+        <div class="col-12 col-md-6">
+            <!-- reporting visible within 5 seconds -->
+            <a class="btn report-action-btn report-action-btn--primary w-100"
+               asp-controller="Reports"
+               asp-action="Create"
+               aria-label="Go to the issue submission form">
+                Report an Issue
+            </a>
+        </div>
+
+        <div class="col-12 col-md-3">
+            <a class="btn report-action-btn w-100"
+               asp-controller="Home"
+               asp-action="Index"
+               aria-label="Return to the home page">
+                Back to Home
+            </a>
+        </div>
+    </div>
+
+    <div class="text-center mt-4">
+        <small class="text-muted">
+            Keyboard accessible: use Tab to focus buttons (visible focus ring enabled).
+        </small>
+    </div>
+</div>
