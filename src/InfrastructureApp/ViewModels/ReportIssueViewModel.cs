@@ -15,6 +15,7 @@ namespace InfrastructureApp.ViewModels
 
         [Required]
         [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180.")]
+        public decimal Longitude { get; set; }
 
         //replace with IFormFile upload + blob storage.
         [MaxLength(450)]
