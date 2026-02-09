@@ -19,6 +19,9 @@ namespace InfrastructureApp.Data
         //will initialize this property at runtime.
         public DbSet<UserPoints> UserPoints { get; set; } = null!;
 
+        //this maps the reportIssue to the reports table
+        public DbSet<ReportIssue> ReportIssue { get; set; } = null!;
+
         //This is the place for constraints, defaults, indexes, and relationships
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -56,6 +59,43 @@ namespace InfrastructureApp.Data
             builder.Entity<UserPoints>()
                 .Property(up => up.LastUpdated)
                 .HasDefaultValueSql("SYSUTCDATETIME()");
+
+
+
+            //report issue maps to existing SQL table reports
+            builder.Entity<ReportIssue>(entity =>
+            {
+                // Map to existing SQL table
+                entity.ToTable("Reports");
+
+                // Primary key
+                entity.HasKey(r => r.Id);
+
+                // Column mappings
+                entity.Property(r => r.Description)
+                    .IsRequired();
+
+                entity.Property(r => r.Status)
+                    .HasMaxLength(50)
+                    .IsRequired();
+
+                entity.Property(r => r.CreatedAt)
+                    .HasColumnType("datetime2");
+
+                entity.Property(r => r.UserId)
+                    .HasMaxLength(450)
+                    .IsRequired();
+
+                entity.Property(r => r.Latitude)
+                    .HasColumnType("decimal(9,6)");
+
+                entity.Property(r => r.Longitude)
+                    .HasColumnType("decimal(9,6)");
+
+                entity.Property(r => r.ImageUrl)
+                    .HasMaxLength(450);
+            });
+
         }
     }
 }
