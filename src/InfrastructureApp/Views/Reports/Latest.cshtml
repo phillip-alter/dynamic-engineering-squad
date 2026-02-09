@@ -7,16 +7,18 @@
 <h1 class="mb-3">Latest Reports</h1>
 
 @if (Model.Reports == null || !Model.Reports.Any())
-{
+{   
+    // Show message if there are no reports
     <div class="alert alert-info">
         No reported issues yet.
     </div>
 }
 else
-{
+{   // Display each report in a simple list
     <div class="list-group">
         @foreach (var r in Model.Reports)
         {
+            // One report item (description + date)
             <div class="list-group-item d-flex justify-content-between align-items-start">
                 <div class="me-3">
                     <div class="fw-bold">@r.Description</div>
