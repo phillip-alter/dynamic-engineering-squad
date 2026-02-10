@@ -58,14 +58,6 @@ CREATE TABLE [UserPoints] (
     CONSTRAINT [FK_UserPoints_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
 );
 
-CREATE TABLE [Leaderboards] (
-    [Id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
-    [UserId] NVARCHAR(450) NOT NULL,
-    [TotalPoints] INT NOT NULL DEFAULT 0,
-    [LastUpdated] DATETIME2 NOT NULL DEFAULT GETDATE(),
-    CONSTRAINT [FK_Leaderboards_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
-);
-
 --DATA SEEDING
 
 -- roles
@@ -106,7 +98,3 @@ VALUES
 -- user points
 INSERT INTO [UserPoints] ([UserId], [CurrentPoints], [LifetimePoints], [LastUpdated])
 VALUES (@UserId, 150, 200, GETDATE());
-
--- leaderboard
-INSERT INTO [Leaderboards] ([UserId], [TotalPoints], [LastUpdated])
-VALUES (@UserId, 200, GETDATE());

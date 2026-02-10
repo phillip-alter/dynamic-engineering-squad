@@ -41,9 +41,3 @@
     * `CurrentPoints`: INT
     * `LifetimePoints`: INT
     * `LastUpdated`: DATETIME2
-
-6.  **Leaderboards** 
-    * `Id`: INT (PK, Identity)
-    * `UserId`: NVARCHAR(450) (FK -> AspNetUsers.Id)
-    * `TotalPoints`: INT
-    * `LastUpdated`: DATETIME2
