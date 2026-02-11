@@ -8,7 +8,7 @@
 
     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-    <form asp-action="Create" asp-controller="ReportIssue" method="post">
+    <form asp-action="Create" asp-controller="ReportIssue" method="post" enctype="multipart/form-data">   <!--enctype is required for photo uploads-->
         @Html.AntiForgeryToken()
 
         <div class="mb-3">
@@ -20,25 +20,24 @@
             <span asp-validation-for="Description" class="text-danger"></span>
         </div>
 
-        <div class="row g-3">
-            <div class="col-12 col-md-6">
-                <label asp-for="Latitude" class="form-label"></label>
-                <input asp-for="Latitude" class="form-control" aria-label="Latitude" />
-                <span asp-validation-for="Latitude" class="text-danger"></span>
-            </div>
-
-            <div class="col-12 col-md-6">
-                <label asp-for="Longitude" class="form-label"></label>
-                <input asp-for="Longitude" class="form-control" aria-label="Longitude" />
-                <span asp-validation-for="Longitude" class="text-danger"></span>
-            </div>
-        </div>
-
         <div class="mb-3 mt-3">
-            <label asp-for="ImageUrl" class="form-label"></label>
-            <input asp-for="ImageUrl" class="form-control" aria-label="Image URL" />
-            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+            <label asp-for="Photo" class="form-label"></label>
+            <input asp-for="Photo" type="file" class="form-control" accept="image/*" />
+            <span asp-validation-for="Photo" class="text-danger"></span>
         </div>
+
+        <!--removed longitude/latitude-->
+        @* <div class="mb-3">
+            <label asp-for="Latitude" class="form-label"></label>
+            <input asp-for="Latitude" class="form-control" />
+            <span asp-validation-for="Latitude" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Longitude" class="form-label"></label>
+            <input asp-for="Longitude" class="form-control" />
+            <span asp-validation-for="Longitude" class="text-danger"></span>
+        </div> *@
 
         <button type="submit"
                 class="btn report-action-btn report-action-btn--primary"
