@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services;
 using Microsoft.Extensions.Options;
+using InfrastructureApp.Repositories;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +38,9 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
 builder.Services.AddScoped<ILeaderboardRepository, LeaderboardRepositoryEf>();
 builder.Services.AddScoped<LeaderboardService>();
 
+builder.Services.AddScoped<IReportIssueRepository, ReportIssueRepositoryEf>();
+builder.Services.AddScoped<IReportIssueService, ReportIssueService>();
+
 
 
 
@@ -50,6 +55,8 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseStaticFiles(); //for photo uploads
 
 app.UseHttpsRedirection();
 app.UseRouting();

@@ -27,11 +27,11 @@ namespace InfrastructureApp.Models
 
         //DECIMAL(9,6)
         [Range(-90, 90)]
-        public decimal Latitude {get; set;}
+        public decimal? Latitude {get; set;}
 
         //DECIMAL (9,6)
         [Range(-180, 180)]
-        public decimal Longitude {get; set;}
+        public decimal? Longitude {get; set;}
 
         //NVARCHAR(450) (URL to blob)
         [MaxLength(450)]
