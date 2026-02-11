@@ -16,11 +16,14 @@ namespace InfrastructureApp.Controllers
         private readonly ApplicationDbContext _db;
         private readonly UserManager<Users> _userManager;
 
+        private readonly IWebHostEnvironment _env;
+
         //your identity user type is "Users"
-        public ReportIssueController(ApplicationDbContext db, UserManager<Users> userManager)
+        public ReportIssueController(ApplicationDbContext db, UserManager<Users> userManager, IWebHostEnvironment env)
         {
             _db = db;
             _userManager = userManager;
+            _env = env;
         }
 
         //optional public landing page
@@ -52,6 +55,43 @@ namespace InfrastructureApp.Controllers
             // TEST: use seeded user (palter)
             var userId = "user-guid-001";
 
+            // Save file (optional)
+            string? savedImagePath = null;
+
+            if(vm.Photo != null && vm.Photo.Length > 0)
+            {
+                // Basic extension validation (add more later)
+                var allowedExts = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+                var ext = Path.GetExtension(vm.Photo.FileName).ToLowerInvariant();
+
+                if (!allowedExts.Contains(ext))
+                {
+                    ModelState.AddModelError(nameof(vm.Photo), "Only JPG, PNG, or WEBP images are allowed.");
+                    return View(vm);
+                }
+
+                // Optional size limit example (5 MB)
+                const long maxBytes = 5 * 1024 * 1024;
+                if (vm.Photo.Length > maxBytes)
+                {
+                    ModelState.AddModelError(nameof(vm.Photo), "Image must be 5MB or smaller.");
+                    return View(vm);
+                }
+
+                var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "issues");
+                Directory.CreateDirectory(uploadsFolder);
+
+                var fileName = $"{Guid.NewGuid()}{ext}";
+                var fullPath = Path.Combine(uploadsFolder, fileName);
+
+                using (var stream = System.IO.File.Create(fullPath))
+                {
+                    await vm.Photo.CopyToAsync(stream);
+                }
+
+                savedImagePath = $"/uploads/issues/{fileName}";
+            }
+
             // Keep report + points consistent
             await using var tx = await _db.Database.BeginTransactionAsync();
 
@@ -63,7 +103,7 @@ namespace InfrastructureApp.Controllers
                     Description = vm.Description,
                     Latitude = vm.Latitude,
                     Longitude = vm.Longitude,
-                    ImageUrl = string.IsNullOrWhiteSpace(vm.ImageUrl) ? null : vm.ImageUrl.Trim(),
+                    ImageUrl = savedImagePath,
                     Status = "Pending",
                     CreatedAt = DateTime.UtcNow,
                     UserId = userId

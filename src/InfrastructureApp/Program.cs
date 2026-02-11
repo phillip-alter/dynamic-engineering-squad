@@ -51,6 +51,8 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseStaticFiles(); //for photo uploads
+
 app.UseHttpsRedirection();
 app.UseRouting();
 
