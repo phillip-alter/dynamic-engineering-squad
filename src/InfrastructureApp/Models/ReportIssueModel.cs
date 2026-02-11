@@ -36,5 +36,21 @@ namespace InfrastructureApp.Models
         //NVARCHAR(450) (URL to blob)
         [MaxLength(450)]
         public string? ImageUrl {get; set;}
+
+         // ----------------------------
+        // move business rules here
+        // ----------------------------
+
+        public static IQueryable<ReportIssue> VisibleToUser(IQueryable<ReportIssue> query, bool isAdmin)
+        {
+            if (isAdmin) return query;
+            return query.Where(r => r.Status == "Approved");
+        }
+
+        public static IQueryable<ReportIssue> OrderLatestFirst(IQueryable<ReportIssue> query)
+        {
+            return query.OrderByDescending(r => r.CreatedAt);
+        }
+
     }
 }
