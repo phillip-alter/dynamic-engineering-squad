@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services;
 using Microsoft.Extensions.Options;
+using InfrastructureApp.Repositories;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +37,9 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
 
 builder.Services.AddScoped<ILeaderboardRepository, LeaderboardRepositoryEf>();
 builder.Services.AddScoped<LeaderboardService>();
+
+builder.Services.AddScoped<IReportIssueRepository, ReportIssueRepositoryEf>();
+builder.Services.AddScoped<IReportIssueService, ReportIssueService>();
 
 
 
