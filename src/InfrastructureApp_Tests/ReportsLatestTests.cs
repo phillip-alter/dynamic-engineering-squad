@@ -116,5 +116,38 @@ namespace InfrastructureApp_Tests
                 Is.True
             );
         }
+        
+        // -------------------------------------------------------
+        // TEST 5: Model validation - Latitude range
+        // -------------------------------------------------------
+        [Test]
+        public void ReportIssue_ShouldFailValidation_WhenLatitudeOutOfRange()
+        {
+            // Arrange
+            var report = new ReportIssue
+            {
+                Description = "Test report",
+                Status = "Approved",
+                UserId = "user-guid-001",
+                Latitude = 200 // invalid: must be between -90 and 90
+            };
+
+            var context = new ValidationContext(report);
+            var results = new List<ValidationResult>();
+
+            // Act
+            var isValid = Validator.TryValidateObject(
+                report,
+                context,
+                results,
+                validateAllProperties: true);
+
+            // Assert
+            Assert.That(isValid, Is.False);
+            Assert.That(
+                results.Any(r => r.MemberNames.Contains(nameof(ReportIssue.Latitude))),
+                Is.True
+            );
+        }
     }
 }
