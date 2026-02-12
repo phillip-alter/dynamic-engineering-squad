@@ -24,10 +24,10 @@ namespace InfrastructureApp.Controllers
             bool isAdmin = User.IsInRole("Admin");
 
             // Delegate database access and filtering to the repository to keep the controller thin (separation of concerns)
-            var reports = await _repo.GetLatestAsync(isAdmin);
+            var reports = await _repo.GetLatestReportsAsync(isAdmin);  //TODO: Look and check for this part. 
 
             // Convert domain models → ViewModels for the UI
-            var items = reports.Select(r => new LatestReportItemViewModel
+            var items = reports.Select(r => new LatestReportItemViewModel //TODO: Look and check for this part. 
             {
                 Id = r.Id,
                 Description = r.Description,

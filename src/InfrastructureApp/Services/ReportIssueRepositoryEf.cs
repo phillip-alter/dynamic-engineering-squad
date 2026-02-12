@@ -15,7 +15,7 @@ namespace InfrastructureApp.Services
         }
 
         // Returns latest reports based on visibility rules
-        public async Task<List<ReportIssue>> GetLatestAsync(bool isAdmin)
+        public async Task<List<ReportIssue>> GetLatestReportsAsync(bool isAdmin)
         {
             // Start building query from ReportIssue table
             var query = _db.ReportIssue.AsQueryable();
