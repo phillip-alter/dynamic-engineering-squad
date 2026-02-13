@@ -30,7 +30,7 @@ public class LeaderboardService
 
     //Returns top 25 entries
     //Deterministic sorting to avoid ties or random order
-    public async Task<IReadOnlyList<LeaderboardEntry>> GetTopAsync(int n = 25)
+    public virtual async Task<IReadOnlyList<LeaderboardEntry>> GetTopAsync(int n = 25)
     {
 
         //If an invalid or nagative value is supplied, fall back to the default
@@ -60,26 +60,4 @@ public class LeaderboardService
         return ordered;    
     }
 
-
-    /*Method enforces all business validation before delegating persistence to the repo
-    public async Task AddPointsAsync(string displayName, int pointsToAdd)
-    {
-
-        if (string.IsNullOrWhiteSpace(displayName))
-            throw new ArgumentException("DisplayName is required.", nameof(displayName));
-
-        var name = displayName.Trim();
-        if (name.Length > 64)
-            throw new ArgumentException("DisplayName must be 64 characters or fewer", nameof(displayName));
-
-        if (pointsToAdd <=0)
-            throw new ArgumentException("Points must be greater than 0.", nameof(pointsToAdd));    
-
-        //Points cannot be negative: enforced by requiring pointsToAdd > 0
-        await _repo.UpsertAddPointsAsync(name, pointsToAdd, DateTime.UtcNow);
-
-    }
-
-    public Task SeedIfEmptyAsync(IEnumerable<LeaderboardEntry> seedEntries)
-        => _repo.SeedIfEmptyAsync(seedEntries);*/
 }
