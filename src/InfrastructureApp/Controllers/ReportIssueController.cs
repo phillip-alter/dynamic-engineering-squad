@@ -39,7 +39,7 @@ namespace InfrastructureApp.Controllers
             try
             {
                 var reportId = await _reportService.CreateAsync(vm, userId);
-                TempData["Success"] = "Report submitted! +10 points awarded.";
+                TempData["Success"] = "XP gained! +10 points awarded.";
                 return RedirectToAction(nameof(Details), new { id = reportId });
             }
             catch (InvalidOperationException ex)
