@@ -7,13 +7,14 @@ namespace InfrastructureApp.ViewModels
     public class ReportIssueViewModel
     {
         [Required(ErrorMessage = "Please enter a description.")]
+        [StringLength(300, ErrorMessage = "Description must be 300 characters or less.")]
         [Display(Name = "Description")]
         public string Description { get; set; } = "";
 
         //replaced URL with photo upload
         [Required(ErrorMessage = "Please upload a photo of the damage.")]
         [Display(Name = "Photo")]
-        public IFormFile? Photo {get; set;}
+        public IFormFile? Photo {get; set;} = default!;
 
         [Required]
         [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90.")]
