@@ -41,6 +41,8 @@ builder.Services.AddScoped<LeaderboardService>();
 builder.Services.AddScoped<IReportIssueRepository, ReportIssueRepositoryEf>();
 builder.Services.AddScoped<IReportIssueService, ReportIssueService>();
 
+// Added Repository ID (Dependency Injection) for Dashboardrepo
+builder.Services.AddScoped<IDashboardRepository, DashboardRepositoryEf>();
 
 
 var app = builder.Build();
