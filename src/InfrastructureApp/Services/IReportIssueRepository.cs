@@ -9,7 +9,7 @@ namespace InfrastructureApp.Services
         Task AddAsync(ReportIssue report);
         Task SaveChangesAsync();
 
-        // Latest Reports feature
+        // Latest Reports feature 7
         // isAdmin controls visibility (admins see all, others see approved only)
         Task<List<ReportIssue>> GetLatestReportsAsync(bool isAdmin);
     }
