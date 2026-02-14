@@ -1,4 +1,5 @@
 using InfrastructureApp.Data;
+using InfrastructureApp.Models;
 using InfrastructureApp.ViewModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,36 +16,48 @@ namespace InfrastructureApp.Services
 
         public async Task<DashboardViewModel> GetDashboardSummaryAsync()
         {
-            var user = await _db.Users.AsNoTracking().FirstOrDefaultAsync();
+            // Load a demo/seeded user if one exists.
+            var user = await _db.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
 
-            
-            string username = "DemoUser";
-            string email = "demo@example.com";
-            int reportsSubmitted = 0;
-            int points = 0;
-
-            if (user != null)
+            if (user == null)
             {
-                username = user.UserName ?? username;
-                email = user.Email ?? email;
-
-                reportsSubmitted = await _db.ReportIssue
-                    .AsNoTracking()
-                    .CountAsync(r => r.UserId == user.Id);
-
-                var pointsRow = await _db.UserPoints
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(p => p.UserId == user.Id);
-
-                points = pointsRow?.CurrentPoints ?? 0;
+                return BuildPlaceholderDashboard();
             }
+
+            return await BuildDashboardForUserAsync(user);
+        }
+
+        private static DashboardViewModel BuildPlaceholderDashboard()
+        {
+            return new DashboardViewModel
+            {
+                Username = "DemoUser",
+                Email = "demo@example.com",
+                ReportsSubmitted = 0,
+                Points = 0
+            };
+        }
+
+        private async Task<DashboardViewModel> BuildDashboardForUserAsync(Users user)
+        {
+            // Count reports submitted by this user
+            var reportsSubmitted = await _db.ReportIssue
+                .AsNoTracking()
+                .CountAsync(r => r.UserId == user.Id);
+
+            // Load points if they exist
+            var pointsRow = await _db.UserPoints
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
             return new DashboardViewModel
             {
-                Username = username,
-                Email = email,
+                Username = user.UserName ?? "DemoUser",
+                Email = user.Email ?? "demo@example.com",
                 ReportsSubmitted = reportsSubmitted,
-                Points = points
+                Points = pointsRow?.CurrentPoints ?? 0
             };
         }
     }
