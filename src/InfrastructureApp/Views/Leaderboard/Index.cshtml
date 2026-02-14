@@ -43,30 +43,42 @@ else
                 - Easily calculate rank (index + 1)
                 - Guarantee stable ordering matching the service output
             *@
-            @for (int i = 0; i < Model.Entries.Count; i++)
-            {
-                <tr>
-                     <!--
-                        Rank is derived from the zero-based index.
-                        +1 converts it into human-friendly numbering.
-                    -->
-                    <td>@(i + 1)</td>
+@{
+    int rank = 1;   // human-friendly ranking counter
+}
 
-                       <!--
-                        Display name or identifier for the user.
-                        This value is already sanitized and validated
-                        by the service layer.
-                    -->
-                    <td>@Model.Entries[i].UserId</td>
+@foreach (var entry in Model.Entries)
+{
+    <tr>
+        <!--
+            Rank is manually incremented because foreach
+            does not provide an index like a for loop.
+        -->
+        <td>@rank</td>
 
-                     <!--
-                        UserPoints represents the score used to order
-                        the leaderboard.
-                    -->
-                    <td>@Model.Entries[i].UserPoints</td>
-                    <td>@Model.Entries[i].UpdatedAtUtc.ToLocalTime().ToString("g")</td>
-                </tr>
-            }
+        <!--
+            Display name or identifier for the user.
+            This value is already sanitized and validated
+            by the service layer.
+        -->
+        <td>@entry.UserId</td>
+
+        <!--
+            UserPoints represents the score used to order
+            the leaderboard.
+        -->
+        <td>@entry.UserPoints</td>
+
+        <!--
+            Convert UTC time stored in the database to the
+            user's local time for readability.
+        -->
+        <td>@entry.UpdatedAtUtc.ToLocalTime().ToString("g")</td>
+    </tr>
+
+    rank++;   // move to next leaderboard position
+}
+
         </tbody>
     </table>
 }
