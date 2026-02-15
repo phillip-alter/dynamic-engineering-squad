@@ -4,7 +4,7 @@ using System;
 using System.Threading.Tasks;
 using InfrastructureApp.Data;
 using InfrastructureApp.Models;
-using InfrastructureApp.Repositories;
+using InfrastructureApp.Services;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;

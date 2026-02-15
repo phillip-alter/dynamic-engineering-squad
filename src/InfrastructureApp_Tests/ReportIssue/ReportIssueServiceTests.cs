@@ -6,7 +6,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using InfrastructureApp.Data;
 using InfrastructureApp.Models;
-using InfrastructureApp.Repositories;
 using InfrastructureApp.Services;
 using InfrastructureApp.ViewModels;
 using Microsoft.AspNetCore.Hosting;
@@ -250,6 +249,18 @@ namespace InfrastructureApp_Tests
 
             public Task SaveChangesAsync()
                 => _db.SaveChangesAsync();
+
+            public async Task<List<ReportIssue>> GetLatestReportsAsync(bool isAdmin)
+            {
+                var query = _db.ReportIssue.AsQueryable();
+
+                if (!isAdmin)
+                    query = query.Where(r => r.Status == "Approved");
+
+                return await query
+                    .OrderByDescending(r => r.CreatedAt)
+                    .ToListAsync();
+            }
         }
     }
 }
