@@ -1,7 +1,10 @@
 using InfrastructureApp.Data;
+using InfrastructureApp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services;
+using Microsoft.Extensions.Options;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,10 +20,30 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
+builder.Services.AddIdentity<Users, IdentityRole>(options =>
+{
+    options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
+    options.Password.RequireUppercase = true;
+    options.Password.RequiredLength = 6;
+    options.User.RequireUniqueEmail = true;
+    options.SignIn.RequireConfirmedAccount = false; // until we set up email api we don't need confirmation
+    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedPhoneNumber = false;
+})
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
 builder.Services.AddScoped<ILeaderboardRepository, LeaderboardRepositoryEf>();
 builder.Services.AddScoped<LeaderboardService>();
 
+// Added Repository DI (Dependency Injection) for ReportIssueRepositoryEf
+//dependency injection configuration. They tell the application what concrete classes to use whenever an interface is requested.
+builder.Services.AddScoped<IReportIssueRepository, ReportIssueRepositoryEf>();
+builder.Services.AddScoped<IReportIssueService, ReportIssueService>();
 
+// Added Repository ID (Dependency Injection) for Dashboardrepo
+builder.Services.AddScoped<IDashboardRepository, DashboardRepositoryEf>();
 
 
 var app = builder.Build();
@@ -34,6 +57,8 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseStaticFiles(); //for photo uploads
 
 app.UseHttpsRedirection();
 app.UseRouting();
