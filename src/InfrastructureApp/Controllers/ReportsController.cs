@@ -1,55 +1,39 @@
-using InfrastructureApp.Data;
+using InfrastructureApp.Services;
 using InfrastructureApp.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace InfrastructureApp.Controllers
 {
-    // Controller handles requests related to reports pages
+    // Controller handles requests for Reports pages
     public class ReportsController : Controller
     {
-        private readonly ApplicationDbContext _db; // Database (EF Core) access
+        // Repository handles all database logic 
+        private readonly IReportIssueRepository _repo;
 
-        public ReportsController(ApplicationDbContext db)
+        // Inject repository through constructor (Dependency Injection)
+        public ReportsController(IReportIssueRepository repo)
         {
-            _db = db;
+            _repo = repo;
         }
 
         // GET: /Reports/Latest
-        // Shows the Latest Reports page
         [HttpGet]
         public async Task<IActionResult> Latest()
         {
-            // Show approved reports by default; some roles can see everything
             bool isAdmin = User.IsInRole("Admin");
 
-            var query = _db.ReportIssue.AsQueryable();
+            // Repository handles filtering and sorting
+            var reports = await _repo.GetLatestReportsAsync(isAdmin);
 
-            if (!isAdmin)
-            {
-                query = query.Where(r => r.Status == "Approved");
-            }
-
-            // Map to ViewModels
-            var items = await query
-                .OrderByDescending(r => r.CreatedAt)
-                .Select(r => new LatestReportItemViewModel
-                {
-                    Id = r.Id,
-                    Description = r.Description,
-                    Status = r.Status,
-                    CreatedAt = r.CreatedAt
-                })
-                .ToListAsync();
-
-            // Put list into page ViewModel
+            // Pass data directly to ViewModel (no copying)
             var vm = new LatestReportsViewModel
             {
-                Reports = items
+                Reports = reports
             };
 
-            // Send data to the view (Razor page)
             return View(vm);
         }
     }
 }
+
+
