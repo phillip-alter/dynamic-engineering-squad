@@ -11,6 +11,7 @@ namespace InfrastructureApp.Models
 
         //NVARCHAR(MAX)
         [Required]
+        [StringLength(300)]
         public string Description {get; set;} = "";
 
         //NVARCHAR(50): Pending, Approved, Rejected
@@ -36,5 +37,31 @@ namespace InfrastructureApp.Models
         //NVARCHAR(450) (URL to blob)
         [MaxLength(450)]
         public string? ImageUrl {get; set;}
+
+        // ----------------------------------------------------
+        // Report query helpers
+        // Keep filtering and sorting logic here instead of the controller
+        // Moved it to here because this keeps controllers simple and separates data logic from UI logic
+        // ----------------------------------------------------
+
+        // Determines which reports should be visible to the user
+        public static IQueryable<ReportIssue> VisibleToUser(IQueryable<ReportIssue> query, bool isAdmin)
+        {
+            // Admin sees all reports; others see only approved ones
+            if (isAdmin)
+            {
+                return query;
+            } 
+
+            return query.Where(r => r.Status == "Approved");
+        }
+
+        // Orders reports so the newest appear first
+        public static IQueryable<ReportIssue> OrderLatestFirst(IQueryable<ReportIssue> query)
+        {
+            // Sort by creation date (newest first)
+            return query.OrderByDescending(r => r.CreatedAt);
+        }
+
     }
 }
