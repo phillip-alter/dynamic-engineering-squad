@@ -1,40 +1,37 @@
+<!-- omit in toc -->
 # Dynamic Engineering Squad
 Refactoring the Future
 
-> A description of our app (when we come up with it)
+## Vision Statement
 
+This project is a gamified ASP.NET infrastructure reporting application defined by three core features: AI-driven damage analysis for cost estimation, a competitive community leaderboard, and a unique "naming rights" system that allows users to title and track specific hazards like local landmarks. The purpose of this platform is to transform passive residents into active infrastructure monitors, leveraging social accountability to motivate municipalities to prioritize repairs.  While competitors like SeeClickFix and standard 311 apps exist, they function as dry administrative intake forms; our application improves upon this by introducing identity and narrative—turning a generic ticket into a "community cause" - which drives significantly higher engagement and visibility than existing tools.
+
+<!-- omit in toc -->
 ## Table of Contents
-- [Team](#team)
-- [Project Ideas](#project-ideas)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Features](#features)
+- [Team Materials](#team-materials)
+- [Meeting Times](#meeting-times)
+- [Infrastructure Project Idea](#infrastructure-project-idea)
 
-## Team
-- [Julian Aguilar-Tomas](team/JulianResume.pdf)
-- [Phillip Alter](team/PAlterResume.pdf)
-- [Erin Anderson](team/EAndersonResume.pdf)
-- [Sunair Iqbal](team/SIqbalResume.pdf)
-
-### Team Materials
+## Team Materials
+- [Our team](team/Contributors.md)
 - [Logo](doc/DESlogo.png)
 - [Letterhead](doc/DES_Letterhead_Template.pdf)
 - [Business Card](doc/business_card.png)
 
-## Project Ideas
+### Meeting Times
+- Monday, 12pm - 1pm
+- Tuesday, 12pm - 1pm
+- Wednesday, 12pm - 1pm
+- Thursday, flex (as needed)
+- Friday, flex (as needed)
 
-Project ideas can be found in [team/ProjectIdeas](team/ProjectIdeas.pdf).
+## Infrastructure Project Idea
 
-## Installation
-
-TBD
-
-## Usage
-
-TBD
-
-## Features
-
-TBD
-
-TEST SUNAIR
+- [Timeline](./doc/timeline-and-release.md)
+- [Mind Map](./doc/infrastructure_inception/InfrastructureAppMindMap.md)
+     - [Visualization](./doc/infrastructure_inception/infrastructure_mind_map.svg)
+- [Needs and Features](./doc/infrastructure_inception/NeedsAndFeatures.md)
+- [Architecture Map](./doc/infrastructure_inception/architecture.svg)
+- [Stakeholders and Users](./doc/infrastructure_inception/stakeholders.md)
+- [Database Schema (Working Copy)](./doc/infrastructure_inception/full_erd_infrastructure.md)
+- [Entity Relationship Diagram for full application (Working Copy)](./doc/infrastructure_inception/full_erd_infrastructure.svg)
