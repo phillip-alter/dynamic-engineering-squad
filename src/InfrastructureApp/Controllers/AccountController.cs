@@ -34,12 +34,10 @@ namespace InfrastructureApp.Controllers
                 return View(model);
             }
 
-            var user = new Users
+            var user = new Users(userName: model.Username, email: model.Email)
             {
                 UserName = model.Username,
-                NormalizedUserName = model.Username,
                 Email = model.Email,
-                NormalizedEmail = model.Email.ToUpper(),
             };
 
             var result = await userManager.CreateAsync(user, model.Password);

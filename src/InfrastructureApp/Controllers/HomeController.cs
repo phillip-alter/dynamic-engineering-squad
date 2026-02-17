@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using InfrastructureApp.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InfrastructureApp.Controllers;
 
@@ -18,6 +19,7 @@ public class HomeController : Controller
         return View();
     }
 
+    [AllowAnonymous]
     public IActionResult Privacy()
     {
         return View();
@@ -27,5 +29,10 @@ public class HomeController : Controller
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+    }
+
+    public IActionResult About()
+    {
+        return View();
     }
 }
