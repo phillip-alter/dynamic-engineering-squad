@@ -1,0 +1,33 @@
+@model InfrastructureApp.ViewModels.RoadCameraIndexViewModel
+
+<h1>Road Cameras</h1>
+
+<p class="text-muted">
+    Cameras loaded: @(Model?.Cameras?.Count ?? 0)
+</p>
+
+@if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
+{
+    <div class="alert alert-warning">@Model.ErrorMessage</div>
+}
+
+@if (Model?.Cameras == null || Model.Cameras.Count == 0)
+{
+    <div class="alert alert-info">
+        No cameras were returned. (This usually means TripCheck is unavailable or the request failed.)
+    </div>
+}
+else
+{
+    <ul>
+        @foreach (var cam in Model.Cameras)
+        {
+            <li>
+                <a asp-controller="RoadCamera" asp-action="Details" asp-route-id="@cam.CameraId">
+                    @cam.Name (@cam.CameraId)
+                </a>
+            </li>
+        }
+    </ul>
+}
+

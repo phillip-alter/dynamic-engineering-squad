@@ -47,15 +47,31 @@ builder.Services.AddScoped<IDashboardRepository, DashboardRepositoryEf>();
 
 builder.Services.AddMemoryCache();
 
-builder.Services.AddSingleton(new TripCheckOptions
+// TripCheck config (loads BaseUrl/CacheMinutes from appsettings + SubscriptionKey from user-secrets)
+builder.Services.Configure<TripCheckOptions>(builder.Configuration.GetSection("TripCheck"));
+
+// TripCheck HTTP client + service
+builder.Services.AddHttpClient<ITripCheckService, TripCheckService>((sp, client) =>
 {
-    CacheMinutes = 10
+    var opts = sp.GetRequiredService<IOptions<TripCheckOptions>>().Value;
+
+    client.BaseAddress = new Uri(opts.BaseUrl);
+    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("InfrastructureApp/1.0");
 });
+
 
 builder.Services.AddHttpClient<ITripCheckService, TripCheckService>(client =>
 {
-    client.BaseAddress = new Uri("https://tripcheck.com/");
+    client.BaseAddress = new Uri("https://api.odot.state.or.us/tripcheck/");
+    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("InfrastructureApp/1.0");
 });
+
+builder.Services.Configure<TripCheckOptions>(builder.Configuration.GetSection("TripCheck"));
+
+
+
 
 
 
