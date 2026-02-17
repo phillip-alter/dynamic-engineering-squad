@@ -7,11 +7,13 @@ namespace InfrastructureApp.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<Users> userManager;
+        private readonly UserManager<Users> _userManager;
+        private readonly SignInManager<Users> _signInManager;
 
-        public AccountController(UserManager<Users> userManager)
+        public AccountController(UserManager<Users> userManager,  SignInManager<Users> signInManager)
         {
-            this.userManager = userManager;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public IActionResult Login()
@@ -40,7 +42,7 @@ namespace InfrastructureApp.Controllers
                 Email = model.Email,
             };
 
-            var result = await userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
