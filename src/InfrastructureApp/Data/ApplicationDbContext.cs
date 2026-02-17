@@ -19,7 +19,7 @@ namespace InfrastructureApp.Data
         //will initialize this property at runtime.
         public DbSet<UserPoints> UserPoints { get; set; } = null!;
 
-        //this maps the reportIssue to the reports table
+        //this maps the reportIssue to the reports table, used for CRUD operations in EF
         public DbSet<ReportIssue> ReportIssue { get; set; } = null!;
 
         //This is the place for constraints, defaults, indexes, and relationships
@@ -72,9 +72,11 @@ namespace InfrastructureApp.Data
                 entity.HasKey(r => r.Id);
 
                 // Column mappings
+                //description required
                 entity.Property(r => r.Description)
                     .IsRequired();
 
+                //status required
                 entity.Property(r => r.Status)
                     .HasMaxLength(50)
                     .IsRequired();
@@ -82,6 +84,7 @@ namespace InfrastructureApp.Data
                 entity.Property(r => r.CreatedAt)
                     .HasColumnType("datetime2");
 
+                // Foreign key to the Identity user who submitted the report
                 entity.Property(r => r.UserId)
                     .HasMaxLength(450)
                     .IsRequired();

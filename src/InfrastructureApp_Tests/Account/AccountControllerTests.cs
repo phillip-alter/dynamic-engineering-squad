@@ -1,8 +1,12 @@
 using InfrastructureApp.Controllers;
 using InfrastructureApp.Models;
 using InfrastructureApp.ViewModels.Account;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace InfrastructureApp_Tests;
@@ -11,6 +15,7 @@ namespace InfrastructureApp_Tests;
 public class AccountControllerTests
 {
     private Mock<UserManager<Users>> _mockUserManager;
+    private Mock<SignInManager<Users>> _mockSignInManager;
     private AccountController _controller;
 
     [SetUp]
@@ -18,7 +23,16 @@ public class AccountControllerTests
     {
         var store = new Mock<IUserStore<Users>>();
         _mockUserManager = new Mock<UserManager<Users>>(store.Object, null, null, null, null, null, null, null, null);
-        _controller = new AccountController(_mockUserManager.Object);
+        _mockSignInManager = new Mock<SignInManager<Users>>(
+            _mockUserManager.Object,
+            new Mock<IHttpContextAccessor>().Object,
+            new Mock<IUserClaimsPrincipalFactory<Users>>().Object,
+            new Mock<IOptions<IdentityOptions>>().Object,
+            new Mock<ILogger<SignInManager<Users>>>().Object,
+            new Mock<IAuthenticationSchemeProvider>().Object,
+            new Mock<IUserConfirmation<Users>>().Object
+        );
+        _controller = new AccountController(_mockUserManager.Object, _mockSignInManager.Object);
     }
 
     [TearDown]
@@ -81,5 +95,59 @@ public class AccountControllerTests
 
         Assert.That(_controller.ModelState.IsValid, Is.False);
         Assert.That(_controller.ModelState[string.Empty].Errors[0].ErrorMessage, Is.EqualTo("Password is too simple."));
+    }
+        
+    [Test]
+    public async Task Login_ReturnsView_WhenModelStateIsInvalid()
+    {
+        _controller.ModelState.AddModelError("UserName", "Required");
+        var model = new LoginViewModel();
+        
+        var result = await _controller.Login(model);
+        
+        Assert.That(result, Is.InstanceOf<ViewResult>());
+        var viewResult = result as ViewResult;
+        Assert.That(viewResult.Model, Is.EqualTo(model));
+    }
+    
+    [Test]
+    public async Task Login_RedirectsToHome_WhenSignInSucceeds()
+    {
+        var model = new LoginViewModel 
+        { 
+            UserName = "test@example.com", 
+            Password = "Password123!", 
+            RememberMe = false 
+        };
+
+        _mockSignInManager
+            .Setup(x => x.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, false))
+            .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Success);
+        
+        var result = await _controller.Login(model);
+        
+        Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
+        var redirect = result as RedirectToActionResult;
+        Assert.That(redirect.ActionName, Is.EqualTo("Index"));
+        Assert.That(redirect.ControllerName, Is.EqualTo("Home"));
+    }
+    
+    [Test]
+    public async Task Login_AddsError_WhenSignInFails()
+    {
+        var model = new LoginViewModel { UserName = "wrong@user.com", Password = "WrongPassword" };
+
+        _mockSignInManager
+            .Setup(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), false))
+            .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Failed);
+        
+        var result = await _controller.Login(model);
+        
+        Assert.That(result, Is.InstanceOf<ViewResult>());
+        Assert.That(_controller.ModelState.IsValid, Is.False);
+        Assert.That(_controller.ModelState.ContainsKey(string.Empty), Is.True);
+        
+        var error = _controller.ModelState[string.Empty].Errors[0];
+        Assert.That(error.ErrorMessage, Is.EqualTo("Invalid login attempt."));
     }
 }

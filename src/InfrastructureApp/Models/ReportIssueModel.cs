@@ -11,6 +11,7 @@ namespace InfrastructureApp.Models
 
         //NVARCHAR(MAX)
         [Required]
+        [StringLength(300)]
         public string Description {get; set;} = "";
 
         //NVARCHAR(50): Pending, Approved, Rejected

@@ -23,11 +23,11 @@ public class LeaderboardController : Controller
     //Handles HTTP GET requests to /Leaderboard or /Leaderboard/Index
     //Oprtional query parameter 'top' controls how many leaderboard entries to fetch
     [HttpGet]
-    public async Task<IActionResult> Index(int top = 25)
+    public async Task<IActionResult> Index(int topN = 25)
     {
         //Calls into the service layer to retrieve the top N Leaderboard entries
         //Async keeps the request non blocking while waiting on the db
-        var entries = await _service.GetTopAsync(top);
+        var entries = await _service.GetTopAsync(topN);
 
         //Populate a strongly typed ViewModel that the Razor view will consume.
         //This avoids passing raw entities or service models directly to the view
@@ -38,7 +38,7 @@ public class LeaderboardController : Controller
 
             //Defensive check
             //If an invalid or negative value is provided, default back to 25
-            TopN = top <= 0 ? 25 : top
+            TopN = topN <= 0 ? 25 : topN
         };
 
         //Returns the Index.cshtml view and passes the ViewModel to it.
