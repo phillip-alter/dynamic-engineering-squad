@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services;
 using Microsoft.Extensions.Options;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -36,7 +37,13 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
 builder.Services.AddScoped<ILeaderboardRepository, LeaderboardRepositoryEf>();
 builder.Services.AddScoped<LeaderboardService>();
 
+// Added Repository DI (Dependency Injection) for ReportIssueRepositoryEf
+//dependency injection configuration. They tell the application what concrete classes to use whenever an interface is requested.
+builder.Services.AddScoped<IReportIssueRepository, ReportIssueRepositoryEf>();
+builder.Services.AddScoped<IReportIssueService, ReportIssueService>();
 
+// Added Repository ID (Dependency Injection) for Dashboardrepo
+builder.Services.AddScoped<IDashboardRepository, DashboardRepositoryEf>();
 
 
 var app = builder.Build();
@@ -50,6 +57,8 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseStaticFiles(); //for photo uploads
 
 app.UseHttpsRedirection();
 app.UseRouting();
