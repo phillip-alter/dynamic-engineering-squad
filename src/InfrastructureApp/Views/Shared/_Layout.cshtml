@@ -59,56 +59,60 @@
                         <li class="nav-item">
                             <a class="nav-link active" href="/Home/Index"><i class="fa-solid fa-map"></i>Home</a>
                         </li>
+
                         <li class="nav-item">
-                            <a class="nav-link" href="/Reports/Latest"><i class="fa-solid fa-scroll"></i>Latest
-                                Reports</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/Achievements"><i class="fa-solid fa-medal"></i>Badges</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="ReportIssue" asp-action="ReportIssue"><i
-                                                                                                          class="fa fa-car"></i>Report Issue</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
-                        </li>
+                            <a class="nav-link" href="/Reports/Latest">
+                                <i class="fa-solid fa-scroll"></i>Latest
+                                Reports
+                            </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Achievements"><i class="fa-solid fa-medal"></i>Badges</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="RoadCamera" asp-action="Index"><i class="fa-solid fa-video"></i> Road Cameras </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="ReportIssue" asp-action="ReportIssue">
+                            <i class="fa fa-car"></i>Report Issue
+                        </a>
+                    </li>
                     </ul>
                     <partial name="_LoginPartial" />
 
-                        @*     <ul class="navbar-nav d-flex align-items-center text-light gap-3"> *@
-                        @*         @* <div class="d-none d-lg-block"> *@
-                        @*     <span class="user-level-badge">Lvl 14</span> *@
-                        @*     <span class="ms-2">XP:</span> *@
-                        @*     <div class="xp-bar"><div class="xp-fill"></div></div> *@
-                        @* </div> *@ 
-                        @*     <li class="nav-item d-flex align-items-center"> *@
-                        @*         <div id="google_translate_element"></div> *@
-                        @*     </li> *@
-                        @* *@
-                        @*     <li class="nav-item"> *@
-                        @*         <a class="nav-link text-light" asp-controller="Account" asp-action="Login"> *@
-                        @*             Login *@
-                        @*         </a> *@
-                        @*     </li> *@
-                        @*     <li class="nav-item"> *@
-                        @*         <a class="nav-link text-light" asp-controller="Account" asp-action="Register"> *@
-                        @*             Register *@
-                        @*         </a> *@
-                        @*     </li> *@
-                        @*     @* <div class="dropdown"> *@
-                        @*     <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"> *@
-                        @*         <i class="fa-solid fa-user-astronaut"></i> PlayerOneZeroOne *@
-                        @*     </a> *@
-                        @*     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark"> *@
-                        @*         <li><a class="dropdown-item" href="/Profile">Character Sheet (Profile)</a></li> *@
-                        @*         <li><a class="dropdown-item" href="/Settings">Config</a></li> *@
-                        @*         <li><hr class="dropdown-divider"></li> *@
-                        @*         <li><a class="dropdown-item text-danger" href="/Account/Logout">Log Out</a></li> *@
-                        @*     </ul> *@
-                        @* </div> *@ 
-                        @* </ul> *@
-                    </div>
+                    @*     <ul class="navbar-nav d-flex align-items-center text-light gap-3"> *@
+                    @*         @* <div class="d-none d-lg-block"> *@
+                    @*     <span class="user-level-badge">Lvl 14</span> *@
+                    @*     <span class="ms-2">XP:</span> *@
+                    @*     <div class="xp-bar"><div class="xp-fill"></div></div> *@
+                    @* </div> *@
+                    @*     <li class="nav-item d-flex align-items-center"> *@
+                    @*         <div id="google_translate_element"></div> *@
+                    @*     </li> *@
+                    @* *@
+                    @*     <li class="nav-item"> *@
+                    @*         <a class="nav-link text-light" asp-controller="Account" asp-action="Login"> *@
+                    @*             Login *@
+                    @*         </a> *@
+                    @*     </li> *@
+                    @*     <li class="nav-item"> *@
+                    @*         <a class="nav-link text-light" asp-controller="Account" asp-action="Register"> *@
+                    @*             Register *@
+                    @*         </a> *@
+                    @*     </li> *@
+                    @*     @* <div class="dropdown"> *@
+                    @*     <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"> *@
+                    @*         <i class="fa-solid fa-user-astronaut"></i> PlayerOneZeroOne *@
+                    @*     </a> *@
+                    @*     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark"> *@
+                    @*         <li><a class="dropdown-item" href="/Profile">Character Sheet (Profile)</a></li> *@
+                    @*         <li><a class="dropdown-item" href="/Settings">Config</a></li> *@
+                    @*         <li><hr class="dropdown-divider"></li> *@
+                    @*         <li><a class="dropdown-item text-danger" href="/Account/Logout">Log Out</a></li> *@
+                    @*     </ul> *@
+                    @* </div> *@
+                    @* </ul> *@
+                </div>
                 </div>
             </nav>
         </header>

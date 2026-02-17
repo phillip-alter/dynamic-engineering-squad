@@ -8,6 +8,9 @@
     </li>
     @if (signInManager.IsSignedIn(User))
     {
+        <li class="nav-item">
+            <a class="nav-link" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+        </li>
         <li class="nav-item d-flex align-items-center">
             <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                 @Html.AntiForgeryToken()

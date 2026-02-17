@@ -96,4 +96,58 @@ public class AccountControllerTests
         Assert.That(_controller.ModelState.IsValid, Is.False);
         Assert.That(_controller.ModelState[string.Empty].Errors[0].ErrorMessage, Is.EqualTo("Password is too simple."));
     }
+        
+    [Test]
+    public async Task Login_ReturnsView_WhenModelStateIsInvalid()
+    {
+        _controller.ModelState.AddModelError("UserName", "Required");
+        var model = new LoginViewModel();
+        
+        var result = await _controller.Login(model);
+        
+        Assert.That(result, Is.InstanceOf<ViewResult>());
+        var viewResult = result as ViewResult;
+        Assert.That(viewResult.Model, Is.EqualTo(model));
+    }
+    
+    [Test]
+    public async Task Login_RedirectsToHome_WhenSignInSucceeds()
+    {
+        var model = new LoginViewModel 
+        { 
+            UserName = "test@example.com", 
+            Password = "Password123!", 
+            RememberMe = false 
+        };
+
+        _mockSignInManager
+            .Setup(x => x.PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, false))
+            .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Success);
+        
+        var result = await _controller.Login(model);
+        
+        Assert.That(result, Is.InstanceOf<RedirectToActionResult>());
+        var redirect = result as RedirectToActionResult;
+        Assert.That(redirect.ActionName, Is.EqualTo("Index"));
+        Assert.That(redirect.ControllerName, Is.EqualTo("Home"));
+    }
+    
+    [Test]
+    public async Task Login_AddsError_WhenSignInFails()
+    {
+        var model = new LoginViewModel { UserName = "wrong@user.com", Password = "WrongPassword" };
+
+        _mockSignInManager
+            .Setup(x => x.PasswordSignInAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), false))
+            .ReturnsAsync(Microsoft.AspNetCore.Identity.SignInResult.Failed);
+        
+        var result = await _controller.Login(model);
+        
+        Assert.That(result, Is.InstanceOf<ViewResult>());
+        Assert.That(_controller.ModelState.IsValid, Is.False);
+        Assert.That(_controller.ModelState.ContainsKey(string.Empty), Is.True);
+        
+        var error = _controller.ModelState[string.Empty].Errors[0];
+        Assert.That(error.ErrorMessage, Is.EqualTo("Invalid login attempt."));
+    }
 }
