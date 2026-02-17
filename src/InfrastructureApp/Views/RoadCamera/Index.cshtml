@@ -1,33 +1,65 @@
 @model InfrastructureApp.ViewModels.RoadCameraIndexViewModel
 
-<h1>Road Cameras</h1>
+<h1 class="text-center mb-4">Road Cameras</h1>
 
-<p class="text-muted">
-    Cameras loaded: @(Model?.Cameras?.Count ?? 0)
-</p>
+<div class="container">
 
-@if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
-{
-    <div class="alert alert-warning">@Model.ErrorMessage</div>
-}
+    <p class="text-muted text-center">
+        Cameras loaded: @(Model?.Cameras?.Count ?? 0)
+    </p>
 
-@if (Model?.Cameras == null || Model.Cameras.Count == 0)
-{
-    <div class="alert alert-info">
-        No cameras were returned. (This usually means TripCheck is unavailable or the request failed.)
-    </div>
-}
-else
-{
-    <ul>
-        @foreach (var cam in Model.Cameras)
-        {
-            <li>
-                <a asp-controller="RoadCamera" asp-action="Details" asp-route-id="@cam.CameraId">
-                    @cam.Name (@cam.CameraId)
-                </a>
-            </li>
-        }
-    </ul>
-}
+    @if (!string.IsNullOrWhiteSpace(Model?.ErrorMessage))
+    {
+        <div class="alert alert-warning text-center">
+            @Model.ErrorMessage
+        </div>
+    }
 
+    @if (Model?.Cameras == null || Model.Cameras.Count == 0)
+    {
+        <div class="alert alert-info text-center">
+            No cameras were returned. (This usually means TripCheck is unavailable or the request failed.)
+        </div>
+    }
+    else
+    {
+        <div class="row g-4 justify-content-center">
+            @foreach (var cam in Model.Cameras)
+            {
+                <div class="col-12 col-md-6 col-lg-4">
+
+                    <a asp-action="Details"
+                       asp-route-id="@cam.CameraId"
+                       class="text-decoration-none text-dark">
+
+                        <div class="card h-100 shadow-sm camera-card">
+
+                            <div class="card-body text-center">
+                                <i class="fa-solid fa-camera fa-2x mb-2 text-primary"></i>
+
+                                <h5 class="card-title">
+                                    @cam.Name
+                                </h5>
+
+                                <div class="text-muted small">
+                                    @cam.Latitude, @cam.Longitude
+                                </div>
+
+                                @if (cam.LastUpdated != null)
+                                {
+                                    <div class="small text-muted mt-2">
+                                        Updated: @cam.LastUpdated.Value.ToLocalTime().ToString("g")
+                                    </div>
+                                }
+                            </div>
+
+                        </div>
+
+                    </a>
+
+                </div>
+            }
+        </div>
+    }
+
+</div>
