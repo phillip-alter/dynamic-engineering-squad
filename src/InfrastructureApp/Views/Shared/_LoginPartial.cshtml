@@ -1,3 +1,18 @@
 ﻿@using Microsoft.AspNetCore.Identity;
 @inject SignInManager<Users> signInManager;
 
+<ul class="navbar-nav d-flex align-items-center text-light gap-3">
+    <li class="nav-item d-flex align-items-center">
+        <div id="google_translate_element"></div>
+    </li>
+    @if (signInManager.IsSignedIn(User))
+    {
+        <li class="nav-item d-flex align-items-center">
+            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-link nav-link text-light p-0">Logout</button>
+            </form>
+        </li>
+    }
+
+</ul>
