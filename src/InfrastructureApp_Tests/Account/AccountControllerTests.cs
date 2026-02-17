@@ -1,8 +1,12 @@
 using InfrastructureApp.Controllers;
 using InfrastructureApp.Models;
 using InfrastructureApp.ViewModels.Account;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace InfrastructureApp_Tests;
@@ -11,6 +15,7 @@ namespace InfrastructureApp_Tests;
 public class AccountControllerTests
 {
     private Mock<UserManager<Users>> _mockUserManager;
+    private Mock<SignInManager<Users>> _mockSignInManager;
     private AccountController _controller;
 
     [SetUp]
@@ -18,7 +23,16 @@ public class AccountControllerTests
     {
         var store = new Mock<IUserStore<Users>>();
         _mockUserManager = new Mock<UserManager<Users>>(store.Object, null, null, null, null, null, null, null, null);
-        _controller = new AccountController(_mockUserManager.Object);
+        _mockSignInManager = new Mock<SignInManager<Users>>(
+            _mockUserManager.Object,
+            new Mock<IHttpContextAccessor>().Object,
+            new Mock<IUserClaimsPrincipalFactory<Users>>().Object,
+            new Mock<IOptions<IdentityOptions>>().Object,
+            new Mock<ILogger<SignInManager<Users>>>().Object,
+            new Mock<IAuthenticationSchemeProvider>().Object,
+            new Mock<IUserConfirmation<Users>>().Object
+        );
+        _controller = new AccountController(_mockUserManager.Object, _mockSignInManager.Object);
     }
 
     [TearDown]
