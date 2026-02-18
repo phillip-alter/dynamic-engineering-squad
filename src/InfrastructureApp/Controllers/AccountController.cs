@@ -7,16 +7,36 @@ namespace InfrastructureApp.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UserManager<Users> userManager;
+        private readonly UserManager<Users> _userManager;
+        private readonly SignInManager<Users> _signInManager;
 
-        public AccountController(UserManager<Users> userManager)
+        public AccountController(UserManager<Users> userManager,  SignInManager<Users> signInManager)
         {
-            this.userManager = userManager;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
-        public IActionResult Index()
+        public IActionResult Login()
         {
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Login(LoginViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var result = await _signInManager
+                .PasswordSignInAsync(model.UserName, model.Password, model.RememberMe, false);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+            return View(model);
         }
 
         [HttpGet]
@@ -34,13 +54,13 @@ namespace InfrastructureApp.Controllers
                 return View(model);
             }
 
-            var user = new Users(userName: model.Username, email: model.Email)
+            var user = new Users()
             {
                 UserName = model.Username,
                 Email = model.Email,
             };
 
-            var result = await userManager.CreateAsync(user, model.Password);
+            var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
