@@ -26,9 +26,18 @@
         }
     </div>
 
-    <div class="mt-3">
-        <a class="btn report-action-btn" asp-action="ReportIssue" aria-label="Report another issue">
-            Report another
+    <div class="mt-3 d-flex gap-2">
+        <a class="btn report-action-btn"
+        asp-action="Create"
+        aria-label="Report another issue">
+            Report another Issue
+        </a>
+
+        <a class="btn report-action-btn"
+        asp-controller="Home"
+        asp-action="Index"
+        aria-label="Return to the home page">
+            Back to Home
         </a>
     </div>
 </div>
