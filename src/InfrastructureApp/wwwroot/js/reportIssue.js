@@ -112,6 +112,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+// map for details.cshtml
+
+window.initSubmittedMap = function () {
+
+    const mapElement = document.getElementById("submittedMap");
+    if (!mapElement) return;
+
+    const lat = Number(mapElement.dataset.lat);
+    const lng = Number(mapElement.dataset.lng);
+
+    if (!lat || !lng) {
+        console.warn("No coordinates available.");
+        return;
+    }
+
+    const position = { lat: lat, lng: lng };
+
+    const map = new google.maps.Map(mapElement, {
+        center: position,
+        zoom: 16,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false
+    });
+
+    new google.maps.Marker({
+        position: position,
+        map: map
+    });
+};
+
+
+
 
 
 
