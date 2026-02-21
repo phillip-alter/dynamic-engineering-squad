@@ -78,6 +78,9 @@ builder.Services.Configure<GoogleMapsOptions>(
 //Nearby Issues
 builder.Services.AddScoped<INearbyIssueService, NearbyIssueService>();
 
+//geocoding
+builder.Services.AddHttpClient();
+
 
 
 

@@ -164,28 +164,19 @@
   }
 
   async function geocodeAddress(address) {
-  const cfg = window.NearbyIssuesConfig;
-  const key = cfg?.mapsKey;
-  if (!key) throw new Error("Google Maps API key missing (NearbyIssuesConfig.mapsKey).");
+    const url = `/api/geocode?q=${encodeURIComponent(address)}`;
+    const res = await fetch(url);
 
-  const url =
-    `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&region=us&key=${encodeURIComponent(key)}`;
+    if (!res.ok) {
+        const data = await res.json().catch(() => null);
+        const msg = data?.errorMessage
+        ? `${data.status}: ${data.errorMessage}`
+        : (data?.message || "Could not geocode that location.");
+        throw new Error(msg);
+    }
 
-  const res = await fetch(url);
-  const data = await res.json();
-
-  console.log("Geocode JSON:", data);
-
-  if (data.status !== "OK" || !data.results?.length) {
-    const msg = data.error_message
-      ? `${data.status}: ${data.error_message}`
-      : `${data.status}`;
-    throw new Error(`Geocoding failed - ${msg}`);
-  }
-
-  const loc = data.results[0].geometry.location;
-  return { lat: loc.lat, lng: loc.lng };
-}
+    return await res.json(); // { lat, lng }
+    }
 
   async function searchLocation() {
     try {
