@@ -20,7 +20,10 @@ else
         {
             <button type="button"
                     class="list-group-item list-group-item-action d-flex justify-content-between align-items-start report-item"
-                    data-description="@r.Description"        data-created="@r.CreatedAt.ToLocalTime().ToString("f")"
+                    data-bs-toggle="modal"        
+                    data-bs-target="#reportModal"        
+                    data-description="@r.Description"
+                    data-created="@r.CreatedAt.ToLocalTime().ToString("f")" 
                     data-status="@r.Status">
                 <div class="me-3">
                     <div class="fw-bold">@r.Description</div>
