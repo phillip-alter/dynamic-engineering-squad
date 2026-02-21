@@ -19,6 +19,93 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+// Handles Google Maps interaction for reporting issues
+
+let map;
+let marker = null;
+
+// Google Maps calls this automatically because of callback=initMap
+function initMap() {
+
+    // Default location (Monmouth, Oregon)
+    const defaultLocation = {
+        lat: 44.84845,
+        lng: -123.23399
+    };
+
+    // Create map
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: defaultLocation,
+        zoom: 12,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false
+    });
+
+    // When user clicks map
+    map.addListener("click", function (event) {
+
+        const lat = event.latLng.lat();
+        const lng = event.latLng.lng();
+
+        placeMarker(lat, lng);
+        updateHiddenInputs(lat, lng);
+    });
+}
+
+
+
+// Marker logic
+function placeMarker(lat, lng) {
+
+    const position = { lat: lat, lng: lng };
+
+    if (marker === null) {
+        marker = new google.maps.Marker({
+            position: position,
+            map: map
+        });
+    } else {
+        marker.setPosition(position);
+    }
+}
+
+
+// Hidden form fields
+function updateHiddenInputs(lat, lng) {
+
+    const latInput = document.getElementById("Latitude");
+    const lngInput = document.getElementById("Longitude");
+
+    if (latInput && lngInput) {
+        latInput.value = lat;
+        lngInput.value = lng;
+    }
+}
+
+
+
+// Prevent submit without location
+document.addEventListener("DOMContentLoaded", () => {
+
+    const form = document.querySelector("form");
+
+    if (!form) return;
+
+    form.addEventListener("submit", function (e) {
+
+        const lat = document.getElementById("Latitude").value;
+        const lng = document.getElementById("Longitude").value;
+
+        if (!lat || !lng) {
+            e.preventDefault();
+            alert("Please select the location of the issue.");
+        }
+    });
+});
+
+
+
 
 
 
