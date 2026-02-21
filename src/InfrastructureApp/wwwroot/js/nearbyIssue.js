@@ -155,48 +155,60 @@
         renderResults(reports);
       },
       (err) => {
-        setStatus("Location permission denied or unavailable. Please enter a location.");
         console.warn(err);
+        initMapAt(44.8512, -123.2334, 13); //default to monmouth if permission is denied
+        setStatus("Location permission denied. Please enter a zip, city, or address and click Search.");
       },
       { enableHighAccuracy: true, timeout: 10000 }
     );
   }
 
   async function geocodeAddress(address) {
-    const cfg = window.NearbyIssuesConfig;
-    const key = cfg?.mapsKey;
+  const cfg = window.NearbyIssuesConfig;
+  const key = cfg?.mapsKey;
+  if (!key) throw new Error("Google Maps API key missing (NearbyIssuesConfig.mapsKey).");
 
-    if (!key) throw new Error("Google Maps API key missing (NearbyIssuesConfig.mapsKey).");
+  const url =
+    `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&region=us&key=${encodeURIComponent(key)}`;
 
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${encodeURIComponent(key)}`;
-    const res = await fetch(url);
-    const data = await res.json();
+  const res = await fetch(url);
+  const data = await res.json();
 
-    if (data.status !== "OK" || !data.results?.length) {
-      throw new Error("Could not find that location. Try a more specific address/city/zip.");
-    }
+  console.log("Geocode JSON:", data);
 
-    const loc = data.results[0].geometry.location;
-    return { lat: loc.lat, lng: loc.lng };
+  if (data.status !== "OK" || !data.results?.length) {
+    const msg = data.error_message
+      ? `${data.status}: ${data.error_message}`
+      : `${data.status}`;
+    throw new Error(`Geocoding failed - ${msg}`);
   }
+
+  const loc = data.results[0].geometry.location;
+  return { lat: loc.lat, lng: loc.lng };
+}
 
   async function searchLocation() {
-    const address = ($("locationInput")?.value || "").trim();
-    const radiusMiles = parseFloat($("radiusMiles")?.value || "5");
+    try {
+        const address = ($("locationInput")?.value || "").trim();
+        const radiusMiles = parseFloat($("radiusMiles")?.value || "5");
 
-    if (!address) {
-      setStatus("Enter a zip, city, or address first.");
-      return;
+        if (!address) {
+        setStatus("Enter a zip, city, or address first.");
+        return;
+        }
+
+        setStatus("Finding that location...");
+        const { lat, lng } = await geocodeAddress(address);
+
+        initMapAt(lat, lng);
+        setStatus("Loading nearby reports...");
+        const reports = await fetchNearby(lat, lng, radiusMiles);
+        renderResults(reports);
+    } catch (e) {
+        console.error(e);
+        setStatus(e.message || "Search failed. Try a more specific address.");
     }
-
-    setStatus("Finding that location...");
-    const { lat, lng } = await geocodeAddress(address);
-
-    initMapAt(lat, lng);
-    setStatus("Loading nearby reports...");
-    const reports = await fetchNearby(lat, lng, radiusMiles);
-    renderResults(reports);
-  }
+}
 
   // Called by Google Maps once its script is loaded
   window.initNearbyIssuesPage = () => {
