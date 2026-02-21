@@ -20,19 +20,25 @@ else
         {
             <button type="button"
                     class="list-group-item list-group-item-action d-flex justify-content-between align-items-start report-item"
-                    data-bs-toggle="modal"          data-bs-target="#reportModal" data-description="@r.Description"
-                    data-created="@r.CreatedAt.ToLocalTime().ToString("f")"             data-status="@r.Status">
+                    data-bs-toggle="modal"
+                    data-bs-target="#reportModal"
+                    data-description="@r.Description"
+                    data-created="@r.CreatedAt.ToLocalTime().ToString("f")"
+                    data-status="@r.Status"
+                    data-image="@r.ImageUrl">
+
                 <div class="me-3">
                     <div class="fw-bold">@r.Description</div>
                 </div>
+
                 <small class="text-muted">
                     @r.CreatedAt.ToLocalTime().ToString("g")
                 </small>
+
             </button>
         }
     </div>
 }
-
 <!-- Report Details Modal -->
 <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
