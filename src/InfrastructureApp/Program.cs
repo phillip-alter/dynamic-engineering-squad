@@ -80,6 +80,7 @@ builder.Services.AddScoped<INearbyIssueService, NearbyIssueService>();
 
 //geocoding
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IGeocodingService, GeocodingService>();
 
 
 
