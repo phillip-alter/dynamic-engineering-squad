@@ -1,0 +1,74 @@
+@{
+    ViewData["Title"] = "Nearby Issues";
+}
+
+<div class="container py-4">
+    <h1 class="h3 mb-3">Nearby Reported Issues</h1>
+
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <p class="mb-2">
+                        We will try to use your current location. If you deny permission, enter a location below.
+                    </p>
+
+                    <label class="form-label" for="locationInput">Zip, city, or address</label>
+                    <input id="locationInput" class="form-control" placeholder="e.g., 97301 or Salem, OR or 123 Main St" />
+
+                    <div class="mt-3">
+                        <label class="form-label" for="radiusMiles">Radius (miles)</label>
+                        <select id="radiusMiles" class="form-select">
+                            <option value="1">1 mile</option>
+                            <option value="3">3 miles</option>
+                            <option value="5" selected>5 miles</option>
+                            <option value="10">10 miles</option>
+                            <option value="25">25 miles</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3">
+                        <button id="useMyLocationBtn" class="btn btn-primary">Use my location</button>
+                        <button id="searchLocationBtn" class="btn btn-outline-primary">Search location</button>
+                    </div>
+
+                    <div id="statusMsg" class="small text-muted mt-3"></div>
+
+                    <hr />
+
+                    <div>
+                        <div class="fw-semibold mb-2">Results</div>
+                        <div id="resultsList" class="list-group small"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-2">
+                    <div id="map" style="height: 600px; width: 100%; border-radius: 8px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Pass server-side values to the static JS file
+        window.NearbyIssuesConfig = {
+            mapsKey: "@(Context.RequestServices.GetService<IConfiguration>()["GoogleMaps:ApiKey"])",
+            nearbyApiUrl: "/api/reports/nearby",
+            autoLocateOnLoad: true
+        };
+    </script>
+
+    <!-- Your JS file (must come BEFORE Google callback fires, so initNearbyIssuesPage exists) -->
+    <script src="~/js/nearbyIssue.js" asp-append-version="true"></script>
+
+    <!-- Load Google Maps and call initNearbyIssuesPage when ready -->
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=@(Context.RequestServices.GetService<IConfiguration>()["GoogleMaps:ApiKey"])&callback=initNearbyIssuesPage">
+    </script>
+}
