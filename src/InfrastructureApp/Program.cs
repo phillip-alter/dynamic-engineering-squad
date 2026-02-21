@@ -75,6 +75,9 @@ builder.Services.Configure<TripCheckOptions>(builder.Configuration.GetSection("T
 builder.Services.Configure<GoogleMapsOptions>(
     builder.Configuration.GetSection("GoogleMaps"));
 
+//Nearby Issues
+builder.Services.AddScoped<INearbyIssueService, NearbyIssueService>();
+
 
 
 

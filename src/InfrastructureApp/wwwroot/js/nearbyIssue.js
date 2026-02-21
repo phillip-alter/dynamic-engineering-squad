@@ -45,7 +45,7 @@
 
   async function fetchNearby(lat, lng, radiusMiles) {
     const cfg = window.NearbyIssuesConfig;
-    const base = cfg?.nearbyApiUrl || "/api/reports/nearby";
+    const base = cfg?.nearbyApiUrl || "/api/nearbyIssues";
 
     const url = `${base}?lat=${encodeURIComponent(lat)}&lng=${encodeURIComponent(lng)}&radiusMiles=${encodeURIComponent(radiusMiles)}`;
     const res = await fetch(url);
@@ -59,66 +59,81 @@
   }
 
   function renderResults(reports) {
-    clearMarkers();
+  clearMarkers();
 
-    if (!reports || reports.length === 0) {
-      setStatus("No reports found in this radius.");
-      return;
-    }
-
-    setStatus(`Found ${reports.length} report(s). Click a marker to view details.`);
-
-    const resultsList = $("resultsList");
-
-    for (const r of reports) {
-      const pos = { lat: r.latitude, lng: r.longitude };
-
-      const marker = new google.maps.Marker({
-        position: pos,
-        map,
-        title: `#${r.id} - ${r.status}`,
-      });
-
-      marker.addListener("click", () => {
-        const html = `
-          <div style="min-width:220px">
-            <div style="font-weight:600;margin-bottom:6px">Report #${r.id}</div>
-            <div><b>Status:</b> ${r.status}</div>
-            <div><b>Created:</b> ${new Date(r.createdAt).toLocaleString()}</div>
-            ${r.distanceMiles != null ? `<div><b>Distance:</b> ${r.distanceMiles.toFixed(2)} mi</div>` : ""}
-            <div style="margin-top:8px">
-              <a href="${r.detailsUrl}">View report</a>
-            </div>
-          </div>
-        `;
-        infoWindow.setContent(html);
-        infoWindow.open(map, marker);
-      });
-
-      markers.push(marker);
-
-      if (resultsList) {
-        const a = document.createElement("a");
-        a.href = r.detailsUrl;
-        a.className = "list-group-item list-group-item-action";
-        a.innerHTML = `
-          <div class="d-flex justify-content-between">
-            <span class="fw-semibold">#${r.id} - ${r.status}</span>
-            ${r.distanceMiles != null ? `<span>${r.distanceMiles.toFixed(2)} mi</span>` : ""}
-          </div>
-          <div class="text-muted">${new Date(r.createdAt).toLocaleString()}</div>
-        `;
-        a.addEventListener("mouseenter", () => marker.setAnimation(google.maps.Animation.BOUNCE));
-        a.addEventListener("mouseleave", () => marker.setAnimation(null));
-        resultsList.appendChild(a);
-      }
-    }
-
-    // Fit bounds to markers
-    const bounds = new google.maps.LatLngBounds();
-    for (const m of markers) bounds.extend(m.getPosition());
-    map.fitBounds(bounds);
+  if (!reports || reports.length === 0) {
+    setStatus("No reports found in this radius.");
+    return;
   }
+
+  setStatus(`Found ${reports.length} report(s). Click a marker to view details.`);
+  const resultsList = $("resultsList");
+
+  for (const r of reports) {
+    // Normalize casing (works with either camelCase or PascalCase JSON)
+    const id = r.id ?? r.Id;
+    const status = r.status ?? r.Status;
+    const createdAt = r.createdAt ?? r.CreatedAt;
+    const lat = r.latitude ?? r.Latitude;
+    const lng = r.longitude ?? r.Longitude;
+    const distanceMiles = r.distanceMiles ?? r.DistanceMiles;
+    const detailsUrl = r.detailsUrl ?? r.DetailsUrl ?? `/ReportIssue/Details/${id}`;
+
+    // Skip bad rows
+    if (lat == null || lng == null) continue;
+
+    const pos = { lat: Number(lat), lng: Number(lng) };
+
+    const marker = new google.maps.Marker({
+      position: pos,
+      map,
+      title: `#${id} - ${status}`,
+    });
+
+    marker.addListener("click", () => {
+      const html = `
+        <div style="min-width:220px">
+          <div style="font-weight:600;margin-bottom:6px">Report #${id}</div>
+          <div><b>Status:</b> ${status}</div>
+          <div><b>Created:</b> ${new Date(createdAt).toLocaleString()}</div>
+          ${distanceMiles != null ? `<div><b>Distance:</b> ${Number(distanceMiles).toFixed(2)} mi</div>` : ""}
+          <div style="margin-top:8px">
+            <a href="${detailsUrl}">View report</a>
+          </div>
+        </div>
+      `;
+      infoWindow.setContent(html);
+      infoWindow.open(map, marker);
+    });
+
+    markers.push(marker);
+
+    if (resultsList) {
+      const a = document.createElement("a");
+      a.href = detailsUrl;
+      a.className = "list-group-item list-group-item-action";
+      a.innerHTML = `
+        <div class="d-flex justify-content-between">
+          <span class="fw-semibold">#${id} - ${status}</span>
+          ${distanceMiles != null ? `<span>${Number(distanceMiles).toFixed(2)} mi</span>` : ""}
+        </div>
+        <div class="text-muted">${new Date(createdAt).toLocaleString()}</div>
+      `;
+      a.addEventListener("mouseenter", () => marker.setAnimation(google.maps.Animation.BOUNCE));
+      a.addEventListener("mouseleave", () => marker.setAnimation(null));
+      resultsList.appendChild(a);
+    }
+  }
+
+    // Fit bounds to markers (only if we have markers)
+    if (markers.length > 0) {
+        const bounds = new google.maps.LatLngBounds();
+        for (const m of markers) bounds.extend(m.getPosition());
+        map.fitBounds(bounds);
+    } else {
+        setStatus("No valid report coordinates returned.");
+    }
+}
 
   async function useBrowserLocation() {
     setStatus("Requesting location permission...");
