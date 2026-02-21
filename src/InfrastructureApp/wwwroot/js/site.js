@@ -15,6 +15,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const modalDescriptionElement = document.getElementById("modalDescription");
     const modalCreatedElement = document.getElementById("modalCreated");
     const modalStatusElement = document.getElementById("modalStatus");
+    // Modal image elements
+    const modalImageElement = document.getElementById("modalImage");
+    const modalImageFallbackElement = document.getElementById("modalImageFallback");
 
     // Get all clickable report items
     const reportItems = document.querySelectorAll(".report-item");
@@ -26,7 +29,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const description = this.dataset.description || "";
             const created = this.dataset.created || "";
             const status = this.dataset.status || "";
-
+            const imageUrl = this.dataset.image || ""; // read image URL from data-image attribute
+ 
             if (modalDescriptionElement) {
                 modalDescriptionElement.textContent = description;
             }
@@ -39,8 +43,27 @@ document.addEventListener("DOMContentLoaded", function () {
                 modalStatusElement.textContent = status;
             }
 
+            // Image handling logic 
+            if (modalImageElement && modalImageFallbackElement) {
+
+                if (imageUrl.trim().length > 0) {
+
+                    // Show image if URL exists
+                    modalImageElement.src = imageUrl;
+                    modalImageElement.classList.remove("d-none");
+
+                    modalImageFallbackElement.classList.add("d-none");
+                    modalImageFallbackElement.textContent = "";
+                }
+                else {
+                    // Show fallback message if no image
+                    modalImageElement.removeAttribute("src");
+                    modalImageElement.classList.add("d-none");
+
+                    modalImageFallbackElement.textContent = "No image was provided for this report.";
+                    modalImageFallbackElement.classList.remove("d-none");
+                }
+            }
         });
-
     });
-
 });
