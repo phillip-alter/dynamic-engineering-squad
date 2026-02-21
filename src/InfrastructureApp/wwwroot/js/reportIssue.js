@@ -112,7 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-// map for details.cshtml
+// map for details.cshtml when user submits report
 
 window.initSubmittedMap = function () {
 
@@ -152,7 +152,8 @@ window.initSubmittedMap = function () {
 if (typeof module !== "undefined") {
     module.exports = {
         updateHiddenInputs,
-        shouldBlockSubmit
+        shouldBlockSubmit,
+        initSubmittedMap: window.initSubmittedMap
     };
 }
 
