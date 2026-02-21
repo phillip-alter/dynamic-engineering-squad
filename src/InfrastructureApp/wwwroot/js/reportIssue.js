@@ -25,7 +25,8 @@ let map;
 let marker = null;
 
 // Google Maps calls this automatically because of callback=initMap
-function initMap() {
+//window.initMap makes it global and allows it to work with modules/bundling
+window.initMap = function initMap() {
 
     // Default location (Monmouth, Oregon)
     const defaultLocation = {
@@ -83,6 +84,11 @@ function updateHiddenInputs(lat, lng) {
     }
 }
 
+//block submission if no geolocation provided
+function shouldBlockSubmit(lat, lng) {
+    // Treat empty strings, null, undefined as invalid
+    return lat == null || lat === "" || lng == null || lng === "";
+}
 
 
 // Prevent submit without location
@@ -97,12 +103,25 @@ document.addEventListener("DOMContentLoaded", () => {
         const lat = document.getElementById("Latitude").value;
         const lng = document.getElementById("Longitude").value;
 
-        if (!lat || !lng) {
+        if (shouldBlockSubmit(lat, lng)) {
             e.preventDefault();
             alert("Please select the location of the issue.");
         }
     });
 });
+
+
+
+
+
+
+// Export functions for Jest testing
+if (typeof module !== "undefined") {
+    module.exports = {
+        updateHiddenInputs,
+        shouldBlockSubmit
+    };
+}
 
 
 
