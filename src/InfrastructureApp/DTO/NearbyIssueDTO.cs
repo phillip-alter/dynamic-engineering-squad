@@ -1,3 +1,4 @@
+// A nearby infrastructure issue returned to the map UI
 // Namespace that holds objects used ONLY for transferring data
 // between layers (Service → API → Frontend)
 // DTO = Data Transfer Object
