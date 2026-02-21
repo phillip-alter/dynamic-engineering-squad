@@ -59,7 +59,7 @@
         // Pass server-side values to the static JS file
         window.NearbyIssuesConfig = {
             mapsKey: "@(Context.RequestServices.GetService<IConfiguration>()["GoogleMaps:ApiKey"])",
-            nearbyApiUrl: "/api/reports/nearby",
+            nearbyApiUrl: "/api/nearbyIssues/nearbyIssues",
             autoLocateOnLoad: true
         };
     </script>

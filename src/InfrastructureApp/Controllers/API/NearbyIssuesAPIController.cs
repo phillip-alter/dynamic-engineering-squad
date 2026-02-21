@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace InfrastructureApp.Controllers.Api
 {
     [ApiController]
-    [Route("api/nearby")]
+    [Route("api/nearbyIssues")]
     public class ReportsApiController : ControllerBase
     {
         private readonly INearbyIssueService _reportQuery;
@@ -15,7 +15,7 @@ namespace InfrastructureApp.Controllers.Api
             _reportQuery = reportQuery;
         }
 
-        [HttpGet("nearby")]
+        [HttpGet("nearbyIssues")]
         public async Task<ActionResult<List<object>>> GetNearby(
             double lat,
             double lng,

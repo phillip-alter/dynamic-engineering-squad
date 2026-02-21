@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InfrastructureApp.Controllers
 {
-    public class NearbyController : Controller
+    public class NearbyIssueController : Controller
     {
         [HttpGet]
         public IActionResult Index()
