@@ -1,3 +1,10 @@
+@using InfrastructureApp.Configuration
+@using Microsoft.Extensions.Options
+
+
+<!--injects API key, avoids using viewbag-->
+@inject IOptions<GoogleMapsOptions> GoogleMaps    
+
 @model InfrastructureApp.ViewModels.ReportIssueViewModel
 @{
     ViewData["Title"] = "Submit Issue";
@@ -61,8 +68,14 @@
     </form>
 </div>
 
+
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/reportIssue.js"></script>
+
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey&callback=initMap">
+    </script>
 }
 

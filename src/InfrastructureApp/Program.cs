@@ -1,5 +1,6 @@
 using InfrastructureApp.Data;
 using InfrastructureApp.Models;
+using InfrastructureApp.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services;
@@ -69,6 +70,10 @@ builder.Services.AddHttpClient<ITripCheckService, TripCheckService>(client =>
 });
 
 builder.Services.Configure<TripCheckOptions>(builder.Configuration.GetSection("TripCheck"));
+
+//Google Maps 
+builder.Services.Configure<GoogleMapsOptions>(
+    builder.Configuration.GetSection("GoogleMaps"));
 
 
 
