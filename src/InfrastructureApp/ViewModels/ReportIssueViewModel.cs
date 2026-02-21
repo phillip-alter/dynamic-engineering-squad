@@ -21,12 +21,12 @@ namespace InfrastructureApp.ViewModels
         [Display(Name = "Photo")]
         public IFormFile? Photo {get; set;} = default!;
 
-        [Required(ErrorMessage = "Please select a location on the map.")]
+        [Required(ErrorMessage = "Please select a location on the map to populate Latitude.")]
         [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90.")]
-        public decimal Latitude { get; set; }
+        public decimal? Latitude { get; set; }
 
-        [Required(ErrorMessage = "Please select a location on the map.")]
+        [Required(ErrorMessage = "Please select a location on the map to populate Longitude.")]
         [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180.")]
-        public decimal Longitude { get; set; }
+        public decimal? Longitude { get; set; }
     }
 }
