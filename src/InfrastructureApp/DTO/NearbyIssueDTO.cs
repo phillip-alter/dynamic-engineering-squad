@@ -1,6 +1,6 @@
 namespace InfrastructureApp.Dtos
 {
-    public class NearbyReportDto
+    public class NearbyIssueDTO
     {
         public int Id { get; init; }
         public string Status { get; init; } = "";
@@ -8,6 +8,6 @@ namespace InfrastructureApp.Dtos
         public double Latitude { get; init; }
         public double Longitude { get; init; }
         public double? DistanceMiles { get; init; }
-        public string DetailsUrl { get; init; } = "";
+        
     }
 }
