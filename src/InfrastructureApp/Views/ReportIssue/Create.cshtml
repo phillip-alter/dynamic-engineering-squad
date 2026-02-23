@@ -1,3 +1,10 @@
+@using InfrastructureApp.Configuration
+@using Microsoft.Extensions.Options
+
+
+<!--injects API key, avoids using viewbag-->
+@inject IOptions<GoogleMapsOptions> GoogleMaps    
+
 @model InfrastructureApp.ViewModels.ReportIssueViewModel
 @{
     ViewData["Title"] = "Submit Issue";
@@ -11,6 +18,7 @@
     <form asp-action="Create" asp-controller="ReportIssue" method="post" enctype="multipart/form-data">   <!--enctype is required for photo uploads-->
         @Html.AntiForgeryToken()
 
+        <!--text box-->
         <div class="mb-3">
             <label asp-for="Description" class="form-label"></label>
             <textarea asp-for="Description"
@@ -26,11 +34,25 @@
             </div>
         </div>
 
+        <!--picture upload-->
         <div class="mb-3 mt-3">
             <label asp-for="Photo" class="form-label"></label>
             <input asp-for="Photo" type="file" class="form-control" accept="image/*" />
             <span asp-validation-for="Photo" class="text-danger"></span>
         </div>
+
+        <!--map-->
+        <div class="mb-3">
+            <label class="form-label">Select location</label>
+            <div id="map" style="height: 380px; width: 100%; border-radius: 12px;"></div>
+            <small class="text-muted">Click on the map to drop a marker where the issue happened.</small>
+            <span asp-validation-for="Latitude" class="text-danger d-block"></span>
+            <span asp-validation-for="Longitude" class="text-danger d-block"></span>
+        </div>
+
+        <!--hidden inputs that get populated by javascript-->
+        <input asp-for="Latitude" type="hidden" id="Latitude" value="" />
+        <input asp-for="Longitude" type="hidden" id="Longitude" value="" />
 
         <button type="submit"
                 class="btn report-action-btn report-action-btn--primary"
@@ -46,8 +68,14 @@
     </form>
 </div>
 
+
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/reportIssue.js"></script>
+
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey&callback=initMap">
+    </script>
 }
 
