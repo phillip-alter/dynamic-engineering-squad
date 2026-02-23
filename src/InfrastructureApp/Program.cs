@@ -1,5 +1,6 @@
 using InfrastructureApp.Data;
 using InfrastructureApp.Models;
+using InfrastructureApp.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services;
@@ -61,6 +62,17 @@ builder.Services.AddHttpClient<ITripCheckService, TripCheckService>((sp, client)
     client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
     client.DefaultRequestHeaders.UserAgent.ParseAdd("InfrastructureApp/1.0");
 });
+
+//Google Maps 
+builder.Services.Configure<GoogleMapsOptions>(
+    builder.Configuration.GetSection("GoogleMaps"));
+
+//Nearby Issues
+builder.Services.AddScoped<INearbyIssueService, NearbyIssueService>();
+
+//geocoding
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<IGeocodingService, GeocodingService>();
 
 
 
