@@ -1,3 +1,10 @@
+@using InfrastructureApp.Configuration
+@using Microsoft.Extensions.Options
+
+<!--injects API key, avoids using viewbag-->
+@inject IOptions<GoogleMapsOptions> GoogleMaps
+
+
 @model InfrastructureApp.Models.ReportIssue
 @{
     ViewData["Title"] = "Report Submitted";
@@ -19,16 +26,47 @@
         <p><strong>Description:</strong><br />@Model.Description</p>
         <p><strong>Location:</strong> (@Model.Latitude, @Model.Longitude)</p>
 
+        <div class="mt-3">
+            <p><strong>Location on map:</strong></p>
+
+            <div id="submittedMap"
+                data-lat="@Model.Latitude"
+                data-lng="@Model.Longitude"
+                style="height:320px; width:100%; border-radius:12px;">
+            </div>
+        </div>
+
         @if (!string.IsNullOrWhiteSpace(Model.ImageUrl))
         {
-            <p class="mt-3"><strong>Image:</strong></p>
+            <p><strong>Image:</strong></p>
             <img src="@Model.ImageUrl" class="img-fluid rounded" alt="Uploaded issue photo" />
         }
     </div>
 
-    <div class="mt-3">
-        <a class="btn report-action-btn" asp-action="ReportIssue" aria-label="Report another issue">
-            Report another
+    <div class="mt-3 d-flex gap-2">
+        <a class="btn report-action-btn"
+        asp-action="Create"
+        aria-label="Report another issue">
+            Report another Issue
+        </a>
+
+        <a class="btn report-action-btn"
+        asp-controller="Home"
+        asp-action="Index"
+        aria-label="Return to the home page">
+            Back to Home
         </a>
     </div>
 </div>
+
+
+
+@section Scripts {
+
+    <script src="~/js/reportIssue.js"></script>
+
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey&callback=initSubmittedMap">
+    </script>
+
+}
