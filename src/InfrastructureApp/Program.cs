@@ -75,7 +75,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<IGeocodingService, GeocodingService>();
 
 
-
+builder.Services.AddScoped<IAvatarService, AvatarService>();
 
 
 
