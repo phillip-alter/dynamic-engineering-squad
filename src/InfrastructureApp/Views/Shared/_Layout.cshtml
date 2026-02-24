@@ -82,6 +82,12 @@
                             <i class="fa-solid fa-map-pin"></i> Nearby Issues
                         </a>
                     </li>
+                     @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="ChooseAvatar">Choose Avatar</a>
+                            </li>
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
 
