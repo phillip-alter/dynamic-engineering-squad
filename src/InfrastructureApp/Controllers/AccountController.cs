@@ -104,6 +104,7 @@ namespace InfrastructureApp.Controllers
             if (!success)
                 return View(_avatarService.BuildChooseAvatarViewModel(user, vm.SelectedAvatarKey, error));
 
+            await _signInManager.RefreshSignInAsync(user); 
             return RedirectToAction("Index", "Home");
         }
     }

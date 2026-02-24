@@ -14,15 +14,9 @@ namespace InfrastructureApp.ViewComponents
             _userManager = userManager;
         }
 
-        public async Task<IViewComponentResult> InvokeAsync()
+      public Task<IViewComponentResult> InvokeAsync()
         {
-            if (User?.Identity?.IsAuthenticated != true)
-                return Content(string.Empty);
-
-            var user = await _userManager.GetUserAsync(UserClaimsPrincipal);
-            var avatarUrl = AvatarCatalog.ToUrl(user?.AvatarKey);
-
-            return View("Default", avatarUrl);
+            return Task.FromResult<IViewComponentResult>(Content("[VC HIT]"));
         }
     }
 }
