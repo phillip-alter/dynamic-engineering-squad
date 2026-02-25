@@ -284,4 +284,19 @@
       setStatus("Enter a location to search.");
     }
   };
+
+    // Expose internals for unit tests only
+  if (typeof window !== "undefined" && window.__JEST__) {
+    window.__nearbyIssues = {
+      _setStatus: setStatus,
+      _clearMarkers: clearMarkers,
+      _initMapAt: initMapAt,
+      _fetchNearby: fetchNearby,
+      _renderResults: renderResults,
+      _geocodeAddress: geocodeAddress,
+      _searchLocation: searchLocation,
+      _useBrowserLocation: useBrowserLocation,
+    };
+  }
+  
 })();
