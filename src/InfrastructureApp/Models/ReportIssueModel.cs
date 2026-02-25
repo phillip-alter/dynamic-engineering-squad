@@ -17,7 +17,7 @@ namespace InfrastructureApp.Models
         //NVARCHAR(50): Pending, Approved, Rejected
         [Required]
         [MaxLength(50)]
-        public string Status {get; set;} = "Pending";
+        public string Status {get; set;} = "Approved";
 
         //DATETIME2
         public DateTime CreatedAt {get; set;} = DateTime.UtcNow;
