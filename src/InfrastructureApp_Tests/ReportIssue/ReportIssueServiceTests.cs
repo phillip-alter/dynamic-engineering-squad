@@ -261,6 +261,21 @@ namespace InfrastructureApp_Tests
                     .OrderByDescending(r => r.CreatedAt)
                     .ToListAsync();
             }
+
+            public async Task<List<ReportIssue>> SearchLatestReportsAsync(bool isAdmin, string? keyword)
+            {
+                var query = _db.ReportIssue.AsQueryable();
+
+                if (!isAdmin)
+                    query = query.Where(r => r.Status == "Approved");
+
+                if (!string.IsNullOrWhiteSpace(keyword))
+                    query = query.Where(r => r.Description != null && r.Description.Contains(keyword));
+
+                return await query
+                    .OrderByDescending(r => r.CreatedAt)
+                    .ToListAsync();
+            }
         }
     }
 }
