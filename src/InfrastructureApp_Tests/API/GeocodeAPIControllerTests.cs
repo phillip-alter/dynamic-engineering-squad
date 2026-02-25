@@ -1,3 +1,5 @@
+//this tests whether the input validation path is correct. Whether q is null or empty, the happy path is correct, and the error path is correct
+
 using System;
 using System.Threading.Tasks;
 using InfrastructureApp.Controllers.Api;

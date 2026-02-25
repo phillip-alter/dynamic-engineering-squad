@@ -1,3 +1,5 @@
+//this tests whether the controller calls the service, the controller builds navigation URL's correctly. We are verifying that the controller asks asp.net to generate the correct url.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +9,7 @@ using InfrastructureApp.Dtos;
 using InfrastructureApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.AspNetCore.Mvc.Routing;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -77,14 +80,13 @@ namespace InfrastructureApp_Tests.Controllers.Api
                 .Returns(serviceResults);
 
             // Mock Url.Action(...) so DetailsUrl becomes predictable
-            _urlHelper.Action(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<object>())
+            _urlHelper.Action(Arg.Any<UrlActionContext>())
                 .Returns(callInfo =>
                 {
-                    // callInfo.ArgAt<object>(2) = the route values object (anonymous: new { id = r.Id })
-                    var valuesObj = callInfo.ArgAt<object>(2);
+                    var ctx = callInfo.Arg<UrlActionContext>();
 
-                    var idProp = valuesObj.GetType().GetProperty("id");
-                    var id = (int)idProp!.GetValue(valuesObj)!;
+                    var values = new RouteValueDictionary(ctx.Values);
+                    var id = (int)values["id"]!;
 
                     return $"/ReportIssue/Details/{id}";
                 });
@@ -166,7 +168,7 @@ namespace InfrastructureApp_Tests.Controllers.Api
             _nearbyIssueService.GetNearbyIssuesAsync(Arg.Any<double>(), Arg.Any<double>(), Arg.Any<double>())
                 .Returns(serviceResults);
 
-            _urlHelper.Action(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<object>())
+            _urlHelper.Action(Arg.Any<UrlActionContext>())
                 .Returns("/ReportIssue/Details/2");
 
             // Act
@@ -247,12 +249,11 @@ namespace InfrastructureApp_Tests.Controllers.Api
             await _nearbyIssueService.Received(1).GetNearbyIssuesAsync(lat, lng, defaultRadius);
         }
 
+        // Pretend the service found ONE nearby issue.
+        // The controller should then build a Details URL for it.
         [Test]
         public async Task GetNearby_CallsUrlAction_WithExpectedActionControllerAndId()
         {
-            // WHAT: Controller builds DetailsUrl using Url.Action("Details","ReportIssue", new { id = r.Id })
-            // WHY: Your map UI depends on this link. If action/controller/id changes, navigation breaks.
-
             // Arrange
             var serviceResults = new List<NearbyIssueDTO>
             {
@@ -267,37 +268,41 @@ namespace InfrastructureApp_Tests.Controllers.Api
                 }
             };
 
+            // Mock the service layer.
+            // Instead of querying a database, return our fake data.
             _nearbyIssueService
                 .GetNearbyIssuesAsync(Arg.Any<double>(), Arg.Any<double>(), Arg.Any<double>())
                 .Returns(serviceResults);
 
-            // Capture the anonymous route-values object passed to Url.Action(...)
-            object? capturedRouteValues = null;
 
-            // IMPORTANT: Stub the SAME overload the controller uses (string,string,object)
-            _urlHelper
-                .Action("Details", "ReportIssue", Arg.Do<object?>(o => capturedRouteValues = o))
-                .Returns("/ReportIssue/Details/99");
+            // We will CAPTURE the UrlActionContext passed to Url.Action(...)
+            // so we can inspect it later.
+            UrlActionContext? captured = null;
+
+            _urlHelper.Action(Arg.Do<UrlActionContext>(ctx => captured = ctx))
+                    .Returns("/ReportIssue/Details/99");
 
             // Act
             var actionResult = await _controller.GetNearby(44.8, -123.2, 5);
 
-            // Assert (sanity)
+            // Assert
             Assert.That(actionResult.Result, Is.TypeOf<OkObjectResult>());
+            var ok = (OkObjectResult)actionResult.Result!;
+            Assert.That(ok.Value, Is.Not.Null);
 
-            // Assert 1: Url.Action called exactly once with the expected action/controller
-            _urlHelper.Received(1).Action("Details", "ReportIssue", Arg.Any<object>());
+            // IMPORTANT: force enumeration so Select(...) executes and Url.Action is called
+            var _ = ((IEnumerable<object>)ok.Value!).ToList();
 
-            // Assert 2: Route values included id = 99
-            Assert.That(capturedRouteValues, Is.Not.Null);
+            // Now the call should exist
+            _urlHelper.Received(1).Action(Arg.Any<UrlActionContext>());
 
-            // Controller passes an anonymous object: new { id = r.Id }
-            // So we read the "id" property using reflection.
-            var idProp = capturedRouteValues!.GetType().GetProperty("id");
-            Assert.That(idProp, Is.Not.Null);
+            // And we can assert what it was called with
+            Assert.That(captured, Is.Not.Null);
+            Assert.That(captured!.Action, Is.EqualTo("Details"));
+            Assert.That(captured.Controller, Is.EqualTo("ReportIssue"));
 
-            var idValue = (int)idProp!.GetValue(capturedRouteValues)!;
-            Assert.That(idValue, Is.EqualTo(99));
+            var values = new RouteValueDictionary(captured.Values);
+            Assert.That((int)values["id"]!, Is.EqualTo(99));
         }
     }
 }
