@@ -71,10 +71,10 @@ namespace InfrastructureApp.Models
                 return query;
             }
             
-            keyword = keyword.Trim();
+            keyword = keyword.Trim().ToLower();
 
             // Case-insensitive matching
-            return query.Where(r => r.Description != null && r.Description.Contains(keyword));
+            return query.Where(r => r.Description != null && r.Description.ToLower().Contains(keyword));
         }
 
     }
