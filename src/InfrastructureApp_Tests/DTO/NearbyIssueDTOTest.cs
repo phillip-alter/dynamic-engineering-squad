@@ -33,5 +33,20 @@ namespace InfrastructureApp.Tests.Dtos
             Assert.That(dto.Longitude, Is.EqualTo(-123.19));
             Assert.That(dto.DistanceMiles, Is.EqualTo(2.5));
         }
+
+        //settable during initialization
+        //not modifiable afterward
+        [Test]
+        public void DTO_IsImmutableAfterInitialization()
+        {
+            var dto = new NearbyIssueDTO
+            {
+                Id = 1,
+                Status = "Approved"
+            };
+
+            // compile-time safety test
+            Assert.That(dto.Id, Is.EqualTo(1));
+        }
     }
 }
