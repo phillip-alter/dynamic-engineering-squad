@@ -5,6 +5,7 @@
 // REST API endpoint and dynamically updates the list.
 // ----------------------------------------------------
 
+// Feature-83: Latest Report Search
 document.addEventListener("DOMContentLoaded", () => {
 
   // Get references to UI elements needed for search and results display
@@ -14,10 +15,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const list = document.getElementById("latestReportsList");
   const msg = document.getElementById("latestSearchMessage");
 
-  // Safety check: if any required element is missing, stop execution
-  // This prevents JavaScript errors if the page structure changes
-  if (!input || !btn || !list || !msg) return;
-
+  // if any required element is missing, stop execution
+  // Prevents JavaScript errors if the page structure changes
+  if (!input || !btn || !list || !msg)
+    {
+        return;
+    }
 
   // ----------------------------------------------------
   // Performs the search using AJAX (fetch)
@@ -91,7 +94,65 @@ document.addEventListener("DOMContentLoaded", () => {
       await runSearch(input.value || "");
     }
   });
+
+
+
+  // ----------------------------------------------------
+  // This ensures modal works for dynamically added reports
+  // ----------------------------------------------------
+  document.addEventListener("click", (e) => {
+
+    const item = e.target.closest(".report-item");
+    if (!item)
+    {
+        return;
+    } 
+    const modalDescriptionElement = document.getElementById("modalDescription");
+    const modalCreatedElement = document.getElementById("modalCreated");
+    const modalStatusElement = document.getElementById("modalStatus");
+    const modalImageElement = document.getElementById("modalImage");
+    const modalImageFallbackElement = document.getElementById("modalImageFallback");
+
+    const description = item.dataset.description || "";
+    const created = item.dataset.created || "";
+    const status = item.dataset.status || "";
+    const imageUrl = item.dataset.image || "";
+
+    if (modalDescriptionElement)
+        modalDescriptionElement.textContent = description;
+
+    if (modalCreatedElement)
+        modalCreatedElement.textContent = created;
+
+    if (modalStatusElement)
+        modalStatusElement.textContent = status;
+
+    if (modalImageElement && modalImageFallbackElement) {
+
+        if (imageUrl.trim().length > 0) {
+
+            modalImageElement.src = imageUrl;
+            modalImageElement.classList.remove("d-none");
+
+            modalImageFallbackElement.classList.add("d-none");
+            modalImageFallbackElement.textContent = "";
+
+        } else {
+
+            modalImageElement.removeAttribute("src");
+            modalImageElement.classList.add("d-none");
+
+            modalImageFallbackElement.textContent =
+                "No image was provided for this report.";
+
+            modalImageFallbackElement.classList.remove("d-none");
+
+        }
+    }
+  });
+
 });
+
 
 // basic HTML escaping so user text wont break DOM
 function escapeHtml(value) {
