@@ -5,7 +5,7 @@
 const {
     updateHiddenInputs,
     shouldBlockSubmit
-} = require("../wwwroot/js/reportIssue.js");
+} = require("../InfrastructureApp/wwwroot/js/reportIssue.js");
 
 describe("Create Report JS Tests", () => {
 
@@ -38,7 +38,7 @@ describe("Create Report JS Tests", () => {
 
 
 //js tests for details map JS
-const { initSubmittedMap } = require("../wwwroot/js/reportIssue.js");
+const { initSubmittedMap } = require("../InfrastructureApp/wwwroot/js/reportIssue.js");
 
 describe("Report Details JS Tests", () => {
   let mapCtor;

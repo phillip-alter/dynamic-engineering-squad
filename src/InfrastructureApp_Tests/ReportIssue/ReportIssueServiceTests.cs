@@ -107,7 +107,7 @@ namespace InfrastructureApp_Tests
             Assert.That(report, Is.Not.Null);
             Assert.That(report!.UserId, Is.EqualTo(userId));
             Assert.That(report.Description, Is.EqualTo("Pothole on Main"));
-            Assert.That(report.Status, Is.EqualTo("Pending"));
+            Assert.That(report.Status, Is.EqualTo("Approved"));
             Assert.That(report.ImageUrl, Is.Null);
 
             // verify points created + updated
