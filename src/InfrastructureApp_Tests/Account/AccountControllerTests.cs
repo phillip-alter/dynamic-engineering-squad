@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
+using InfrastructureApp.Services;
 
 namespace InfrastructureApp_Tests;
 
@@ -16,6 +17,7 @@ public class AccountControllerTests
 {
     private Mock<UserManager<Users>> _mockUserManager;
     private Mock<SignInManager<Users>> _mockSignInManager;
+    private Mock<IAvatarService> _mockAvatarService;
     private AccountController _controller;
 
     [SetUp]
@@ -32,7 +34,8 @@ public class AccountControllerTests
             new Mock<IAuthenticationSchemeProvider>().Object,
             new Mock<IUserConfirmation<Users>>().Object
         );
-        _controller = new AccountController(_mockUserManager.Object, _mockSignInManager.Object);
+        _mockAvatarService = new Mock<IAvatarService>();
+        _controller = new AccountController(_mockUserManager.Object, _mockSignInManager.Object, _mockAvatarService.Object);
     }
 
     [TearDown]

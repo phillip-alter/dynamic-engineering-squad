@@ -2,6 +2,8 @@
 using InfrastructureApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using InfrastructureApp.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace InfrastructureApp.Controllers
 {
@@ -10,10 +12,14 @@ namespace InfrastructureApp.Controllers
         private readonly UserManager<Users> _userManager;
         private readonly SignInManager<Users> _signInManager;
 
-        public AccountController(UserManager<Users> userManager,  SignInManager<Users> signInManager)
+        private readonly IAvatarService _avatarService;
+
+        public AccountController(UserManager<Users> userManager,  SignInManager<Users> signInManager, IAvatarService avatarService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _avatarService = avatarService;
+            
         }
 
         public IActionResult Login()
@@ -74,12 +80,39 @@ namespace InfrastructureApp.Controllers
 
             return View(model);
         }
-
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
         {
             await _signInManager.SignOutAsync();
+            return RedirectToAction("Index", "Home");
+        }
+            
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> ChooseAvatar()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login");
+
+            var vm = _avatarService.BuildChooseAvatarViewModel(user);
+            return View(vm);
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChooseAvatar(ChooseAvatarViewModel vm)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login");
+
+            var (success, error) = await _avatarService.SaveAvatarAsync(user, vm.SelectedAvatarKey);
+            if (!success)
+                return View(_avatarService.BuildChooseAvatarViewModel(user, vm.SelectedAvatarKey, error));
+
+            await _signInManager.RefreshSignInAsync(user); 
             return RedirectToAction("Index", "Home");
         }
     }
