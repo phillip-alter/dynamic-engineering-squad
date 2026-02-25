@@ -86,10 +86,25 @@
     return;
   }
 
-  setStatus(`Found ${reports.length} report(s). Click a marker to view details.`);
+  // Only show APPROVED reports on the map/list (client-side filter)
+  const approvedOnly = (reports || []).filter(r => {
+    const status = (r.status ?? r.Status ?? "").toString().trim().toLowerCase();
+
+    // Accept a few common variants just in case your DB/API uses them
+    return status === "approved" || status === "approve" || status === "active";
+  });
+
+  // Handle empty result set AFTER filtering
+  if (approvedOnly.length === 0) {
+    setStatus("No approved reports found in this radius.");
+    return;
+  }
+
+
+  setStatus(`Found ${approvedOnly.length} approved report(s). Click a marker to view details.`);
   const resultsList = $("resultsList");
 
-  for (const r of reports) {
+  for (const r of approvedOnly) {
     // Your backend might return PascalCase properties (C# default) or camelCase 
     // Normalize casing (works with either camelCase or PascalCase JSON)
     const id = r.id ?? r.Id;
