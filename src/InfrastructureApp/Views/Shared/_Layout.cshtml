@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using InfrastructureApp.Models
+@using InfrastructureApp.Services
+@using Microsoft.AspNetCore.Identity
+@using InfrastructureApp.ViewComponents
+@inject UserManager<Users> UserManager
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -43,12 +48,30 @@
 
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
+         <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#">
                     <i class="fa-solid fa-city"></i> PatchNotes
                 </a>
+               @{
+                    string avatarUrl = AvatarCatalog.ToUrl(null);
 
+                    if (User?.Identity?.IsAuthenticated == true)
+                    {
+                        var currentUser = await UserManager.GetUserAsync(User);
+                        avatarUrl = AvatarCatalog.ToUrl(currentUser?.AvatarKey);
+                    }
+                }
+
+                <div class="d-flex align-items-center gap-2">
+                    <img src="@avatarUrl"
+                        alt="Avatar"
+                        style="width:34px;height:34px;border-radius:50%;object-fit:cover;" />
+                </div>
+                <div class="d-flex align-items-center gap-2">
+             
+                    @await Component.InvokeAsync(typeof(UserAvatarViewComponent))
+                </div>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#gameMenu"
                         aria-controls="gameMenu" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -82,6 +105,12 @@
                             <i class="fa-solid fa-map-pin"></i> Nearby Issues
                         </a>
                     </li>
+                     @if (User?.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Account" asp-action="ChooseAvatar"><i class="fa-solid fa-user"></i> Choose Avatar</a>
+                            </li>
+                        }
                     </ul>
                     <partial name="_LoginPartial" />
 
