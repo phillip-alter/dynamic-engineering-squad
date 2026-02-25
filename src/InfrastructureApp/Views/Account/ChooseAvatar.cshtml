@@ -1,0 +1,67 @@
+@model InfrastructureApp.ViewModels.Account.ChooseAvatarViewModel
+
+<div class="container mt-4">
+    <h1 class="mb-3">Choose Your Avatar</h1>
+
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
+    {
+        <div class="alert alert-warning">@Model.ErrorMessage</div>
+    }
+
+    <form asp-action="ChooseAvatar" method="post">
+        @Html.AntiForgeryToken()
+
+        <input type="hidden" asp-for="SelectedAvatarKey" />
+
+        <div class="row g-3">
+            @foreach (var opt in Model.Options)
+            {
+                <div class="col-6 col-md-3">
+                    <button type="button"
+                            class="avatar-tile @(opt.IsSelected ? "selected" : "")"
+                            data-avatar-key="@opt.Key">
+                        <img src="@opt.Url" alt="Avatar @opt.Key" class="img-fluid rounded" />
+                    </button>
+                </div>
+            }
+        </div>
+
+        <div class="mt-4">
+            <button class="btn btn-primary" type="submit">Save Avatar</button>
+            <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<style>
+    .avatar-tile {
+        width: 100%;
+        border: 2px solid transparent;
+        background: white;
+        padding: 8px;
+        border-radius: 12px;
+        cursor: pointer;
+        box-shadow: 0 1px 3px rgba(0,0,0,.08);
+    }
+
+    .avatar-tile.selected {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 3px rgba(13,110,253,.2);
+    }
+</style>
+
+<script>
+    (function () {
+        const hidden = document.querySelector('input[name="SelectedAvatarKey"]');
+        const tiles = document.querySelectorAll('.avatar-tile');
+
+        tiles.forEach(t => {
+            t.addEventListener('click', () => {
+                hidden.value = t.getAttribute('data-avatar-key');
+
+                tiles.forEach(x => x.classList.remove('selected'));
+                t.classList.add('selected');
+            });
+        });
+    })();
+</script>
