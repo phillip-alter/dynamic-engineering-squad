@@ -17,6 +17,7 @@ namespace InfrastructureApp_Tests
         public void FilterByDescription_WhenKeywordMatches_ReturnsOnlyMatchingReports()
         {
             // Arrange
+            // Fake reports to simulate database data
             var reports = new List<ReportIssue>
             {
                 new ReportIssue { Description = "Large pothole on 4th St." },
@@ -25,10 +26,14 @@ namespace InfrastructureApp_Tests
             }.AsQueryable();
 
             // Act
+            // Run the same search filter used by the repository
             var result = ReportIssue.FilterByDescription(reports, "pothole").ToList();
 
             // Assert
+            // Should return only reports containing the keyword
             Assert.That(result.Count, Is.EqualTo(2));
+
+            // Verify each result actually contains the keyword
             Assert.That(result.All(r => r.Description!.ToLower().Contains("pothole")), Is.True);
         }
 
@@ -40,6 +45,7 @@ namespace InfrastructureApp_Tests
         public void FilterByDescription_WhenKeywordHasWhitespace_StillMatches()
         {
             // Arrange
+            // Fake data with one matching report
             var reports = new List<ReportIssue>
             {
                 new ReportIssue { Description = "Streetlight out on Main" },
@@ -47,10 +53,14 @@ namespace InfrastructureApp_Tests
             }.AsQueryable();
 
             // Act
+            // Simulates user typing spaces in search input
             var result = ReportIssue.FilterByDescription(reports, "  streetlight  ").ToList();
 
             // Assert
+            // Should still find the correct report
             Assert.That(result.Count, Is.EqualTo(1));
+
+            // Verify correct report returned
             Assert.That(result[0].Description, Does.Contain("Streetlight"));
         }
 
@@ -61,6 +71,7 @@ namespace InfrastructureApp_Tests
         public void FilterByDescription_WhenNoMatches_ReturnsEmpty()
         {
             // Arrange
+            // No report contains "pothole"
             var reports = new List<ReportIssue>
             {
                 new ReportIssue { Description = "Broken stop sign" },
@@ -68,9 +79,11 @@ namespace InfrastructureApp_Tests
             }.AsQueryable();
 
             // Act
+            // Search keyword not present in data
             var result = ReportIssue.FilterByDescription(reports, "pothole").ToList();
 
             // Assert
+            // Should return nothing
             Assert.That(result, Is.Empty);
         }
 
@@ -82,6 +95,7 @@ namespace InfrastructureApp_Tests
         public void SearchPipeline_WhenNotAdmin_FiltersByKeyword_ApprovedOnly_AndNewestFirst()
         {
             // Arrange
+            // Mixed reports to simulate real database conditions
             var reports = new List<ReportIssue>
             {
                 new ReportIssue
@@ -119,17 +133,25 @@ namespace InfrastructureApp_Tests
             }.AsQueryable();
 
             // Act: simulate the repo/service pipeline for search (non-admin)
+            // Apply same logic used in repository
             var q = ReportIssue.VisibleToUser(reports, isAdmin: false);          // Approved-only
             q = ReportIssue.FilterByDescription(q, "pothole");                  // keyword filter
             q = ReportIssue.OrderLatestFirst(q);                                // newest-first
             var result = q.ToList();
 
             // Assert
-            Assert.That(result.Count, Is.EqualTo(2));                           // only approved potholes remain
+            // Only approved pothole reports should remain
+            Assert.That(result.Count, Is.EqualTo(2));
+
+            // Confirm Pending reports were removed
             Assert.That(result.All(r => r.Status == "Approved"), Is.True);
-            Assert.That(result[0].Id, Is.EqualTo(3));                           // newest approved pothole first
+
+            // Confirm newest appears first
+            Assert.That(result[0].Id, Is.EqualTo(3));
             Assert.That(result[1].Id, Is.EqualTo(1));
-            Assert.That(result[0].ImageUrl, Is.EqualTo("img3"));                // modal needs this preserved
+
+            // Confirm ImageUrl still exists for modal display
+            Assert.That(result[0].ImageUrl, Is.EqualTo("img3"));
         }
     }
 }
