@@ -261,6 +261,33 @@ namespace InfrastructureApp_Tests
                     .OrderByDescending(r => r.CreatedAt)
                     .ToListAsync();
             }
+
+            // This is feature83 related stuff.
+            // Added to match the updated IReportIssueRepository interface.
+            // This is a test-only repository used by NUnit tests.
+            // It simulates the real repository search behavior using in-memory test data.
+            public async Task<List<ReportIssue>> SearchLatestReportsAsync(bool isAdmin, string? keyword)
+            {
+                // Use in-memory reports from test database
+                var query = _db.ReportIssue.AsQueryable();
+
+                // Apply same visibility rule as real app (non-admin sees only Approved)
+                if (!isAdmin)
+                {
+                    query = query.Where(r => r.Status == "Approved");
+                }
+
+                // Apply keyword search filter like real repository search
+                if (!string.IsNullOrWhiteSpace(keyword))
+                {
+                    query = query.Where(r => r.Description != null && r.Description.Contains(keyword));
+                }
+
+                // Apply same sorting rule (newest reports first)
+                return await query
+                    .OrderByDescending(r => r.CreatedAt)
+                    .ToListAsync();
+            }
         }
     }
 }

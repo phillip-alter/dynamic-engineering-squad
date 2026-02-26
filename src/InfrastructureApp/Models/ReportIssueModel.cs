@@ -7,36 +7,37 @@ namespace InfrastructureApp.Models
     public class ReportIssue
     {
         //PK Identity
-        public int Id {get; set;}
+        public int Id { get; set; }
 
         //NVARCHAR(MAX)
         [Required]
         [StringLength(300)]
-        public string Description {get; set;} = "";
+        public string Description { get; set; } = "";
 
         //NVARCHAR(50): Pending, Approved, Rejected
         [Required]
         [MaxLength(50)]
+
         public string Status {get; set;} = "Approved";
 
         //DATETIME2
-        public DateTime CreatedAt {get; set;} = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         //FK to ApsNetUser.Id (nvarchar(450))
         [Required]
-        public string UserId {get; set; } = "";
+        public string UserId { get; set; } = "";
 
         //DECIMAL(9,6)
         [Range(-90, 90)]
-        public decimal? Latitude {get; set;}
+        public decimal? Latitude { get; set; }
 
         //DECIMAL (9,6)
         [Range(-180, 180)]
-        public decimal? Longitude {get; set;}
+        public decimal? Longitude { get; set; }
 
         //NVARCHAR(450) (URL to blob)
         [MaxLength(450)]
-        public string? ImageUrl {get; set;}
+        public string? ImageUrl { get; set; }
 
         // ----------------------------------------------------
         // Report query helpers
@@ -51,7 +52,7 @@ namespace InfrastructureApp.Models
             if (isAdmin)
             {
                 return query;
-            } 
+            }
 
             return query.Where(r => r.Status == "Approved");
         }
@@ -61,6 +62,20 @@ namespace InfrastructureApp.Models
         {
             // Sort by creation date (newest first)
             return query.OrderByDescending(r => r.CreatedAt);
+        }
+
+        // Filters by keyword in Description (case-insensitive)
+        public static IQueryable<ReportIssue> FilterByDescription(IQueryable<ReportIssue> query, string? keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+            {
+                return query;
+            }
+            
+            keyword = keyword.Trim().ToLower();
+
+            // Case-insensitive matching
+            return query.Where(r => r.Description != null && r.Description.ToLower().Contains(keyword));
         }
 
     }

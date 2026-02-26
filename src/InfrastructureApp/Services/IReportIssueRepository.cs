@@ -21,5 +21,9 @@ namespace InfrastructureApp.Services
         // Latest Reports feature 7
         // isAdmin controls visibility (admins see all, others see approved only)
         Task<List<ReportIssue>> GetLatestReportsAsync(bool isAdmin);
+
+        // Latest Report feature 83
+        // Retrieves latest reports filtered by keyword and user role (Admin vs non-Admin)
+        Task<List<ReportIssue>> SearchLatestReportsAsync(bool isAdmin, string? keyword);
     }
 }
