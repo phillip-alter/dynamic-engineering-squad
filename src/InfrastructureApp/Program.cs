@@ -1,5 +1,6 @@
 using InfrastructureApp.Data;
 using InfrastructureApp.Models;
+using InfrastructureApp.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services;
@@ -48,9 +49,11 @@ builder.Services.AddScoped<IDashboardRepository, DashboardRepositoryEf>();
 builder.Services.AddMemoryCache();
 
 // TripCheck config (loads BaseUrl/CacheMinutes from appsettings + SubscriptionKey from user-secrets)
-builder.Services.Configure<TripCheckOptions>(builder.Configuration.GetSection("TripCheck"));
+// Load settings from appsettings.json
+builder.Services.Configure<TripCheckOptions>(
+    builder.Configuration.GetSection("TripCheck"));
 
-// TripCheck HTTP client + service
+// Register typed HTTP client
 builder.Services.AddHttpClient<ITripCheckService, TripCheckService>((sp, client) =>
 {
     var opts = sp.GetRequiredService<IOptions<TripCheckOptions>>().Value;
@@ -60,19 +63,19 @@ builder.Services.AddHttpClient<ITripCheckService, TripCheckService>((sp, client)
     client.DefaultRequestHeaders.UserAgent.ParseAdd("InfrastructureApp/1.0");
 });
 
+//Google Maps 
+builder.Services.Configure<GoogleMapsOptions>(
+    builder.Configuration.GetSection("GoogleMaps"));
 
-builder.Services.AddHttpClient<ITripCheckService, TripCheckService>(client =>
-{
-    client.BaseAddress = new Uri("https://api.odot.state.or.us/tripcheck/");
-    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-    client.DefaultRequestHeaders.UserAgent.ParseAdd("InfrastructureApp/1.0");
-});
+//Nearby Issues
+builder.Services.AddScoped<INearbyIssueService, NearbyIssueService>();
 
-builder.Services.Configure<TripCheckOptions>(builder.Configuration.GetSection("TripCheck"));
+//geocoding
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<IGeocodingService, GeocodingService>();
 
 
-
-
+builder.Services.AddScoped<InfrastructureApp.Services.IAvatarService, InfrastructureApp.Services.AvatarService>();
 
 
 var app = builder.Build();
