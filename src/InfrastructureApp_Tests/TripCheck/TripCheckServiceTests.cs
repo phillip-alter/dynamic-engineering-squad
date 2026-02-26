@@ -18,7 +18,7 @@ namespace InfrastructureApp.Tests.TripCheck
     public class TripCheckServiceTests
     {
         //Sample payload shape 
-        //If TripCheck uses different field names, we will adjust the mapper
+       
       private const string CamerasJson = """
         {
         "organization-information": {

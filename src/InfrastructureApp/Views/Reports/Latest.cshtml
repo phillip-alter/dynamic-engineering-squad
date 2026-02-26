@@ -6,27 +6,83 @@
 
 <h1 class="mb-3">Latest Reports</h1>
 
+<div class="mb-3 d-flex gap-2">
+    <input id="latestSearchInput" class="form-control" type="text" placeholder="Search reports..." />
+    <button id="latestSearchButton" class="btn btn-primary" type="button">Search</button>
+    <button id="latestClearButton" class="btn btn-outline-secondary" type="button">Clear</button>
+</div>
+
+<div id="latestSearchMessage" class="mb-2"></div>
+
 @if (Model.Reports == null || !Model.Reports.Any())
-{   
+{
     // Show message if there are no reports
     <div class="alert alert-info">
         No reported issues yet.
     </div>
 }
 else
-{   // Display each report in a simple list
-    <div class="list-group">
+{
+    <div id="latestReportsList" class="list-group">
         @foreach (var r in Model.Reports)
         {
-            // One report item (description + date)
-            <div class="list-group-item d-flex justify-content-between align-items-start">
+            <button type="button"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-start report-item"
+                    data-bs-toggle="modal"
+                    data-bs-target="#reportModal"
+                    data-description="@r.Description"
+                    data-created="@r.CreatedAt.ToLocalTime().ToString("f")"
+                    data-status="@r.Status"
+                    data-image="@r.ImageUrl">
+
                 <div class="me-3">
                     <div class="fw-bold">@r.Description</div>
                 </div>
+
                 <small class="text-muted">
                     @r.CreatedAt.ToLocalTime().ToString("g")
                 </small>
-            </div>
+
+            </button>
         }
     </div>
+}
+<!-- Report Details Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="reportModalLabel">Report Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                
+                <p class="mb-1"><strong>Image</strong></p>
+                <img id="modalImage"   class="img-fluid rounded border d-none mb-3" alt="Report image" />
+                <p id="modalImageFallback" class="text-muted mb-3 d-none">
+                    No image was provided for this report.
+                </p>
+
+                <p class="mb-1"><strong>Description</strong></p>
+                <p id="modalDescription" class="mb-3"></p>
+
+                <p class="mb-1"><strong>Created</strong></p>
+                <p id="modalCreated" class="mb-3"></p>
+
+                <p class="mb-1"><strong>Status</strong></p>
+                <p id="modalStatus" class="mb-0"></p>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/latestReportsSearch.js"></script>
 }

@@ -75,7 +75,7 @@ namespace InfrastructureApp.Services
                     Latitude = vm.Latitude,
                     Longitude = vm.Longitude,
                     ImageUrl = savedImagePath,
-                    Status = "Pending",
+                    Status = "Approved",
                     CreatedAt = DateTime.UtcNow,
                     UserId = userId
                 };
