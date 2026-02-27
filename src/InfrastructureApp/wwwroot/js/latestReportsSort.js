@@ -1,26 +1,30 @@
-// SCRUM-86 ADDED: Handles sorting dropdown changes and reloads reports using AJAX
+// SCRUM-86: Sorting behavior for Latest Reports (AJAX)
+// This file triggers a reload when user changes OR clicks the sort dropdown.
+// Clicking the already-selected option doesn't fire "change", so we also listen to "click".
+
 document.addEventListener("DOMContentLoaded", () => {
 
-    const sortSelect = document.getElementById("latestSortSelect");
+  const sortSelect = document.getElementById("latestSortSelect");
+  if (!sortSelect) return;
 
-    // exit if dropdown not present
-    if (!sortSelect){
-        return;
-    } 
+  // SCRUM-86 ADDED: reload reports using selected sort and current keyword
+  async function reload() {
 
-    sortSelect.addEventListener("change", async () => {
+    const keywordInput = document.getElementById("latestSearchInput");
+    const keyword = keywordInput ? keywordInput.value : "";
 
-        const keywordInput = document.getElementById("latestSearchInput");
+    const sort = sortSelect.value || "newest";
 
-        const keyword = keywordInput ? keywordInput.value : "";
-        const sort = sortSelect.value;
+    // Uses the shared loader from latestReportsSearch.js
+    if (window.loadLatestReports) {
+      await window.loadLatestReports(keyword, sort);
+    }
+  }
 
-        // call existing search loader (SCRUM-83 function)
-        if (window.loadLatestReports)
-        {
-            await window.loadLatestReports(keyword, sort);
-        }
+  // Works when value changes
+  sortSelect.addEventListener("change", reload);
 
-    });
+  // SCRUM-86 FIX: reload even if same option is clicked
+  sortSelect.addEventListener("click", reload);
 
 });
