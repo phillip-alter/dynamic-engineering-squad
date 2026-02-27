@@ -26,7 +26,7 @@ namespace InfrastructureApp.Controllers.Api
             double radiusMiles = 5) //default radius is 5 miles of location
         {
             // Ask service layer to find nearby issues
-            var results = await _reportQuery.GetNearbyIssuesAsync(lat, lng, radiusMiles);
+            var results = await _reportQuery.GetNearbyIssuesAsync(lat, lng, radiusMiles);         //TODO: move getNearbyissuesAsync into the model or service layer
 
             // Convert results into API response objects
             var response = results.Select(r => new
