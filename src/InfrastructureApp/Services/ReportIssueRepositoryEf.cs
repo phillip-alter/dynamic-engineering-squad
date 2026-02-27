@@ -51,5 +51,25 @@ namespace InfrastructureApp.Services
             // Execute query and return results
             return await query.ToListAsync();
         }
+
+        // This is for feature83
+        // Returns latest reports filtered by user visibility and search keyword
+        public async Task<List<ReportIssue>> SearchLatestReportsAsync(bool isAdmin, string? keyword)
+        {
+            // Start query from ReportIssue table
+            var query = _db.ReportIssue.AsQueryable();
+
+            // Apply visibility rule (approved vs all)
+            query = ReportIssue.VisibleToUser(query, isAdmin);
+
+            // Apply keyword search on description
+            query = ReportIssue.FilterByDescription(query, keyword);
+
+            // Order results newest first
+            query = ReportIssue.OrderLatestFirst(query);
+
+            // Execute query and return results
+            return await query.ToListAsync();
+        }
     }
 }
