@@ -58,24 +58,32 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // rebuild list buttons (keep same data-* so modal still works)
     list.innerHTML = reports.map(r => {
-      const created = new Date(r.createdAt);
-      const createdShort = created.toLocaleString();
+    const created = new Date(r.createdAt);
 
-      return `
-        <button type="button"
+      // FIX: consistent time format everywhere (no seconds)
+      const createdShort = created.toLocaleString(undefined, {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+    });
+
+    return `
+      <button type="button"
           class="list-group-item list-group-item-action d-flex justify-content-between align-items-start report-item"
           data-bs-toggle="modal"
           data-bs-target="#reportModal"
           data-description="${escapeHtml(r.description ?? "")}"
-          data-created="${escapeHtml(created.toLocaleString())}"
+          data-created="${escapeHtml(createdShort)}"
           data-status="${escapeHtml(r.status ?? "")}"
           data-image="${escapeHtml(r.imageUrl ?? "")}">
-          <div class="me-3">
-            <div class="fw-bold">${escapeHtml(r.description ?? "")}</div>
-          </div>
-          <small class="text-muted">${escapeHtml(createdShort)}</small>
-        </button>
-      `;
+        <div class="me-3">
+          <div class="fw-bold">${escapeHtml(r.description ?? "")}</div>
+        </div>
+        <small class="text-muted">${escapeHtml(createdShort)}</small>
+      </button>
+   `;
     }).join("");
   }
 
