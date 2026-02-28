@@ -9,12 +9,12 @@ using Microsoft.Extensions.Configuration;
 
 namespace InfrastructureApp.Services.Moderation;
 
-public sealed class OpenAiModerationService : IContentModerationService
+public sealed class ContentModerationService : IContentModerationService
 {
     private readonly HttpClient _http;
     private readonly IConfiguration _config;
 
-    public OpenAiModerationService(HttpClient http, IConfiguration config)
+    public ContentModerationService(HttpClient http, IConfiguration config)
     {
         _http = http;
         _config = config;
