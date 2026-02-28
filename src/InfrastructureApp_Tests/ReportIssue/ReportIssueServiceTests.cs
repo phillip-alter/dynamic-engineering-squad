@@ -262,11 +262,10 @@ namespace InfrastructureApp_Tests
                     .ToListAsync();
             }
 
-            // This is feature83 related stuff.
-            // Added to match the updated IReportIssueRepository interface.
-            // This is a test-only repository used by NUnit tests.
-            // It simulates the real repository search behavior using in-memory test data.
-            public async Task<List<ReportIssue>> SearchLatestReportsAsync(bool isAdmin, string? keyword)
+            // Feature83 + SCRUM-86 updated signature.
+            // Test-only repository used by NUnit tests.
+            // Simulates the real repository search + sorting behavior using in-memory test data.
+            public async Task<List<ReportIssue>> SearchLatestReportsAsync(bool isAdmin, string? keyword, string? sort)
             {
                 // Use in-memory reports from test database
                 var query = _db.ReportIssue.AsQueryable();
@@ -280,13 +279,21 @@ namespace InfrastructureApp_Tests
                 // Apply keyword search filter like real repository search
                 if (!string.IsNullOrWhiteSpace(keyword))
                 {
+                    keyword = keyword.Trim(); // SCRUM-86 ADDED: handles accidental whitespace
                     query = query.Where(r => r.Description != null && r.Description.Contains(keyword));
                 }
 
-                // Apply same sorting rule (newest reports first)
-                return await query
-                    .OrderByDescending(r => r.CreatedAt)
-                    .ToListAsync();
+                // SCRUM-86 ADDED: apply newest/oldest sort (default newest)
+                if (!string.IsNullOrWhiteSpace(sort) && sort.Trim().ToLower() == "oldest")
+                {
+                    query = query.OrderBy(r => r.CreatedAt);
+                }
+                else
+                {
+                    query = query.OrderByDescending(r => r.CreatedAt);
+                }
+
+                return await query.ToListAsync();
             }
         }
     }
