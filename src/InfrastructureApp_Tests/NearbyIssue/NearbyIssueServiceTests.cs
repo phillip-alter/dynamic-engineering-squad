@@ -7,12 +7,24 @@ using InfrastructureApp.Services;   // NearbyIssueService (class under test)
 using Microsoft.Data.Sqlite;        // SQLite in-memory connection
 using Microsoft.EntityFrameworkCore;
 using NUnit.Framework;
+using Microsoft.AspNetCore.Routing;
+using NSubstitute;
+using Microsoft.AspNetCore.Http;
+
 
 namespace InfrastructureApp_Tests.Services
 {
     [TestFixture]
     public class NearbyIssueServiceTests
     {
+        private LinkGenerator _links = null!;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _links = Substitute.For<LinkGenerator>();
+        }
+
         // ----------------------------
         // Test helper: Build a SQLite in-memory EF Core database
         // ----------------------------
@@ -68,7 +80,7 @@ namespace InfrastructureApp_Tests.Services
             using var db = BuildDb(out var conn);
             using var connection = conn;
 
-            var service = new NearbyIssueService(db);
+            var service = new NearbyIssueService(db, _links);
 
             db.ReportIssue.AddRange(
                 Issue(1, null, -123.23m),      // missing lat => excluded by .Where(...)
@@ -90,7 +102,7 @@ namespace InfrastructureApp_Tests.Services
             using var db = BuildDb(out var conn);
             using var connection = conn;
 
-            var service = new NearbyIssueService(db);
+            var service = new NearbyIssueService(db, _links);
 
             // One issue at query point (distance ~ 0) so it will always pass radius=5
             db.ReportIssue.Add(Issue(1, 44.84m, -123.23m));
@@ -112,7 +124,7 @@ namespace InfrastructureApp_Tests.Services
             using var db = BuildDb(out var conn);
             using var connection = conn;
 
-            var service = new NearbyIssueService(db);
+            var service = new NearbyIssueService(db, _links);
 
             const double qLat = 44.84;
             const double qLng = -123.23;
@@ -143,7 +155,7 @@ namespace InfrastructureApp_Tests.Services
             using var db = BuildDb(out var conn);
             using var connection = conn;
 
-            var service = new NearbyIssueService(db);
+            var service = new NearbyIssueService(db, _links);
 
             const double qLat = 44.84;
             const double qLng = -123.23;
@@ -167,7 +179,7 @@ namespace InfrastructureApp_Tests.Services
             using var db = BuildDb(out var conn);
             using var connection = conn;
 
-            var service = new NearbyIssueService(db);
+            var service = new NearbyIssueService(db, _links);
 
             // 350 issues at query point => all within radius => output should be capped by Take(300)
             for (int i = 1; i <= 350; i++)
@@ -187,7 +199,7 @@ namespace InfrastructureApp_Tests.Services
             using var db = BuildDb(out var conn);
             using var connection = conn;
 
-            var service = new NearbyIssueService(db);
+            var service = new NearbyIssueService(db, _links);
 
             var created = new DateTime(2026, 2, 24, 12, 0, 0, DateTimeKind.Utc);
 
@@ -209,6 +221,7 @@ namespace InfrastructureApp_Tests.Services
             Assert.That(dto.Latitude, Is.EqualTo(44.84).Within(0.000001));
             Assert.That(dto.Longitude, Is.EqualTo(-123.23).Within(0.000001));
             Assert.That(dto.DistanceMiles, Is.Not.Null);
+            Assert.That(dto.DetailsUrl, Is.EqualTo("/ReportIssue/Details/99"));
         }
 
         [Test]
@@ -217,7 +230,7 @@ namespace InfrastructureApp_Tests.Services
             using var db = BuildDb(out var conn);
             using var connection = conn;
 
-            var service = new NearbyIssueService(db);
+            var service = new NearbyIssueService(db, _links);
 
             db.ReportIssue.Add(Issue(1, 44.84m, -123.23m));
             await db.SaveChangesAsync();

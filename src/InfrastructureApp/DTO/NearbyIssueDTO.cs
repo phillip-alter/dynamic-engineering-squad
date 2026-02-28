@@ -30,6 +30,9 @@ namespace InfrastructureApp.Dtos
         // Distance from the user's current location
         // Calculated by service layer (NOT stored in database)
         public double? DistanceMiles { get; init; }
+
+        //link to Details page for maps to use to take you to report details page from popup
+        public string DetailsUrl { get; init; } = "";
         
     }
 }
