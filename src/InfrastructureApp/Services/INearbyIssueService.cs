@@ -12,10 +12,6 @@ namespace InfrastructureApp.Services
         // A list of NearbyIssueDTO objects containing
         // map-ready information (coordinates, status, distance, etc.)
         // var issues = await service.GetNearbyIssuesAsync(44.84, -123.23, 5);
-        Task<List<NearbyIssueDTO>> GetNearbyIssuesAsync(
-            double lat,
-            double lng,
-            double radiusMiles
-        );
+        Task<List<NearbyIssueDTO>> GetNearbyIssuesAsync(double lat, double lng, double radiusMiles);
     }
 }
