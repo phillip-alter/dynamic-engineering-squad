@@ -52,6 +52,12 @@ namespace InfrastructureApp.Services
                     "Moderation service is unavailable. Please try again in a moment.",
                     ex
                 );
+
+                // // TEMP: show real reason during debugging                               //for debugging purposes can delete later
+                // throw new InvalidOperationException(
+                //     $"Moderation failed: {ex.Message}",
+                //     ex
+                // );
             }
 
             if (!modResult.IsAllowed)
