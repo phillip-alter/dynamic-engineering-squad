@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services;
 using Microsoft.Extensions.Options;
+using InfrastructureApp.Services.Moderation;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,6 +74,9 @@ builder.Services.AddScoped<INearbyIssueService, NearbyIssueService>();
 //geocoding
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<IGeocodingService, GeocodingService>();
+
+//OpenAI moderation service
+builder.Services.AddHttpClient<IContentModerationService, ContentModerationService>();
 
 
 builder.Services.AddScoped<InfrastructureApp.Services.IAvatarService, InfrastructureApp.Services.AvatarService>();
