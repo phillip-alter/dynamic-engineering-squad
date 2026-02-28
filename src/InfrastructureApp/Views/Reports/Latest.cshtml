@@ -14,6 +14,12 @@
 
 <div id="latestSearchMessage" class="mb-2"></div>
 
+<!-- SCRUM-86 ADDED: Sort dropdown allows user to select newest or oldest -->
+<select id="latestSortSelect" class="form-select" style="max-width: 200px;">
+  <option value="newest" selected>Newest first</option>
+  <option value="oldest">Oldest first</option>
+</select>
+
 @if (Model.Reports == null || !Model.Reports.Any())
 {
     // Show message if there are no reports
@@ -84,5 +90,6 @@ else
 </div>
 
 @section Scripts {
-    <script src="~/js/latestReportsSearch.js"></script>
+    <script src="~/js/latestReportsSearch.js" asp-append-version="true"></script>
+    <script src="~/js/latestReportsSort.js" asp-append-version="true"></script> <!-- SCRUM-86 ADDED: enables newest/oldest sorting -->
 }

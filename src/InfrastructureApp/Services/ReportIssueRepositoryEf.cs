@@ -52,9 +52,10 @@ namespace InfrastructureApp.Services
             return await query.ToListAsync();
         }
 
-        // This is for feature83
-        // Returns latest reports filtered by user visibility and search keyword
-        public async Task<List<ReportIssue>> SearchLatestReportsAsync(bool isAdmin, string? keyword)
+        // Originally feature83
+        // Returns latest reports filtered by user visibility, search keyword, and sort order
+        // SCRUM-86 UPDATED: added sort support using ApplyDateSort helper
+        public async Task<List<ReportIssue>> SearchLatestReportsAsync(bool isAdmin, string? keyword, string? sort)
         {
             // Start query from ReportIssue table
             var query = _db.ReportIssue.AsQueryable();
@@ -65,8 +66,8 @@ namespace InfrastructureApp.Services
             // Apply keyword search on description
             query = ReportIssue.FilterByDescription(query, keyword);
 
-            // Order results newest first
-            query = ReportIssue.OrderLatestFirst(query);
+            // SCRUM-86 UPDATED: apply newest/oldest sort (default newest)
+            query = ReportIssue.ApplyDateSort(query, sort);
 
             // Execute query and return results
             return await query.ToListAsync();
