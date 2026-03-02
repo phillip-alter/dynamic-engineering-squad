@@ -108,7 +108,8 @@ namespace InfrastructureApp_Tests
 
             var userId = "user-1";
 
-            var reportId = await service.CreateAsync(vm, userId);
+            var (reportId, status) = await service.CreateAsync(vm, userId);
+            Assert.That(status, Is.EqualTo("Approved"));
 
             // verify report saved (DbSet name is ReportIssue)
             var report = await db.ReportIssue.FirstOrDefaultAsync(r => r.Id == reportId);
@@ -148,9 +149,10 @@ namespace InfrastructureApp_Tests
                 Photo = null
             };
 
-            var reportId = await service.CreateAsync(vm, "user-2");
+            var (reportId, status) = await service.CreateAsync(vm, "user-2");
 
             Assert.That(reportId, Is.GreaterThan(0));
+            Assert.That(status, Is.EqualTo("Approved"));
 
             var points = await db.UserPoints.SingleAsync(p => p.UserId == "user-2");
             Assert.That(points.CurrentPoints, Is.EqualTo(15));
@@ -171,7 +173,8 @@ namespace InfrastructureApp_Tests
                 Photo = MakeFormFile(bytes, "sidewalk.png", "image/png")
             };
 
-            var reportId = await service.CreateAsync(vm, "user-3");
+            var (reportId, status) = await service.CreateAsync(vm, "user-3");
+            Assert.That(status, Is.EqualTo("Approved"));
 
             var report = await db.ReportIssue.SingleAsync(r => r.Id == reportId);
 
