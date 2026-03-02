@@ -82,7 +82,7 @@ namespace InfrastructureApp_Tests
 
             // Default behavior: allow all text (so existing tests keep working)
             moderation.CheckAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-              .Returns(Task.FromResult(new ModerationResult(IsAllowed: true, Flagged: false)));
+              .Returns(Task.FromResult(new ModerationResult(Performed: true, IsAllowed: true, Flagged: false)));
 
             return new ReportIssueService(db, repo, env, moderation);
         }
@@ -247,7 +247,7 @@ namespace InfrastructureApp_Tests
 
             var moderation = Substitute.For<IContentModerationService>();
             moderation.CheckAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns(Task.FromResult(new ModerationResult(IsAllowed: false, Flagged: true, ReasonCategory: "hate")));
+                    .Returns(Task.FromResult(new ModerationResult(Performed: true, IsAllowed: false, Flagged: true, Reason: "hate")));
 
             var service = new ReportIssueService(db, repo, env, moderation);
 
