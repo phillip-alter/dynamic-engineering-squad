@@ -28,11 +28,11 @@ public sealed class ContentModerationService : IContentModerationService
     public async Task<ModerationResult> CheckAsync(string text, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(text))
-            return new ModerationResult(IsAllowed: true, Flagged: false);
+            return new ModerationResult(Performed: true, IsAllowed: true, Flagged: false);
 
         var apiKey = _config["OpenAIModerationAPIkey"];
         if (string.IsNullOrWhiteSpace(apiKey))
-            throw new InvalidOperationException("Missing OpenAIModerationAPIkey configuration.");
+            return new ModerationResult(Performed: false, IsAllowed: false, Flagged: true, Reason: "Missing moderation API key.");
 
         // Add an upper bound so the request doesn't hang forever
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
@@ -57,35 +57,59 @@ public sealed class ContentModerationService : IContentModerationService
                 "application/json"
             );
 
-            using var resp = await _http.SendAsync(req, timeoutCts.Token);
-
-            Console.WriteLine($"[Moderation] Response Status: {(int)resp.StatusCode}");
-
-            if (resp.IsSuccessStatusCode)
+            HttpResponseMessage? resp = null;
+            try
             {
-                await using var stream = await resp.Content.ReadAsStreamAsync(timeoutCts.Token);
-                using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: timeoutCts.Token);
+                resp = await _http.SendAsync(req, timeoutCts.Token);
+            }
+            catch (Exception ex) when (attempt < RetryDelaysMs.Length)
+            {
+                // Retry on transient network/timeouts too
+                var delay = TimeSpan.FromMilliseconds(RetryDelaysMs[attempt]);
+                Console.WriteLine($"[Moderation] Exception: {ex.Message}. Retrying after {delay.TotalMilliseconds} ms");
+                await Task.Delay(delay, timeoutCts.Token);
+                continue;
+            }
+            catch (Exception ex)
+            {
+                return new ModerationResult(
+                    Performed: false,
+                    IsAllowed: false,
+                    Flagged: true,
+                    Reason: $"Moderation exception: {ex.Message}"
+                );
+            }
 
-                var r0 = doc.RootElement.GetProperty("results")[0];
-                bool flagged = r0.GetProperty("flagged").GetBoolean();
+            using (resp)
+            {
+                Console.WriteLine($"[Moderation] Response Status: {(int)resp.StatusCode}");
 
-                if (!flagged)
-                    return new ModerationResult(IsAllowed: true, Flagged: false);
-
-                string? category = null;
-                if (r0.TryGetProperty("categories", out var cats))
+                if (resp.IsSuccessStatusCode)
                 {
-                    foreach (var prop in cats.EnumerateObject())
+                    await using var stream = await resp.Content.ReadAsStreamAsync(timeoutCts.Token);
+                    using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: timeoutCts.Token);
+
+                    var r0 = doc.RootElement.GetProperty("results")[0];
+                    bool flagged = r0.GetProperty("flagged").GetBoolean();
+
+                    if (!flagged)
+                        return new ModerationResult(Performed: true, IsAllowed: true, Flagged: false);
+
+                    string? category = null;
+                    if (r0.TryGetProperty("categories", out var cats))
                     {
-                        if (prop.Value.ValueKind == JsonValueKind.True)
+                        foreach (var prop in cats.EnumerateObject())
                         {
-                            category = prop.Name;
-                            break;
+                            if (prop.Value.ValueKind == JsonValueKind.True)
+                            {
+                                category = prop.Name;
+                                break;
+                            }
                         }
                     }
-                }
 
-                return new ModerationResult(IsAllowed: false, Flagged: true, ReasonCategory: category);
+                    return new ModerationResult(Performed: true, IsAllowed: false, Flagged: true, Reason: category is null ? "Flagged by moderation." : $"Flagged category: {category}");
+                }
             }
 
             // Retry only on 429 or transient 5xx
@@ -104,15 +128,18 @@ public sealed class ContentModerationService : IContentModerationService
                 continue;
             }
 
-            // Fail with useful body
+            // Return a non-performed result so callers can keep the content out of public views
             var body = await resp.Content.ReadAsStringAsync(timeoutCts.Token);
-            throw new HttpRequestException(
-                $"Moderation request failed: {statusCode} {resp.ReasonPhrase}. Body: {body}"
+            return new ModerationResult(
+                Performed: false,
+                IsAllowed: false,
+                Flagged: true,
+                Reason: $"Moderation request failed: {statusCode} {resp.ReasonPhrase}. Body: {body}"
             );
         }
 
-        // Should never happen
-        throw new InvalidOperationException("Unexpected moderation retry loop exit.");
+        // If we ever exit unexpectedly, fail safe (do not publish)
+        return new ModerationResult(Performed: false, IsAllowed: false, Flagged: true, Reason: "Unexpected moderation retry loop exit.");
     }
 
     private static TimeSpan? GetRetryAfterDelay(HttpResponseMessage resp)

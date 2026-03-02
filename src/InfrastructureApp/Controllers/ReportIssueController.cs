@@ -46,8 +46,12 @@ namespace InfrastructureApp.Controllers
             try
             {
                 //creating report
-                var reportId = await _reportService.CreateAsync(vm, userId);
-                TempData["Success"] = "XP gained! +10 points awarded.";
+                var (reportId, status) = await _reportService.CreateAsync(vm, userId);
+
+                TempData["Success"] = status == "Approved"
+                    ? "XP gained! +10 points awarded."
+                    : "Report submitted! It will appear on the map once moderation is complete.";
+
                 return RedirectToAction(nameof(Details), new { id = reportId });
             }
             catch (ModerationRejectedException)

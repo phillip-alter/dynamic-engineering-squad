@@ -28,7 +28,7 @@ namespace InfrastructureApp.Services
             => _reports.GetByIdAsync(id);
 
         //submit report workflow
-        public async Task<int> CreateAsync(ReportIssueViewModel vm, string userId)
+        public async Task<(int reportId, string status)> CreateAsync(ReportIssueViewModel vm, string userId)
         {
             //hard coded point rule, can change later
             const int pointsForReport = 10;
@@ -39,32 +39,21 @@ namespace InfrastructureApp.Services
             // ---------------------------------------------------------
             var description = vm.Description ?? string.Empty;
 
-            ModerationResult modResult;
-            try
-            {
-                modResult = await _moderation.CheckAsync(description);
-            }
-            catch (Exception ex)
-            {
-                // If moderation service is down / errors out, we do NOT allow submission.
-                // This matches your acceptance criteria: "If moderation check fails, report does not submit/save."
-                throw new InvalidOperationException(
-                    "Moderation service is unavailable. Please try again in a moment.",
-                    ex
-                );
+            // ContentModerationService should now return Performed=false instead of throwing
+            var modResult = await _moderation.CheckAsync(description);
 
-                // // TEMP: show real reason during debugging                               //for debugging purposes can delete later
-                // throw new InvalidOperationException(
-                //     $"Moderation failed: {ex.Message}",
-                //     ex
-                // );
-            }
-
-            if (!modResult.IsAllowed)
+            if (!modResult.Performed)
             {
+                // Moderation didn't actually run (startup/network/429/etc).
+                // FAIL SAFE: do not publish publicly.
+                // We will still accept the submission but keep it hidden until reviewed.
+            }
+            else if (!modResult.IsAllowed)
+            {
+                // Moderation ran and flagged content
                 throw new ModerationRejectedException(
                     "Your description contains unsafe content and cannot be submitted.",
-                    modResult.ReasonCategory
+                    modResult.Reason
                 );
             }
 
@@ -115,7 +104,7 @@ namespace InfrastructureApp.Services
                     Latitude = vm.Latitude,
                     Longitude = vm.Longitude,
                     ImageUrl = savedImagePath,
-                    Status = "Approved",
+                    Status = modResult.Performed ? "Approved" : "Pending",
                     CreatedAt = DateTime.UtcNow,
                     UserId = userId
                 };
@@ -137,14 +126,19 @@ namespace InfrastructureApp.Services
                     _db.UserPoints.Add(userPoints);
                 }
 
-                userPoints.CurrentPoints += pointsForReport;
-                userPoints.LifetimePoints += pointsForReport;
-                userPoints.LastUpdated = DateTime.UtcNow;
-
+                if (modResult.Performed)
+                {
+                    userPoints.CurrentPoints += pointsForReport;
+                    userPoints.LifetimePoints += pointsForReport;
+                    userPoints.LastUpdated = DateTime.UtcNow;
+                }
+                
+                // One save no matter what (report + maybe points)
                 await _db.SaveChangesAsync();
+                
                 await tx.CommitAsync();
 
-                return report.Id;
+                return (report.Id, report.Status);
             }
             catch
             {
