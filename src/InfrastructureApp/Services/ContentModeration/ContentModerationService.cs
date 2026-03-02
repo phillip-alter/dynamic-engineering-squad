@@ -9,7 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 
-namespace InfrastructureApp.Services.Moderation;
+namespace InfrastructureApp.Services.ContentModeration;
 
 public sealed class ContentModerationService : IContentModerationService
 {
@@ -25,14 +25,14 @@ public sealed class ContentModerationService : IContentModerationService
         _config = config;
     }
 
-    public async Task<ModerationResult> CheckAsync(string text, CancellationToken ct = default)
+    public async Task<ContentModerationResult> CheckAsync(string text, CancellationToken ct = default)
     {
         if (string.IsNullOrWhiteSpace(text))
-            return new ModerationResult(Performed: true, IsAllowed: true, Flagged: false);
+            return new ContentModerationResult(Performed: true, IsAllowed: true, Flagged: false);
 
         var apiKey = _config["OpenAIModerationAPIkey"];
         if (string.IsNullOrWhiteSpace(apiKey))
-            return new ModerationResult(Performed: false, IsAllowed: false, Flagged: true, Reason: "Missing moderation API key.");
+            return new ContentModerationResult(Performed: false, IsAllowed: false, Flagged: true, Reason: "Missing moderation API key.");
 
         // Add an upper bound so the request doesn't hang forever
         using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
@@ -72,7 +72,7 @@ public sealed class ContentModerationService : IContentModerationService
             }
             catch (Exception ex)
             {
-                return new ModerationResult(
+                return new ContentModerationResult(
                     Performed: false,
                     IsAllowed: false,
                     Flagged: true,
@@ -93,7 +93,7 @@ public sealed class ContentModerationService : IContentModerationService
                     bool flagged = r0.GetProperty("flagged").GetBoolean();
 
                     if (!flagged)
-                        return new ModerationResult(Performed: true, IsAllowed: true, Flagged: false);
+                        return new ContentModerationResult(Performed: true, IsAllowed: true, Flagged: false);
 
                     string? category = null;
                     if (r0.TryGetProperty("categories", out var cats))
@@ -108,7 +108,7 @@ public sealed class ContentModerationService : IContentModerationService
                         }
                     }
 
-                    return new ModerationResult(Performed: true, IsAllowed: false, Flagged: true, Reason: category is null ? "Flagged by moderation." : $"Flagged category: {category}");
+                    return new ContentModerationResult(Performed: true, IsAllowed: false, Flagged: true, Reason: category is null ? "Flagged by moderation." : $"Flagged category: {category}");
                 }
             }
 
@@ -130,7 +130,7 @@ public sealed class ContentModerationService : IContentModerationService
 
             // Return a non-performed result so callers can keep the content out of public views
             var body = await resp.Content.ReadAsStringAsync(timeoutCts.Token);
-            return new ModerationResult(
+            return new ContentModerationResult(
                 Performed: false,
                 IsAllowed: false,
                 Flagged: true,
@@ -139,7 +139,7 @@ public sealed class ContentModerationService : IContentModerationService
         }
 
         // If we ever exit unexpectedly, fail safe (do not publish)
-        return new ModerationResult(Performed: false, IsAllowed: false, Flagged: true, Reason: "Unexpected moderation retry loop exit.");
+        return new ContentModerationResult(Performed: false, IsAllowed: false, Flagged: true, Reason: "Unexpected moderation retry loop exit.");
     }
 
     private static TimeSpan? GetRetryAfterDelay(HttpResponseMessage resp)

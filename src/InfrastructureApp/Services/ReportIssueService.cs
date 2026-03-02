@@ -4,7 +4,7 @@ using InfrastructureApp.Data;
 using InfrastructureApp.Models;
 using InfrastructureApp.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using InfrastructureApp.Services.Moderation;
+using InfrastructureApp.Services.ContentModeration;
 
 namespace InfrastructureApp.Services
 {
@@ -51,7 +51,7 @@ namespace InfrastructureApp.Services
             else if (!modResult.IsAllowed)
             {
                 // Moderation ran and flagged content
-                throw new ModerationRejectedException(
+                throw new ContentModerationRejectedException(
                     "Your description contains unsafe content and cannot be submitted.",
                     modResult.Reason
                 );
