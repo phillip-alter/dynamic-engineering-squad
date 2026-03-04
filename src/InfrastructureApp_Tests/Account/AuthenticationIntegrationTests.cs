@@ -1,5 +1,8 @@
 ﻿using System.Net;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace InfrastructureApp_Tests;
 
@@ -8,6 +11,7 @@ public class AuthenticationIntegrationTests
 {
     private WebApplicationFactory<Program> _factory;
     private HttpClient _client;
+    private HttpClient _authedClient;
 
     [SetUp]
     public void SetUp()
@@ -17,6 +21,18 @@ public class AuthenticationIntegrationTests
         {
             AllowAutoRedirect = false
         });
+        
+        _authedClient = _factory.WithWebHostBuilder(builder =>
+        {
+            builder.ConfigureTestServices(services =>
+            {
+                services
+                    .AddAuthentication(defaultScheme: "TestScheme")
+                    .AddScheme<AuthenticationSchemeOptions,
+                        TestAuthHandler>("TestScheme",
+                        options => { });
+            });
+        }).CreateClient(new WebApplicationFactoryClientOptions());
     }
 
     [TearDown]
@@ -24,6 +40,7 @@ public class AuthenticationIntegrationTests
     {
         _client.Dispose();
         _factory.Dispose();
+        _authedClient.Dispose();
     }
 
     [Test]
@@ -32,7 +49,7 @@ public class AuthenticationIntegrationTests
     {
         var protectedUrl = "/Dashboard";
         
-        var response = _client.GetAsync(protectedUrl).Result;
+        var response = await _client.GetAsync(protectedUrl);
         Assert.That(response.StatusCode,
             Is.EqualTo(HttpStatusCode.Redirect));
 
@@ -47,7 +64,7 @@ public class AuthenticationIntegrationTests
     {
         var protectedUrl = "/ReportIssue/ReportIssue";
         
-        var response = _client.GetAsync(protectedUrl).Result;
+        var response = await _client.GetAsync(protectedUrl);
         Assert.That(response.StatusCode,
             Is.EqualTo(HttpStatusCode.Redirect));
 
@@ -62,7 +79,7 @@ public class AuthenticationIntegrationTests
     {
         var protectedUrl = "/ReportIssue/Create";
         
-        var response = _client.GetAsync(protectedUrl).Result;
+        var response = await _client.GetAsync(protectedUrl);
         Assert.That(response.StatusCode,
             Is.EqualTo(HttpStatusCode.Redirect));
 
@@ -77,12 +94,23 @@ public class AuthenticationIntegrationTests
     {
         var protectedUrl = "/ReportIssue/Details/1";
         
-        var response = _client.GetAsync(protectedUrl).Result;
+        var response = await _client.GetAsync(protectedUrl);
         Assert.That(response.StatusCode,
             Is.EqualTo(HttpStatusCode.Redirect));
 
         var redirectLoc = response.Headers.Location?.ToString();
         Assert.That(redirectLoc,
             Does.Contain("/Login"));
+    }
+
+    [Test]
+    public async Task AuthedUser_AccessingDashboard_ReturnsOk()
+    {
+        var protectedUrl = "/Dashboard";
+
+        var response = await _authedClient.GetAsync(protectedUrl);
+        
+        Assert.That(response.StatusCode,
+            Is.EqualTo(HttpStatusCode.OK));
     }
 }
