@@ -10,6 +10,7 @@ using InfrastructureApp.Services.Moderation;
 
 namespace InfrastructureApp.Controllers
 {
+    [Authorize]
     public class ReportIssueController : Controller
     {
         //dependency injection (business logic + identity for users)
@@ -24,7 +25,6 @@ namespace InfrastructureApp.Controllers
 
         //landing page
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult ReportIssue() => View();
 
         //shows the form to create a report +creates a fresh reportIssueViewModel and passes it into the view
@@ -33,7 +33,6 @@ namespace InfrastructureApp.Controllers
 
         //runs when user submits the form
         [HttpPost]
-        [AllowAnonymous] // later: [Authorize for users]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ReportIssueViewModel vm)
         {
@@ -73,7 +72,6 @@ namespace InfrastructureApp.Controllers
 
         //Shows the details page for a specific report id.
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
             // Load report through the service layer; return 404 if it doesn't exist.
