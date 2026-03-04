@@ -26,10 +26,25 @@ namespace InfrastructureApp.Controllers
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ReportIssue() => View();
-
+        // Default Create page (no camera context)
+        public IActionResult Create()
+        {
+            return View(new ReportIssueViewModel());
+        }
         //shows the form to create a report +creates a fresh reportIssueViewModel and passes it into the view
         [HttpGet]
-        public IActionResult Create() => View(new ReportIssueViewModel());
+        public IActionResult Create(string cameraId, string imageUrl, decimal? lat, decimal? lng)
+        {
+            var vm = new ReportIssueViewModel
+            {
+                CameraId = cameraId,
+                CameraImageUrl = imageUrl,
+                Latitude = lat,
+                Longitude = lng
+            };
+
+            return View(vm);
+        }
 
         //runs when user submits the form
         [HttpPost]
