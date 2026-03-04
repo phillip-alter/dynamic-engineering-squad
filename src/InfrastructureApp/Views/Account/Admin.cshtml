@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Admin Panel";
+}
+
+
+<h1>Admin Panel Placeholder Page</h1>
+
+<ul>
+    <li>Authenticated: @User.Identity.IsAuthenticated</li>
+    <li>Name: @User.Identity.Name</li>
+    <li>Is Admin: @User.IsInRole("Admin")</li>
+</ul>
