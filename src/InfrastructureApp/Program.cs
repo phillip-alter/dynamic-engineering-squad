@@ -112,3 +112,6 @@ app.MapControllerRoute(
 
 
 app.Run();
+
+// exposing the program class so that integration tests can use it
+public partial class Program { }
