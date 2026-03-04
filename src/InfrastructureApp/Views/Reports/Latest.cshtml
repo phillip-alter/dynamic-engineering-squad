@@ -6,6 +6,20 @@
 
 <h1 class="mb-3">Latest Reports</h1>
 
+<div class="mb-3 d-flex gap-2">
+    <input id="latestSearchInput" class="form-control" type="text" placeholder="Search reports..." />
+    <button id="latestSearchButton" class="btn btn-primary" type="button">Search</button>
+    <button id="latestClearButton" class="btn btn-outline-secondary" type="button">Clear</button>
+</div>
+
+<div id="latestSearchMessage" class="mb-2"></div>
+
+<!-- SCRUM-86 ADDED: Sort dropdown allows user to select newest or oldest -->
+<select id="latestSortSelect" class="form-select" style="max-width: 200px;">
+  <option value="newest" selected>Newest first</option>
+  <option value="oldest">Oldest first</option>
+</select>
+
 @if (Model.Reports == null || !Model.Reports.Any())
 {
     // Show message if there are no reports
@@ -15,7 +29,7 @@
 }
 else
 {
-    <div class="list-group">
+    <div id="latestReportsList" class="list-group">
         @foreach (var r in Model.Reports)
         {
             <button type="button"
@@ -74,3 +88,8 @@ else
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/latestReportsSearch.js" asp-append-version="true"></script>
+    <script src="~/js/latestReportsSort.js" asp-append-version="true"></script> <!-- SCRUM-86 ADDED: enables newest/oldest sorting -->
+}

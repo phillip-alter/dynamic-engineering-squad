@@ -9,16 +9,19 @@
 using InfrastructureApp.Data;
 using InfrastructureApp.Dtos;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Routing;
 
 namespace InfrastructureApp.Services
 {
     public class NearbyIssueService : INearbyIssueService
     {
         private readonly ApplicationDbContext _db;
+        private readonly LinkGenerator _links;    //generates URLs based on apps routing configuration
         
-        public NearbyIssueService(ApplicationDbContext db)
+        public NearbyIssueService(ApplicationDbContext db, LinkGenerator links)
         {
             _db = db;
+            _links = links;
         }
 
         // Returns reports within radiusMiles of (lat, lng)
@@ -71,14 +74,26 @@ namespace InfrastructureApp.Services
 
             // 3) Convert into DTO objects (API-safe payload)
             // DTOs protect you from exposing EF entities directly.
-            return filtered.Select(r => new NearbyIssueDTO
+            return filtered.Select(r =>
             {
-                Id = r.Id,
-                Status = r.Status,
-                CreatedAt = r.CreatedAt,
-                Latitude = r.Lat,
-                Longitude = r.Lng,
-                DistanceMiles = r.Distance,
+                var path = _links.GetPathByAction(
+                    action: "Details",
+                    controller: "ReportIssue",
+                    values: new { id = r.Id }
+                );
+
+                return new NearbyIssueDTO
+                {
+                    Id = r.Id,
+                    Status = r.Status,
+                    CreatedAt = r.CreatedAt,
+                    Latitude = r.Lat,
+                    Longitude = r.Lng,
+                    DistanceMiles = r.Distance,
+                    DetailsUrl = string.IsNullOrWhiteSpace(path)
+                        ? $"/ReportIssue/Details/{r.Id}"
+                        : path
+                };
             }).ToList();
         }
 

@@ -40,104 +40,6 @@ namespace InfrastructureApp_Tests.Controllers.Api
         }
 
         [Test]
-        public async Task GetNearby_ReturnsOk_WithProjectedFields_AndDetailsUrl()
-        {
-            // ---------------------------------------------------------
-            // WHAT we are testing:
-            // - Controller returns HTTP 200 OK
-            // - It maps (projects) NearbyIssueDTO objects into API objects
-            //   that include DetailsUrl built via Url.Action(...)
-            //
-            // WHY:
-            // - The controller’s main responsibility is "response shaping".
-            // - The frontend map/list depends on these fields existing.
-            // - If someone accidentally removes/renames a field, this test catches it.
-            // ---------------------------------------------------------
-
-            // Arrange (inputs to the controller)
-            double lat = 44.8;
-            double lng = -123.2;
-            double radius = 5;
-
-            var created = new DateTime(2026, 2, 20, 10, 0, 0, DateTimeKind.Utc);
-
-            // Fake service results (what the controller will project)
-            var serviceResults = new List<NearbyIssueDTO>
-            {
-                new NearbyIssueDTO
-                {
-                    Id = 1,
-                    Status = "Approved",
-                    CreatedAt = created,
-                    Latitude = 44.801,
-                    Longitude = -123.201,
-                    DistanceMiles = 1.25 // nullable double? in DTO
-                }
-            };
-
-            // Mock service call
-            _nearbyIssueService.GetNearbyIssuesAsync(lat, lng, radius)
-                .Returns(serviceResults);
-
-            // Mock Url.Action(...) so DetailsUrl becomes predictable
-            _urlHelper.Action(Arg.Any<UrlActionContext>())
-                .Returns(callInfo =>
-                {
-                    var ctx = callInfo.Arg<UrlActionContext>();
-
-                    var values = new RouteValueDictionary(ctx.Values);
-                    var id = (int)values["id"]!;
-
-                    return $"/ReportIssue/Details/{id}";
-                });
-
-            // Act
-            var actionResult = await _controller.GetNearby(lat, lng, radius);
-
-            // Assert (status code)
-            Assert.That(actionResult.Result, Is.TypeOf<OkObjectResult>());
-            var ok = (OkObjectResult)actionResult.Result!;
-            Assert.That(ok.Value, Is.Not.Null);
-
-            // ok.Value is an IEnumerable of anonymous objects, because controller uses Select(new { ... })
-            var items = ((IEnumerable<object>)ok.Value!).ToList();
-            Assert.That(items.Count, Is.EqualTo(1));
-
-            var item = items[0];
-
-            // Read anonymous object's properties via reflection
-            var idProp = item.GetType().GetProperty("Id");
-            var statusProp = item.GetType().GetProperty("Status");
-            var createdProp = item.GetType().GetProperty("CreatedAt");
-            var latProp = item.GetType().GetProperty("Latitude");
-            var lngProp = item.GetType().GetProperty("Longitude");
-            var distProp = item.GetType().GetProperty("DistanceMiles");
-            var urlProp = item.GetType().GetProperty("DetailsUrl");
-
-            Assert.That(idProp, Is.Not.Null);
-            Assert.That(statusProp, Is.Not.Null);
-            Assert.That(createdProp, Is.Not.Null);
-            Assert.That(latProp, Is.Not.Null);
-            Assert.That(lngProp, Is.Not.Null);
-            Assert.That(distProp, Is.Not.Null);
-            Assert.That(urlProp, Is.Not.Null);
-
-            Assert.That((int)idProp!.GetValue(item)!, Is.EqualTo(1));
-            Assert.That((string)statusProp!.GetValue(item)!, Is.EqualTo("Approved"));
-            Assert.That((DateTime)createdProp!.GetValue(item)!, Is.EqualTo(created));
-            Assert.That((double)latProp!.GetValue(item)!, Is.EqualTo(44.801));
-            Assert.That((double)lngProp!.GetValue(item)!, Is.EqualTo(-123.201));
-
-            // DistanceMiles is nullable (double?) so cast to double?
-            Assert.That((double?)distProp!.GetValue(item)!, Is.EqualTo(1.25));
-
-            Assert.That((string)urlProp!.GetValue(item)!, Is.EqualTo("/ReportIssue/Details/1"));
-
-            // Assert (controller/service wiring)
-            await _nearbyIssueService.Received(1).GetNearbyIssuesAsync(lat, lng, radius);
-        }
-
-        [Test]
         public async Task GetNearby_WhenDistanceMilesIsNull_ReturnsOk_AndDistanceMilesIsNullInResponse()
         {
             // ---------------------------------------------------------
@@ -249,60 +151,63 @@ namespace InfrastructureApp_Tests.Controllers.Api
             await _nearbyIssueService.Received(1).GetNearbyIssuesAsync(lat, lng, defaultRadius);
         }
 
-        // Pretend the service found ONE nearby issue.
-        // The controller should then build a Details URL for it.
+
+        //service call verification test:
         [Test]
-        public async Task GetNearby_CallsUrlAction_WithExpectedActionControllerAndId()
+        public async Task GetNearby_CallsService_WithExpectedParameters()
         {
             // Arrange
-            var serviceResults = new List<NearbyIssueDTO>
+            var svc = Substitute.For<INearbyIssueService>();
+            svc.GetNearbyIssuesAsync(44.84, -123.23, 5)
+            .Returns(new List<NearbyIssueDTO>());
+
+            var controller = new ReportsApiController(svc);
+
+            // Act
+            _ = await controller.GetNearby(44.84, -123.23, 5);
+
+            // Assert
+            await svc.Received(1).GetNearbyIssuesAsync(44.84, -123.23, 5);
+        }
+
+        //pass through payload test
+        [Test]
+        public async Task GetNearby_ReturnsOk_WithServicePayload_IncludingDetailsUrl()
+        {
+            // Arrange
+            var svc = Substitute.For<INearbyIssueService>();
+
+            var expected = new List<NearbyIssueDTO>
             {
                 new NearbyIssueDTO
                 {
-                    Id = 99,
+                    Id = 1,
                     Status = "Approved",
-                    CreatedAt = DateTime.UtcNow,
-                    Latitude = 1,
-                    Longitude = 2,
-                    DistanceMiles = 0.5
+                    CreatedAt = new DateTime(2026, 2, 24, 12, 0, 0, DateTimeKind.Utc),
+                    Latitude = 44.84,
+                    Longitude = -123.23,
+                    DistanceMiles = 0.01,
+                    DetailsUrl = "/ReportIssue/Details/1"
                 }
             };
 
-            // Mock the service layer.
-            // Instead of querying a database, return our fake data.
-            _nearbyIssueService
-                .GetNearbyIssuesAsync(Arg.Any<double>(), Arg.Any<double>(), Arg.Any<double>())
-                .Returns(serviceResults);
+            svc.GetNearbyIssuesAsync(Arg.Any<double>(), Arg.Any<double>(), Arg.Any<double>())
+            .Returns(expected);
 
-
-            // We will CAPTURE the UrlActionContext passed to Url.Action(...)
-            // so we can inspect it later.
-            UrlActionContext? captured = null;
-
-            _urlHelper.Action(Arg.Do<UrlActionContext>(ctx => captured = ctx))
-                    .Returns("/ReportIssue/Details/99");
+            var controller = new ReportsApiController(svc);
 
             // Act
-            var actionResult = await _controller.GetNearby(44.8, -123.2, 5);
+            var result = await controller.GetNearby(44.84, -123.23, 5);
 
             // Assert
-            Assert.That(actionResult.Result, Is.TypeOf<OkObjectResult>());
-            var ok = (OkObjectResult)actionResult.Result!;
-            Assert.That(ok.Value, Is.Not.Null);
+            var ok = result.Result as OkObjectResult;
+            Assert.That(ok, Is.Not.Null);
 
-            // IMPORTANT: force enumeration so Select(...) executes and Url.Action is called
-            var _ = ((IEnumerable<object>)ok.Value!).ToList();
+            var payload = ok!.Value as IEnumerable<NearbyIssueDTO>;
+            Assert.That(payload, Is.Not.Null);
 
-            // Now the call should exist
-            _urlHelper.Received(1).Action(Arg.Any<UrlActionContext>());
-
-            // And we can assert what it was called with
-            Assert.That(captured, Is.Not.Null);
-            Assert.That(captured!.Action, Is.EqualTo("Details"));
-            Assert.That(captured.Controller, Is.EqualTo("ReportIssue"));
-
-            var values = new RouteValueDictionary(captured.Values);
-            Assert.That((int)values["id"]!, Is.EqualTo(99));
+            var dto = payload!.Single();
+            Assert.That(dto.DetailsUrl, Is.EqualTo("/ReportIssue/Details/1"));
         }
     }
 }
