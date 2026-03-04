@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 using Moq;
 using InfrastructureApp.Services;
 
-namespace InfrastructureApp_Tests;
+namespace InfrastructureApp_Tests.Account;
 
 [TestFixture]
 public class AccountControllerTests

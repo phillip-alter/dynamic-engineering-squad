@@ -1,10 +1,11 @@
 ﻿using System.Net;
+using InfrastructureApp_Tests.Account;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace InfrastructureApp_Tests;
+namespace InfrastructureApp_Tests.Account;
 
 [TestFixture]
 public class AuthenticationIntegrationTests
