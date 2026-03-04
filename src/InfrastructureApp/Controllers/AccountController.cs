@@ -70,6 +70,7 @@ namespace InfrastructureApp.Controllers
 
             if (result.Succeeded)
             {
+                await _userManager.AddToRoleAsync(user, "User");
                 return RedirectToAction("Index","Home");
             }
 
@@ -79,6 +80,13 @@ namespace InfrastructureApp.Controllers
             }
 
             return View(model);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public IActionResult Admin()
+        {
+            return View();
         }
         
         [HttpPost]
