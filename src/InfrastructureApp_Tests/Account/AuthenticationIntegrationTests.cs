@@ -40,4 +40,19 @@ public class AuthenticationIntegrationTests
         Assert.That(redirectLoc,
             Does.Contain("/Login"));
     }
+    
+    [Test]
+    public async Task
+        UnauthedUser_AccessingReportIssues_RedirectsToLogin()
+    {
+        var protectedUrl = "/ReportIssues";
+        
+        var response = _client.GetAsync(protectedUrl).Result;
+        Assert.That(response.StatusCode,
+            Is.EqualTo(HttpStatusCode.Redirect));
+
+        var redirectLoc = response.Headers.Location?.ToString();
+        Assert.That(redirectLoc,
+            Does.Contain("/Login"));
+    }
 }
