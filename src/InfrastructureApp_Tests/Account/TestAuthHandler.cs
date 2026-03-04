@@ -12,8 +12,19 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
     
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        // fake user with name claim.
-        var claims = new[] { new Claim(ClaimTypes.Name, "TestUser") };
+        Context.Request.Headers.TryGetValue("TestRole", out var role);
+        
+        var claims = new List<Claim> 
+        { 
+            new Claim(ClaimTypes.Name, "TestUser"),
+            new Claim(ClaimTypes.NameIdentifier, "1") 
+        };
+        
+        if (!string.IsNullOrEmpty(role))
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+        
         var identity = new ClaimsIdentity(claims, "Test");
         var principal = new ClaimsPrincipal(identity);
             
