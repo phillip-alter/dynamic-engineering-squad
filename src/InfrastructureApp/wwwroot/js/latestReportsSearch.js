@@ -15,6 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const list = document.getElementById("latestReportsList");
   const msg = document.getElementById("latestSearchMessage");
 
+  const sortSelect = document.getElementById("latestSortSelect"); // SCRUM-86 ADDED: reads sort dropdown value
+
   // if any required element is missing, stop execution
   // Prevents JavaScript errors if the page structure changes
   if (!input || !btn || !list || !msg)
@@ -27,13 +29,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Calls our ReportsAPIController endpoint and updates
   // the Latest Reports list dynamically without page reload
   // ----------------------------------------------------
-  async function runSearch(keyword) {
+  async function runSearch(keyword, sort) { // SCRUM-86 UPDATED: accepts sort option
 
     // Clear any previous messages before running new search
     msg.innerHTML = "";
 
     // Build the REST API URL with encoded keyword parameter
-    const url = `/api/reports/latest?query=${encodeURIComponent(keyword ?? "")}`;
+    const url = `/api/reports/latest?query=${encodeURIComponent(keyword ?? "")}&sort=${encodeURIComponent(sort || "newest")}`; // SCRUM-86 UPDATED: include sort
 
     // Call the backend API
     const res = await fetch(url);
@@ -56,42 +58,58 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // rebuild list buttons (keep same data-* so modal still works)
     list.innerHTML = reports.map(r => {
-      const created = new Date(r.createdAt);
-      const createdShort = created.toLocaleString();
+    const created = new Date(r.createdAt);
 
-      return `
-        <button type="button"
+      // FIX: consistent time format everywhere (no seconds)
+      const createdShort = created.toLocaleString(undefined, {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+    });
+
+    return `
+      <button type="button"
           class="list-group-item list-group-item-action d-flex justify-content-between align-items-start report-item"
           data-bs-toggle="modal"
           data-bs-target="#reportModal"
           data-description="${escapeHtml(r.description ?? "")}"
-          data-created="${escapeHtml(created.toLocaleString())}"
+          data-created="${escapeHtml(createdShort)}"
           data-status="${escapeHtml(r.status ?? "")}"
           data-image="${escapeHtml(r.imageUrl ?? "")}">
-          <div class="me-3">
-            <div class="fw-bold">${escapeHtml(r.description ?? "")}</div>
-          </div>
-          <small class="text-muted">${escapeHtml(createdShort)}</small>
-        </button>
-      `;
+        <div class="me-3">
+          <div class="fw-bold">${escapeHtml(r.description ?? "")}</div>
+        </div>
+        <small class="text-muted">${escapeHtml(createdShort)}</small>
+      </button>
+   `;
     }).join("");
   }
 
+  // SCRUM-86 ADDED: shared loader so sort JS can reuse same fetch + render logic
+  window.loadLatestReports = async function(keyword, sort) {
+    await runSearch(keyword, sort);
+  };
+
   btn.addEventListener("click", async () => {
     const keyword = input.value || "";
-    await runSearch(keyword);
+    const sort = sortSelect ? sortSelect.value : "newest"; // SCRUM-86 ADDED
+    await runSearch(keyword, sort); // SCRUM-86 UPDATED
   });
 
   clearBtn.addEventListener("click", async () => {
     input.value = "";
-    await runSearch("");
+    const sort = sortSelect ? sortSelect.value : "newest"; // SCRUM-86 ADDED
+    await runSearch("", sort); // SCRUM-86 UPDATED
   });
 
   // Optional: press Enter to search
   input.addEventListener("keydown", async (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      await runSearch(input.value || "");
+      const sort = sortSelect ? sortSelect.value : "newest"; // SCRUM-86 ADDED
+      await runSearch(input.value || "", sort); // SCRUM-86 UPDATED
     }
   });
 
