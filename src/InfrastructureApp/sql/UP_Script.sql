@@ -24,7 +24,8 @@ CREATE TABLE [AspNetUsers] (
     [TwoFactorEnabled] BIT NOT NULL,
     [LockoutEnd] DATETIMEOFFSET NULL,
     [LockoutEnabled] BIT NOT NULL,
-    [AccessFailedCount] INT NOT NULL
+    [AccessFailedCount] INT NOT NULL,
+    [AvatarKey] NVARCHAR(256) NULL
 );
 
 CREATE TABLE [AspNetUserRoles] (
@@ -34,6 +35,18 @@ CREATE TABLE [AspNetUserRoles] (
     CONSTRAINT [FK_AspNetUserRoles_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE,
     CONSTRAINT [FK_AspNetUserRoles_AspNetRoles_RoleId] FOREIGN KEY ([RoleId]) REFERENCES [AspNetRoles] ([Id]) ON DELETE CASCADE
 );
+
+CREATE TABLE [AspNetUserClaims] (
+    [Id] INT IDENTITY (1, 1) NOT NULL,
+    [UserId] NVARCHAR (450) NOT NULL,
+    [ClaimType] NVARCHAR (MAX) NULL,
+    [ClaimValue] NVARCHAR (MAX) NULL,
+    CONSTRAINT [PK_AspNetUserClaims] PRIMARY KEY CLUSTERED ([Id] ASC),
+    CONSTRAINT [FK_AspNetUserClaims_AspNetUsers_UserId] FOREIGN KEY ([UserId]) REFERENCES [AspNetUsers] ([Id]) ON DELETE CASCADE
+);
+
+CREATE NONCLUSTERED INDEX [IX_AspNetUserClaims_UserId]
+    ON [AspNetUserClaims]([UserId] ASC);
 
 -- reporting
 CREATE TABLE [Reports] (
@@ -81,7 +94,7 @@ VALUES (
     'palter', 'PALTER', 
     'p.alter@example.com', 'P.ALTER@EXAMPLE.COM', 0, 
     'AQAAAAEAACcQAAAAEBL6w...YourActualHashHere...', -- totally legit asp.net hash
-    NEWID(), NEWID(), 0, 0, 1, 0
+    NEWID(), NEWID(), 0, 0, 1, 0, NULL
 );
 
 -- assign 'user' role to user

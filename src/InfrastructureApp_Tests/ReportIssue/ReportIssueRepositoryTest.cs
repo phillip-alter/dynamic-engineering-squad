@@ -52,7 +52,7 @@ namespace InfrastructureApp_Tests.Repositories
             var report = new ReportIssue
             {
                 Description = "Broken curb",
-                Status = "Pending",
+                Status = "Approved",
                 CreatedAt = DateTime.UtcNow,
                 UserId = "user-123",
                 Latitude = 44.85m,
@@ -75,7 +75,7 @@ namespace InfrastructureApp_Tests.Repositories
             Assert.That(fetched!.Id, Is.EqualTo(savedId));
             Assert.That(fetched.Description, Is.EqualTo("Broken curb"));
             Assert.That(fetched.UserId, Is.EqualTo("user-123"));
-            Assert.That(fetched.Status, Is.EqualTo("Pending"));
+            Assert.That(fetched.Status, Is.EqualTo("Approved"));
             Assert.That(fetched.ImageUrl, Is.EqualTo("/uploads/issues/test.png"));
         }
     }

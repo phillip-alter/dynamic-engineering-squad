@@ -95,6 +95,44 @@ public class ReportIssueViewModelTests
             r.ErrorMessage.Contains("Longitude")));
     }
 
+    //if geolocation is not provided, test fails
+    [Test]
+    public void Location_IsRequired_WhenMissing_Fails()
+    {
+        var vm = new ReportIssueViewModel
+        {
+            Description = "Valid",
+            Photo = null,
+            Latitude = null,
+            Longitude = null
+        };
+
+        var results = Validate(vm);
+
+        Assert.That(results, Has.Some.Matches<ValidationResult>(r =>
+            r.MemberNames.Contains(nameof(ReportIssueViewModel.Latitude)) ||
+            r.MemberNames.Contains(nameof(ReportIssueViewModel.Longitude))));
+    }
+
+    //if geolocation is provided, test passes
+    [Test]
+    public void Location_WhenProvided_Passes()
+    {
+        var vm = new ReportIssueViewModel
+        {
+            Description = "Valid",
+            Photo = null,
+            Latitude = 44.9m,
+            Longitude = -123.0m
+        };
+
+        var results = Validate(vm);
+
+        Assert.That(results, Has.None.Matches<ValidationResult>(r =>
+            r.MemberNames.Contains(nameof(ReportIssueViewModel.Latitude)) ||
+            r.MemberNames.Contains(nameof(ReportIssueViewModel.Longitude))));
+    }
+
     //tests whether a photo was not uploaded
     [Test]
     public void Photo_IsRequired()

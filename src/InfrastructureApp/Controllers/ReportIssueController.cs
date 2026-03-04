@@ -6,6 +6,7 @@ using InfrastructureApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using InfrastructureApp.Services.Moderation;
 
 namespace InfrastructureApp.Controllers
 {
@@ -48,6 +49,13 @@ namespace InfrastructureApp.Controllers
                 var reportId = await _reportService.CreateAsync(vm, userId);
                 TempData["Success"] = "XP gained! +10 points awarded.";
                 return RedirectToAction(nameof(Details), new { id = reportId });
+            }
+            catch (ModerationRejectedException)
+            {
+                // This comes from the service when content is unsafe.
+                // Put the error ON the Description field so it shows next to the textbox.
+                ModelState.AddModelError(nameof(vm.Description), "Your description contains unsafe content and cannot be submitted.");
+                return View(vm);
             }
             catch (InvalidOperationException ex)
             {

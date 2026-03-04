@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using InfrastructureApp.Services;
+
 
 namespace InfrastructureApp.Models
 {
     public class Users : IdentityUser
     {
-        public Users(string userName, string email)
-        {
-            NormalizedUserName = userName.ToUpper();
-            NormalizedEmail = email.ToUpper();
-        }
+        public string? AvatarKey { get; set; } // e.g. "avatar01", "avatar02"
     }
 }

@@ -1,9 +1,11 @@
 using InfrastructureApp.Data;
 using InfrastructureApp.Models;
+using InfrastructureApp.Configuration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services;
 using Microsoft.Extensions.Options;
+using InfrastructureApp.Services.Moderation;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -44,6 +46,40 @@ builder.Services.AddScoped<IReportIssueService, ReportIssueService>();
 
 // Added Repository ID (Dependency Injection) for Dashboardrepo
 builder.Services.AddScoped<IDashboardRepository, DashboardRepositoryEf>();
+
+builder.Services.AddMemoryCache();
+
+// TripCheck config (loads BaseUrl/CacheMinutes from appsettings + SubscriptionKey from user-secrets)
+// Load settings from appsettings.json
+builder.Services.Configure<TripCheckOptions>(
+    builder.Configuration.GetSection("TripCheck"));
+
+// Register typed HTTP client
+builder.Services.AddHttpClient<ITripCheckService, TripCheckService>((sp, client) =>
+{
+    var opts = sp.GetRequiredService<IOptions<TripCheckOptions>>().Value;
+
+    client.BaseAddress = new Uri(opts.BaseUrl);
+    client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+    client.DefaultRequestHeaders.UserAgent.ParseAdd("InfrastructureApp/1.0");
+});
+
+//Google Maps 
+builder.Services.Configure<GoogleMapsOptions>(
+    builder.Configuration.GetSection("GoogleMaps"));
+
+//Nearby Issues
+builder.Services.AddScoped<INearbyIssueService, NearbyIssueService>();
+
+//geocoding
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<IGeocodingService, GeocodingService>();
+
+//OpenAI moderation service
+builder.Services.AddHttpClient<IContentModerationService, ContentModerationService>();
+
+
+builder.Services.AddScoped<InfrastructureApp.Services.IAvatarService, InfrastructureApp.Services.AvatarService>();
 
 
 var app = builder.Build();

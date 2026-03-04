@@ -35,3 +35,6 @@ This project is a gamified ASP.NET infrastructure reporting application defined 
 - [Stakeholders and Users](./doc/infrastructure_inception/stakeholders.md)
 - [Database Schema (Working Copy)](./doc/infrastructure_inception/full_erd_infrastructure.md)
 - [Entity Relationship Diagram for full application (Working Copy)](./doc/infrastructure_inception/full_erd_infrastructure.svg)
+
+### Sprint Retrospectives
+- [Sprint 1](./doc/sprint_retrospectives/sprint1_retrospective.md)
