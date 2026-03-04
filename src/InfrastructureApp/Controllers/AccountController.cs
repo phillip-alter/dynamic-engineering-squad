@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using InfrastructureApp.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace InfrastructureApp.Controllers
 {
@@ -11,15 +12,15 @@ namespace InfrastructureApp.Controllers
     {
         private readonly UserManager<Users> _userManager;
         private readonly SignInManager<Users> _signInManager;
-
+        private readonly IUserService _userService;
         private readonly IAvatarService _avatarService;
 
-        public AccountController(UserManager<Users> userManager,  SignInManager<Users> signInManager, IAvatarService avatarService)
+        public AccountController(UserManager<Users> userManager,  SignInManager<Users> signInManager, IAvatarService avatarService, IUserService userService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _avatarService = avatarService;
-            
+            _userService = userService;
         }
 
         public IActionResult Login()
@@ -84,9 +85,11 @@ namespace InfrastructureApp.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public IActionResult Admin()
+        public async Task<IActionResult> Admin(int page = 1)
         {
-            return View();
+            var pageSize = 10;
+            var model = await _userService.GetUsersWithRolesAsync(page, pageSize);
+            return View(model);
         }
         
         [HttpPost]
