@@ -146,4 +146,27 @@ public class AuthenticationIntegrationTests
         Assert.That(response.StatusCode,
             Is.EqualTo(HttpStatusCode.OK));
     }
+
+    [Test]
+    public async Task
+        UnAuthedUser_PostToReportIssues_RedirectsToLogin()
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post,
+            "/ReportIssue/Create");
+        request.Content = new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            {"Description", "Test"},
+            {"Photo",null},
+            {"Latitude", "0"},
+            {"Longitude", "0"}
+        });
+        
+        var response = await _client.SendAsync(request);
+        Assert.That(response.StatusCode,
+            Is.EqualTo(HttpStatusCode.Redirect));
+        
+        var redirectLoc = response.Headers.Location?.ToString();
+        Assert.That(redirectLoc,
+            Does.Contain("/Login"));
+    }
 }
