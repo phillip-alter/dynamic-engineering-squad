@@ -132,17 +132,17 @@ namespace InfrastructureApp_Tests.Services
             Assert.That(uri.Host, Is.EqualTo("maps.googleapis.com"));
             Assert.That(uri.AbsolutePath, Is.EqualTo("/maps/api/geocode/json"));
 
-            // ✅ Parse query robustly
+            //  Parse query robustly
             var query = uri.Query; // "?address=Salem%20Oregon&region=us&key=MY%20KEY"
             Assert.That(query, Does.Contain("region=us"));
 
-            // ✅ Assert the decoded *values* (most reliable)
+            //  Assert the decoded *values* (most reliable)
             var parsed = System.Web.HttpUtility.ParseQueryString(query);
             Assert.That(parsed["address"], Is.EqualTo("Salem Oregon"));
             Assert.That(parsed["region"], Is.EqualTo("us"));
             Assert.That(parsed["key"], Is.EqualTo("MY KEY"));
 
-            // ✅ Optional: if you still want to assert encoding specifically:
+            //  Optional: if you still want to assert encoding specifically:
             Assert.That(uri.OriginalString, Does.Contain("address=Salem%20Oregon"));
             Assert.That(uri.OriginalString, Does.Contain("key=MY%20KEY"));
         }

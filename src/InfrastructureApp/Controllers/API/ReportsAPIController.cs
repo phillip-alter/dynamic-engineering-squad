@@ -24,7 +24,7 @@ namespace InfrastructureApp.Controllers.API
         // GET: /api/reports/latest?query=keyword
         // Called by JavaScript search bar to retrieve filtered Latest Reports
         [HttpGet("latest")]
-        public async Task<ActionResult<IEnumerable<object>>> Latest([FromQuery] string? query)
+        public async Task<ActionResult<IEnumerable<object>>> Latest([FromQuery] string? query, [FromQuery] string? sort)//Added sort
         {
             // Check if current user is Admin (affects which reports are visible)
             bool isAdmin = User.IsInRole("Admin");
@@ -32,7 +32,7 @@ namespace InfrastructureApp.Controllers.API
             try
             {
                 // Get filtered reports from repository
-                var reports = await _repo.SearchLatestReportsAsync(isAdmin, query);
+                var reports = await _repo.SearchLatestReportsAsync(isAdmin, query,sort); //added sort
 
                 // Return only the fields needed by the UI (security + performance)
                 var reportResults = reports.Select(r => new

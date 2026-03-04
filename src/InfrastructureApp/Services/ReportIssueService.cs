@@ -4,6 +4,7 @@ using InfrastructureApp.Data;
 using InfrastructureApp.Models;
 using InfrastructureApp.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using InfrastructureApp.Services.Moderation;
 
 namespace InfrastructureApp.Services
 {
@@ -12,12 +13,14 @@ namespace InfrastructureApp.Services
         private readonly ApplicationDbContext _db; // for transaction + UserPoints
         private readonly IReportIssueRepository _reports; //repo to insert/fetch ReportIssue records
         private readonly IWebHostEnvironment _env; //gives access to wwwroot so you can save uploaded files
+        private readonly IContentModerationService _moderation; //for openAI moderation of user description
 
-        public ReportIssueService(ApplicationDbContext db, IReportIssueRepository reports, IWebHostEnvironment env)
+        public ReportIssueService(ApplicationDbContext db, IReportIssueRepository reports, IWebHostEnvironment env, IContentModerationService moderation)
         {
             _db = db;
             _reports = reports;
             _env = env;
+            _moderation = moderation;
         }
 
         //service gets delegated to the repo
@@ -30,7 +33,44 @@ namespace InfrastructureApp.Services
             //hard coded point rule, can change later
             const int pointsForReport = 10;
 
-            // Save file (local)
+            // ---------------------------------------------------------
+            // 1) Moderation gate (FAIL CLOSED)
+            //    Do this BEFORE saving images or touching the DB.
+            // ---------------------------------------------------------
+            var description = vm.Description ?? string.Empty;
+
+            ModerationResult modResult;
+            try
+            {
+                modResult = await _moderation.CheckAsync(description);
+            }
+            catch (Exception ex)
+            {
+                // If moderation service is down / errors out, we do NOT allow submission.
+                // This matches your acceptance criteria: "If moderation check fails, report does not submit/save."
+                throw new InvalidOperationException(
+                    "Moderation service is unavailable. Please try again in a moment.",
+                    ex
+                );
+
+                // // TEMP: show real reason during debugging                               //for debugging purposes can delete later
+                // throw new InvalidOperationException(
+                //     $"Moderation failed: {ex.Message}",
+                //     ex
+                // );
+            }
+
+            if (!modResult.IsAllowed)
+            {
+                throw new ModerationRejectedException(
+                    "Your description contains unsafe content and cannot be submitted.",
+                    modResult.ReasonCategory
+                );
+            }
+
+            // ---------------------------------------------------------
+            // 2) Save file (local) — only after moderation is SAFE
+            // ---------------------------------------------------------
             string? savedImagePath = null;
 
             if (vm.Photo != null && vm.Photo.Length > 0)

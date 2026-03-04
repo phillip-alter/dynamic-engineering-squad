@@ -11,39 +11,20 @@ namespace InfrastructureApp.Controllers.Api
     public class ReportsApiController : ControllerBase
     {
         // Service responsible for querying nearby reports
-        private readonly INearbyIssueService _reportQuery;
+        private readonly INearbyIssueService _nearbyReport;
 
-        public ReportsApiController(INearbyIssueService reportQuery)
+        public ReportsApiController(INearbyIssueService nearbyReport)
         {
-            _reportQuery = reportQuery;
+            _nearbyReport = nearbyReport;
         }
 
         // GET /api/nearbyIssues/nearbyIssues?lat=44.8&lng=-123.2&radiusMiles=5
         [HttpGet("nearbyIssues")]
-        public async Task<ActionResult<List<object>>> GetNearby(
-            double lat,
-            double lng,
-            double radiusMiles = 5) //default radius is 5 miles of location
+        public async Task<ActionResult<IReadOnlyList<NearbyIssueDTO>>> GetNearby([FromQuery] double lat, [FromQuery] double lng, [FromQuery] double radiusMiles = 5) //default radius is 5 miles of location
         {
             // Ask service layer to find nearby issues
-            var results = await _reportQuery.GetNearbyIssuesAsync(lat, lng, radiusMiles);
-
-            // Convert results into API response objects
-            var response = results.Select(r => new
-            {
-                r.Id,
-                r.Status,
-                r.CreatedAt,
-                r.Latitude,
-                r.Longitude,
-                r.DistanceMiles,                  // computed distance from user
-                DetailsUrl = Url.Action(          // builds URL to MVC Details page
-                    "Details",                    //action method
-                    "ReportIssue",                //controller
-                    new { id = r.Id })!           //route values
-            });
-
-            return Ok(response);
+            var results = await _nearbyReport.GetNearbyIssuesAsync(lat, lng, radiusMiles);
+            return Ok(results);
         }
     }
 }

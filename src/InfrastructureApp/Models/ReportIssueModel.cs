@@ -18,7 +18,7 @@ namespace InfrastructureApp.Models
         [Required]
         [MaxLength(50)]
 
-        public string Status {get; set;} = "Approved";
+        public string Status { get; set; } = "Approved";
 
         //DATETIME2
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
@@ -71,11 +71,25 @@ namespace InfrastructureApp.Models
             {
                 return query;
             }
-            
+
             keyword = keyword.Trim().ToLower();
 
             // Case-insensitive matching
             return query.Where(r => r.Description != null && r.Description.ToLower().Contains(keyword));
+        }
+
+        // Applies sorting based on selected sort option
+        // SCRUM-86 ADDED: allows sorting newest or oldest without putting logic in controller
+        public static IQueryable<ReportIssue> ApplyDateSort(IQueryable<ReportIssue> query, string? sort)
+        {
+            // SCRUM-86 ADDED: oldest-first option
+            if (!string.IsNullOrWhiteSpace(sort) && sort.Trim().ToLower() == "oldest")
+            {
+                return query.OrderBy(r => r.CreatedAt);
+            }
+
+            // default behavior (newest-first)
+            return query.OrderByDescending(r => r.CreatedAt);
         }
 
     }
