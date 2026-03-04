@@ -71,5 +71,18 @@ public class AuthenticationIntegrationTests
             Does.Contain("/Login"));
     }
     
+    [Test]
+    public async Task
+        UnauthedUser_AccessingReportIssuesDetails_RedirectsToLogin()
+    {
+        var protectedUrl = "/ReportIssue/Details/1";
+        
+        var response = _client.GetAsync(protectedUrl).Result;
+        Assert.That(response.StatusCode,
+            Is.EqualTo(HttpStatusCode.Redirect));
 
+        var redirectLoc = response.Headers.Location?.ToString();
+        Assert.That(redirectLoc,
+            Does.Contain("/Login"));
+    }
 }
