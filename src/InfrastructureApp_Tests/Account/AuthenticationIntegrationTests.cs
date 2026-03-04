@@ -45,7 +45,7 @@ public class AuthenticationIntegrationTests
     public async Task
         UnauthedUser_AccessingReportIssues_RedirectsToLogin()
     {
-        var protectedUrl = "/ReportIssues";
+        var protectedUrl = "/ReportIssue/ReportIssue";
         
         var response = _client.GetAsync(protectedUrl).Result;
         Assert.That(response.StatusCode,
