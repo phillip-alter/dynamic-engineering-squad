@@ -1,12 +1,54 @@
-﻿@{
+﻿@using InfrastructureApp.ViewModels.Account;
+@using InfrastructureApp.Models;
+@model PaginatedList<AdminViewModel>
+@{
     ViewData["Title"] = "Admin Panel";
 }
 
+<h1>Admin Panel</h1>
 
-<h1>Admin Panel Placeholder Page</h1>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Roles</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var user in Model)
+    {
+        <tr>
+            <td>@user.UserName</td>
+            <td>@user.Email</td>
+            <td>@(user.Roles != null ? string.Join(", ", user.Roles) : "No Roles")</td>
+            <td>
+                <a asp-action="EditRoles" asp-controller="Account" asp-route-userId="@user.UserId" class="btn btn-sm btn-primary">Edit</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
 
-<ul>
-    <li>Authenticated: @User.Identity.IsAuthenticated</li>
-    <li>Name: @User.Identity.Name</li>
-    <li>Is Admin: @User.IsInRole("Admin")</li>
-</ul>
+<nav aria-label="User pagination">
+    <ul class="pagination">
+        @* Previous Button *@
+        <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+            <a class="page-link" asp-action="Admin" asp-route-page="@(Model.PageIndex - 1)">Previous</a>
+        </li>
+
+        @* Page Numbers *@
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                <a class="page-link" asp-action="Admin" asp-route-page="@i">@i</a>
+            </li>
+        }
+
+        @* Next Button *@
+        <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+            <a class="page-link" asp-action="Admin" asp-route-page="@(Model.PageIndex + 1)">Next</a>
+        </li>
+    </ul>
+</nav>
