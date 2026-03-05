@@ -1,11 +1,38 @@
 ﻿using InfrastructureApp.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
 
 namespace InfrastructureApp_Tests;
 
 [TestFixture]
 public class PaginatedListTests
 {
+    
+    private SqliteConnection _conn = null!;
+    private TestDbContext _context = null!;
+
+    [SetUp]
+    public async Task SetUp()
+    {
+        _conn = new SqliteConnection("DataSource=:memory:");
+        await _conn.OpenAsync();
+
+        var options = new DbContextOptionsBuilder<TestDbContext>()
+            .UseSqlite(_conn)
+            .Options;
+        
+        _context = new TestDbContext(options);
+        
+        await _context.Database.EnsureCreatedAsync();
+    }
+
+    [TearDown]
+    public async Task TearDown()
+    {
+        await _context.DisposeAsync();
+        await _conn.DisposeAsync();
+    }
+    
     [TestCase(10, 1, 3, 4, false, true)]
     [TestCase(10, 2, 3, 4, true, true)]
     [TestCase(10, 4, 3, 4, true, false)]
@@ -31,4 +58,15 @@ public class PaginatedListTests
 
 }
 
+// following are used for in-memory database.
 
+public class TestEntity
+{
+    public int Id { get; set; }
+}
+
+public class TestDbContext : DbContext
+{
+    public TestDbContext(DbContextOptions<TestDbContext> options) : base(options) { }
+    public DbSet<TestEntity> TestEntities { get; set; }
+}
