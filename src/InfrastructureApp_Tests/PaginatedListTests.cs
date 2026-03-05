@@ -55,7 +55,37 @@ public class PaginatedListTests
             Assert.That(paginatedList.HasNextPage, Is.EqualTo(expectedHasNext));
         });
     }
+    
+    [Test]
+    public async Task CreateAsync_ReturnsCorrectlyPaginatedData()
+    {
+        for (int i = 1; i <= 5; i++)
+        {
+            _context.TestEntities.Add(new TestEntity { Id = i });
+        }
+        await _context.SaveChangesAsync();
 
+        int pageIndex = 2;
+        int pageSize = 2;
+        
+        var result = await PaginatedList<TestEntity>.CreateAsync(
+            _context.TestEntities.AsQueryable(), 
+            pageIndex, 
+            pageSize
+        );
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Count.EqualTo(2)); 
+            
+            Assert.That(result[0].Id, Is.EqualTo(3));
+            Assert.That(result[1].Id, Is.EqualTo(4));
+            
+            Assert.That(result.TotalPages, Is.EqualTo(3)); 
+            Assert.That(result.HasPreviousPage, Is.True);
+            Assert.That(result.HasNextPage, Is.True);
+        });
+    }
 }
 
 // following are used for in-memory database.
