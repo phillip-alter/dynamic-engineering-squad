@@ -135,6 +135,32 @@ public class PaginatedListTests
         });
     }
     
+    [Test]
+    public async Task CreateAsync_FirstPage_DoesNotSkipAnyItems()
+    {
+        for (int i = 1; i <= 5; i++)
+        {
+            _context.TestEntities.Add(new TestEntity { Id = i });
+        }
+        await _context.SaveChangesAsync();
+
+        int pageIndex = 1; 
+        int pageSize = 3;
+
+        var result = await PaginatedList<TestEntity>.CreateAsync(
+            _context.TestEntities.AsQueryable(), 
+            pageIndex, 
+            pageSize
+        );
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Count.EqualTo(3), "Should take exactly the page size."); 
+            Assert.That(result[0].Id, Is.EqualTo(1), "Should start with the very first item in the database."); 
+            Assert.That(result.HasPreviousPage, Is.False, "Page 1 has no previous page."); 
+            Assert.That(result.HasNextPage, Is.True, "Page 1 of 2 should have a next page.");
+        });
+    }
 }
 
 // following are used for in-memory database.
