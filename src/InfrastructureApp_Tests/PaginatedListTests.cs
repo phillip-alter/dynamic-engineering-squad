@@ -107,6 +107,34 @@ public class PaginatedListTests
             Assert.That(result.HasNextPage, Is.False);
         });
     }
+    
+    [Test]
+    public async Task CreateAsync_RequestedPageIsGreaterThanTotalPages_ReturnsEmptyList()
+    { 
+        for (int i = 1; i <= 3; i++)
+        {
+            _context.TestEntities.Add(new TestEntity { Id = i });
+        }
+        await _context.SaveChangesAsync();
+
+        int pageIndex = 5; 
+        int pageSize = 2;
+        
+        var result = await PaginatedList<TestEntity>.CreateAsync(
+            _context.TestEntities.AsQueryable(), 
+            pageIndex, 
+            pageSize
+        );
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Empty, "Skipping past available items should yield an empty list.");
+            Assert.That(result.TotalPages, Is.EqualTo(2), "Math should still reflect 2 total pages based on the 3 items.");
+            Assert.That(result.HasPreviousPage, Is.True, "Page 5 is mathematically > 1, so this is technically true.");
+            Assert.That(result.HasNextPage, Is.False, "Page 5 is not < TotalPages (2).");
+        });
+    }
+    
 }
 
 // following are used for in-memory database.
