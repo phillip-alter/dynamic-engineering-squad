@@ -86,6 +86,27 @@ public class PaginatedListTests
             Assert.That(result.HasNextPage, Is.True);
         });
     }
+    
+    [Test]
+    public async Task CreateAsync_WithEmptySource_ReturnsEmptyPaginatedList()
+    {
+        int pageIndex = 1;
+        int pageSize = 5;
+        
+        var result = await PaginatedList<TestEntity>.CreateAsync(
+            _context.TestEntities.AsQueryable(), 
+            pageIndex, 
+            pageSize
+        );
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Is.Empty, "Expected the paginated list to contain zero items.");
+            Assert.That(result.TotalPages, Is.EqualTo(0), "Total pages should be 0 for an empty source.");
+            Assert.That(result.HasPreviousPage, Is.False);
+            Assert.That(result.HasNextPage, Is.False);
+        });
+    }
 }
 
 // following are used for in-memory database.
