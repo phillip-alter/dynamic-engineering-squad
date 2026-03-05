@@ -1,4 +1,5 @@
-﻿using InfrastructureApp.ViewModels.Account;
+﻿using System.Security.Claims;
+using InfrastructureApp.ViewModels.Account;
 using InfrastructureApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
@@ -89,6 +90,31 @@ namespace InfrastructureApp.Controllers
         {
             var pageSize = 10;
             var model = await _userService.GetUsersWithRolesAsync(page, pageSize);
+            return View(model);
+        }
+        
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EditRoles(string userId)
+        {
+            var model = await _userService.GetManageRolesViewModelAsync(userId);
+            return model == null ? NotFound() : View(model);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EditRoles(ManageUserRolesViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            string currentAdminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _userService.UpdateUserRolesAsync(model, currentAdminId);
+        
+            if (result.Succeeded) return RedirectToAction("Admin");
+
+            foreach (var error in result.Errors) ModelState.AddModelError("", error.Description);
             return View(model);
         }
         
