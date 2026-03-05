@@ -87,7 +87,7 @@ builder.Services.AddHttpClient<IContentModerationService, ContentModerationServi
 
 
 builder.Services.AddScoped<InfrastructureApp.Services.IAvatarService, InfrastructureApp.Services.AvatarService>();
-
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
