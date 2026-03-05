@@ -115,6 +115,12 @@
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="Account" asp-action="ChooseAvatar"><i class="fa-solid fa-user"></i> Choose Avatar</a>
                                 </li>
+                                if (User.IsInRole("Admin"))
+                                {
+                                    <li class="nav-item">
+                                        <a class="nav-link" asp-controller="Account" asp-action="Admin"><i class="fa-solid fa-arrow-pointer"></i> Admin Page</a>
+                                    </li>
+                                }
                             }
                     </ul>
                     <partial name="_LoginPartial" />
