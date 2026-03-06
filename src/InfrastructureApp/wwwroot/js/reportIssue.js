@@ -77,19 +77,18 @@ window.initMap = function initMap() {
         fullscreenControl: false
     });
 
-    // ✅ NEW: if hidden inputs already have coords (from RoadCamera), show them immediately
-    const latEl = document.getElementById("Latitude");
-    const lngEl = document.getElementById("Longitude");
 
-    const lat = latEl ? toNumber(latEl.value) : NaN;
-    const lng = lngEl ? toNumber(lngEl.value) : NaN;
+        // ✅ NEW: read initial coords from the map element (most reliable)
+        const mapEl = document.getElementById("map");
+        const latFromData = mapEl ? parseFloat((mapEl.dataset.lat || "").replace(",", ".")) : NaN;
+        const lngFromData = mapEl ? parseFloat((mapEl.dataset.lng || "").replace(",", ".")) : NaN;
 
-    if (!isNaN(lat) && !isNaN(lng)) {
-        placeMarker(lat, lng);
-        map.setCenter({ lat, lng });
-        map.setZoom(15);
-        updateHiddenInputs(lat, lng); // keeps values consistent
-    }
+        if (!isNaN(latFromData) && !isNaN(lngFromData)) {
+            placeMarker(latFromData, lngFromData);
+            map.setCenter({ lat: latFromData, lng: lngFromData });
+            map.setZoom(15);
+            updateHiddenInputs(latFromData, lngFromData); // sync hidden fields too
+        }
 
     // When user clicks map
     map.addListener("click", function (event) {

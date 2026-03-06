@@ -1,5 +1,6 @@
 @using InfrastructureApp.Configuration
 @using Microsoft.Extensions.Options
+@using System.Globalization
 
 
 <!--injects API key, avoids using viewbag-->
@@ -63,7 +64,11 @@
         <!--map-->
         <div class="mb-3">
             <label class="form-label">Select location</label>
-            <div id="map" style="height: 380px; width: 100%; border-radius: 12px;"></div>
+            <div id="map"
+                data-lat="@(Model.Latitude?.ToString(CultureInfo.InvariantCulture) ?? "")"
+                data-lng="@(Model.Longitude?.ToString(CultureInfo.InvariantCulture) ?? "")"
+                style="height: 380px; width: 100%; border-radius: 12px;">
+            </div>
             <small class="text-muted">Click on the map to drop a marker where the issue happened.</small>
             <span asp-validation-for="Latitude" class="text-danger d-block"></span>
             <span asp-validation-for="Longitude" class="text-danger d-block"></span>
