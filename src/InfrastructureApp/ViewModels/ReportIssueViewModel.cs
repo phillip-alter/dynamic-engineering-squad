@@ -18,8 +18,8 @@ namespace InfrastructureApp.ViewModels
 
         //replaced URL with photo upload
         [Required(ErrorMessage = "Please upload a photo of the damage.")]
-        [Display(Name = "Photo")]
-        public IFormFile? Photo {get; set;} = default!;
+        [Display(Name = "Photo")
+        public IFormFile? Photo { get; set; 
 
         [Required(ErrorMessage = "Please select a location on the map to populate Latitude.")]
         [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90.")]
@@ -29,4 +29,6 @@ namespace InfrastructureApp.ViewModels
         [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180.")]
         public decimal? Longitude { get; set; }
     }
+
+    
 }
