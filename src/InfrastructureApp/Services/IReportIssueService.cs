@@ -11,7 +11,7 @@ namespace InfrastructureApp.Services
     public interface IReportIssueService
     {
         //Creates a new report using the data from the ViewModel and the authenticated user's Id. Returns the Id of the newly created report.
-        Task<int> CreateAsync(ReportIssueViewModel vm, string userId);
+        Task<(int reportId, string status)> CreateAsync(ReportIssueViewModel vm, string userId);
 
         // Retrieves a report by its Id. Returns null if the report does not exist.
         Task<ReportIssue?> GetByIdAsync(int id);

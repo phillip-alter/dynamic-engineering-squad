@@ -3,7 +3,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const ta = document.getElementById("Description");
     const count = document.getElementById("descCount");
-    
+
     if (!ta || !count) return;
 
     const max = parseInt(ta.getAttribute("maxlength") || "0", 10);
@@ -23,43 +23,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
 let map;
 let marker = null;
-function toNumber(val) 
-{
-    if (val == null) return NaN;
-    // handles "44,84845" and "44.84845"
-    return parseFloat(String(val).replace(",", "."));
-}
 
 // Google Maps calls this automatically because of callback=initMap
 //window.initMap makes it global and allows it to work with modules/bundling
-/*window.initMap = function initMap() {
-
-    // Default location (Monmouth, Oregon)
-    const defaultLocation = {
-        lat: 44.84845,
-        lng: -123.23399
-    };
-
-    // Create map
-    map = new google.maps.Map(document.getElementById("map"), {
-        center: defaultLocation,
-        zoom: 12,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false
-    });
-
-    // When user clicks map
-    map.addListener("click", function (event) {
-
-        const lat = event.latLng.lat();
-        const lng = event.latLng.lng();
-
-        placeMarker(lat, lng);
-        updateHiddenInputs(lat, lng);
-    });
-}*/
-
 window.initMap = function initMap() {
 
     // Default location (Monmouth, Oregon)
@@ -77,21 +43,9 @@ window.initMap = function initMap() {
         fullscreenControl: false
     });
 
-
-        // ✅ NEW: read initial coords from the map element (most reliable)
-        const mapEl = document.getElementById("map");
-        const latFromData = mapEl ? parseFloat((mapEl.dataset.lat || "").replace(",", ".")) : NaN;
-        const lngFromData = mapEl ? parseFloat((mapEl.dataset.lng || "").replace(",", ".")) : NaN;
-
-        if (!isNaN(latFromData) && !isNaN(lngFromData)) {
-            placeMarker(latFromData, lngFromData);
-            map.setCenter({ lat: latFromData, lng: lngFromData });
-            map.setZoom(15);
-            updateHiddenInputs(latFromData, lngFromData); // sync hidden fields too
-        }
-
     // When user clicks map
     map.addListener("click", function (event) {
+
         const lat = event.latLng.lat();
         const lng = event.latLng.lng();
 
@@ -116,20 +70,6 @@ function placeMarker(lat, lng) {
         marker.setPosition(position);
     }
 }
-
-// after map + marker are created
-/*const latEl = document.getElementById("Latitude");
-const lngEl = document.getElementById("Longitude");
-
-const lat = parseFloat(latEl.value);
-const lng = parseFloat(lngEl.value);
-
-if (!isNaN(lat) && !isNaN(lng)) {
-  const pos = { lat, lng };
-  map.setCenter(pos);
-  map.setZoom(15);
-  marker.setPosition(pos);
-}*/
 
 
 // Hidden form fields
