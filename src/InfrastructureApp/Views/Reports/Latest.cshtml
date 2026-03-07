@@ -99,6 +99,9 @@ else
 
 @section Scripts {
     <script src="~/js/latestReportsSearch.js" asp-append-version="true"></script>
-    <script src="~/js/latestReportsSort.js" asp-append-version="true"></script>
-    <!-- SCRUM-86 ADDED: enables newest/oldest sorting -->
+    <script src="~/js/latestReportsSort.js" asp-append-version="true"></script> <!-- SCRUM-86 ADDED: enables newest/oldest sorting -->
+
+    <script async defer
+            src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey">
+    </script>
 }
