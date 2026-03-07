@@ -1,3 +1,14 @@
+/**This contains the behavior / logic:
+
+load bad words
+
+check local blocklist
+
+call OpenAI moderation
+
+return a decision**/
+
+
 using System;
 using System.Collections.Generic;
 using System.IO;
