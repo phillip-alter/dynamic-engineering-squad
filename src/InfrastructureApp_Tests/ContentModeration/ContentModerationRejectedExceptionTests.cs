@@ -1,3 +1,7 @@
+/*These unit tests are verifying that your custom exception class behaves correctly. 
+Since ContentModerationRejectedException is very small, the tests mainly confirm that the constructor stores data correctly 
+and that the exception behaves like a normal .NET exception when thrown and caught. */
+
 using NUnit.Framework;
 using System;
 using InfrastructureApp.Services.ContentModeration;
@@ -7,6 +11,7 @@ namespace InfrastructureApp_Tests.Services.ContentModeration
     [TestFixture]
     public class ContentModerationRejectedExceptionTests
     {
+        //It verifies that the exception message is correctly passed to the base Exception class.
         [Test]
         public void Ctor_SetsMessage()
         {
@@ -20,6 +25,7 @@ namespace InfrastructureApp_Tests.Services.ContentModeration
             Assert.That(ex.Message, Is.EqualTo(message));
         }
 
+        //It verifies that when a category is passed to the constructor, it is stored in the Category property.
         [Test]
         public void Ctor_WhenCategoryProvided_SetsCategory()
         {
@@ -34,6 +40,7 @@ namespace InfrastructureApp_Tests.Services.ContentModeration
             Assert.That(ex.Category, Is.EqualTo(category));
         }
 
+        //this test verifies that when category is not passed, it defaults to null.
         [Test]
         public void Ctor_WhenCategoryNotProvided_CategoryIsNull()
         {
@@ -47,6 +54,7 @@ namespace InfrastructureApp_Tests.Services.ContentModeration
             Assert.That(ex.Category, Is.Null);
         }
 
+        //This verifies that when the exception is thrown and caught as a base Exception, the important data is still preserved.
         [Test]
         public void ThrowAndCatch_AsException_PreservesData()
         {
@@ -70,6 +78,7 @@ namespace InfrastructureApp_Tests.Services.ContentModeration
             }
         }
 
+        //It verifies that the constructor does not set an InnerException, No unexpected inner exception.
         [Test]
         public void Ctor_DoesNotSetInnerException()
         {
