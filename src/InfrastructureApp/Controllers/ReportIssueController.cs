@@ -53,10 +53,10 @@ namespace InfrastructureApp.Controllers
         public async Task<IActionResult> Create(ReportIssueViewModel vm)
         {
 
-              if (string.IsNullOrWhiteSpace(vm.CameraImageUrl) && vm.Photo == null)
+             /* if (string.IsNullOrWhiteSpace(vm.CameraImageUrl) && vm.Photo == null)
               {
                     ModelState.AddModelError("Photo", "Please upload a photo of the damage.");
-              }
+              }*/
 
             if (!ModelState.IsValid)
                 return View(vm);

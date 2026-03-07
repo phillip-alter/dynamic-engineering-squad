@@ -17,11 +17,10 @@ namespace InfrastructureApp.ViewModels
         public string Description { get; set; } = "";
 
         //replaced URL with photo upload
-       // [Required(ErrorMessage = "Please upload a photo of the damage.")]
-        //[Display(Name = "Photo")]
-
+        [Required(ErrorMessage = "Please upload a photo of the damage.")]
         [Display(Name = "Photo")]
         public IFormFile? Photo { get; set; }
+
         
         //public IFormFile? Photo {get; set;} = default!;
 
@@ -37,4 +36,6 @@ namespace InfrastructureApp.ViewModels
 
         public string? CameraImageUrl { get; set; }
     }
+
+    
 }
