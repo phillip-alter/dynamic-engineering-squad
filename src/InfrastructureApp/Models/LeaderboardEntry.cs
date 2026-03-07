@@ -3,6 +3,7 @@ namespace InfrastructureApp.Models;
 public class LeaderboardEntry
 {
     public string UserId { get; set; } = "";
+   // public string AvatarKey { get; set; }  
     public int UserPoints { get; set; }
     public DateTime UpdatedAtUtc { get; set; }
 }
