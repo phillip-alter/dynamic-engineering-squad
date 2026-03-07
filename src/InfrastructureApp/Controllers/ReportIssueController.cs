@@ -26,37 +26,16 @@ namespace InfrastructureApp.Controllers
         //landing page
         [HttpGet]
         public IActionResult ReportIssue() => View();
-        // Default Create page (no camera context)
-        public IActionResult Create()
-        {
-            return View(new ReportIssueViewModel());
-        }
+
         //shows the form to create a report +creates a fresh reportIssueViewModel and passes it into the view
         [HttpGet]
-        public IActionResult Create(string? cameraId, string? imageUrl, decimal? lat, decimal? lng)
-        {
-            var vm = new ReportIssueViewModel
-            {
-                CameraId = cameraId,
-                CameraImageUrl = imageUrl,
-                Latitude = lat,
-                Longitude = lng
-            };
-
-            return View(vm);
-        }
+        public IActionResult Create() => View(new ReportIssueViewModel());
 
         //runs when user submits the form
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ReportIssueViewModel vm)
         {
-
-              if (string.IsNullOrWhiteSpace(vm.CameraImageUrl) && vm.Photo == null)
-              {
-                    ModelState.AddModelError("Photo", "Please upload a photo of the damage.");
-              }
-
             if (!ModelState.IsValid)
                 return View(vm);
 
