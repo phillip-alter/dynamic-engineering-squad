@@ -42,6 +42,8 @@ namespace InfrastructureApp.Services
             // ContentModerationService should now return Performed=false instead of throwing
             var modResult = await _moderation.CheckAsync(description);
 
+            Console.WriteLine($"[ReportIssue] ModerationResult: Performed={modResult.Performed}, IsAllowed={modResult.IsAllowed}, Flagged={modResult.Flagged}, Reason={modResult.Reason ?? "(none)"}");
+
             if (!modResult.Performed)
             {
                 // Moderation didn't actually run (startup/network/429/etc).
@@ -108,6 +110,8 @@ namespace InfrastructureApp.Services
                     CreatedAt = DateTime.UtcNow,
                     UserId = userId
                 };
+
+                Console.WriteLine($"[ReportIssue] Saving report with Status={report.Status}");
 
                 await _reports.AddAsync(report);
                 await _reports.SaveChangesAsync(); // report.Id now populated

@@ -89,11 +89,18 @@ public sealed class ContentModerationService : IContentModerationService
                     await using var stream = await resp.Content.ReadAsStreamAsync(timeoutCts.Token);
                     using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: timeoutCts.Token);
 
+                    
+
                     var r0 = doc.RootElement.GetProperty("results")[0];
                     bool flagged = r0.GetProperty("flagged").GetBoolean();
 
+                    Console.WriteLine($"[Moderation] flagged={flagged}");
+
                     if (!flagged)
+                    {
+                        Console.WriteLine("[Moderation] Decision: ALLOW");
                         return new ContentModerationResult(Performed: true, IsAllowed: true, Flagged: false);
+                    }
 
                     string? category = null;
                     if (r0.TryGetProperty("categories", out var cats))
@@ -108,7 +115,14 @@ public sealed class ContentModerationService : IContentModerationService
                         }
                     }
 
-                    return new ContentModerationResult(Performed: true, IsAllowed: false, Flagged: true, Reason: category is null ? "Flagged by moderation." : $"Flagged category: {category}");
+                    Console.WriteLine($"[Moderation] Decision: BLOCK. category={category ?? "(none)"}");
+
+                    return new ContentModerationResult(
+                        Performed: true,
+                        IsAllowed: false,
+                        Flagged: true,
+                        Reason: category is null ? "Flagged by moderation." : $"Flagged category: {category}"
+                    );
                 }
             }
 
