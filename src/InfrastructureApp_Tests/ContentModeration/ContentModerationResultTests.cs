@@ -1,3 +1,18 @@
+/**This test file verifies that your ContentModerationResult record behaves correctly. Since ContentModerationResult is a record (immutable value object), these tests mainly check:
+
+constructor behavior
+
+default values
+
+record equality
+
+record immutability
+
+record with expression behavior
+
+record ToString() output**/
+
+
 using NUnit.Framework;
 using InfrastructureApp.Services.ContentModeration;
 
@@ -6,6 +21,7 @@ namespace InfrastructureApp_Tests.Services.ContentModeration
     [TestFixture]
     public class ContentModerationResultTests
     {
+        //It checks that the constructor correctly assigns all properties.
         [Test]
         public void Ctor_SetsAllProperties()
         {
@@ -24,6 +40,7 @@ namespace InfrastructureApp_Tests.Services.ContentModeration
             Assert.That(result.Reason, Is.EqualTo("hate"));
         }
 
+        //string reason = null? So if it is not provided, it should automatically become null.
         [Test]
         public void Ctor_WhenReasonNotProvided_DefaultsToNull()
         {
@@ -39,6 +56,8 @@ namespace InfrastructureApp_Tests.Services.ContentModeration
             Assert.That(result.Reason, Is.Null);
         }
 
+        //One of the biggest features of records is value-based equality.
+        //Two records are equal if their values are the same, even if they are different objects.
         [Test]
         public void Equality_TwoRecordsWithSameValues_AreEqual()
         {
@@ -52,6 +71,7 @@ namespace InfrastructureApp_Tests.Services.ContentModeration
             Assert.That(a.GetHashCode(), Is.EqualTo(b.GetHashCode()));
         }
 
+        //Records should not be equal if their values differ.
         [Test]
         public void Equality_TwoRecordsWithDifferentValues_AreNotEqual()
         {
@@ -64,6 +84,7 @@ namespace InfrastructureApp_Tests.Services.ContentModeration
             Assert.That(a != b, Is.True);
         }
 
+        //Records support a with expression, which creates a copy of the object with modifications.
         [Test]
         public void WithExpression_CreatesNewInstanceWithModifiedValues()
         {
@@ -95,6 +116,7 @@ namespace InfrastructureApp_Tests.Services.ContentModeration
 
         // Optional: ToString tests can be brittle if you rename properties or the compiler changes formatting,
         // but it can be useful for debugging expectations.
+        //Records automatically generate a useful ToString().
         [Test]
         public void ToString_IncludesTypeNameAndSomeFields()
         {
