@@ -1,5 +1,6 @@
 @using InfrastructureApp.Configuration
 @using Microsoft.Extensions.Options
+@using System.Globalization
 
 
 <!--injects API key, avoids using viewbag-->
@@ -13,7 +14,17 @@
 <div class="container py-4">
     <h1 class="h3 mb-3">Issue Submission Form</h1>
 
-    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    @if (!string.IsNullOrWhiteSpace(Model.CameraImageUrl))
+    {
+        <div class="mb-4">
+            <h5>Reporting issue for this camera:</h5>
+            <img src="@Model.CameraImageUrl"
+                class="img-fluid rounded shadow-sm"
+                style="max-height: 300px;" />
+        </div>
+    }
 
     <form asp-action="Create" asp-controller="ReportIssue" method="post" enctype="multipart/form-data">   <!--enctype is required for photo uploads-->
         @Html.AntiForgeryToken()
@@ -35,24 +46,37 @@
         </div>
 
         <!--picture upload-->
-        <div class="mb-3 mt-3">
+        <!--<div class="mb-3 mt-3">
             <label asp-for="Photo" class="form-label"></label>
             <input asp-for="Photo" type="file" class="form-control" accept="image/*" />
             <span asp-validation-for="Photo" class="text-danger"></span>
-        </div>
+        </div>-->
+
+        @if (string.IsNullOrWhiteSpace(Model.CameraImageUrl))
+        {
+            <div class="mb-3">
+                <label asp-for="Photo" class="form-label"></label>
+                <input asp-for="Photo" type="file" class="form-control" />
+                <span asp-validation-for="Photo" class="text-danger"></span>
+            </div>
+        }
 
         <!--map-->
         <div class="mb-3">
             <label class="form-label">Select location</label>
-            <div id="map" style="height: 380px; width: 100%; border-radius: 12px;"></div>
+            <div id="map"
+                data-lat="@(Model.Latitude?.ToString(CultureInfo.InvariantCulture) ?? "")"
+                data-lng="@(Model.Longitude?.ToString(CultureInfo.InvariantCulture) ?? "")"
+                style="height: 380px; width: 100%; border-radius: 12px;">
+            </div>
             <small class="text-muted">Click on the map to drop a marker where the issue happened.</small>
             <span asp-validation-for="Latitude" class="text-danger d-block"></span>
             <span asp-validation-for="Longitude" class="text-danger d-block"></span>
         </div>
 
         <!--hidden inputs that get populated by javascript-->
-        <input asp-for="Latitude" type="hidden" id="Latitude" value="" />
-        <input asp-for="Longitude" type="hidden" id="Longitude" value="" />
+            <input asp-for="Latitude" type="hidden" id="Latitude" />
+            <input asp-for="Longitude" type="hidden" id="Longitude" />
 
         <button type="submit"
                 class="btn report-action-btn report-action-btn--primary"
@@ -65,6 +89,8 @@
            aria-label="Cancel and return to report issue page">
             Cancel
         </a>
+        <input asp-for="CameraId" type="hidden" />
+        <input asp-for="CameraImageUrl" type="hidden" />
     </form>
 </div>
 
