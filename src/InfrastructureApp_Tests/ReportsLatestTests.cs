@@ -150,5 +150,54 @@ namespace InfrastructureApp_Tests
                 Is.True
             );
         }
+
+        // -------------------------------------------------------
+        // TEST 6: ImageUrl is preserved through filtering + sorting
+        // Ensures the report data includes ImageUrl for SCRUM-81 modal display.
+        // -------------------------------------------------------
+        [Test]
+        public void FilteringAndSorting_ShouldPreserveImageUrl_ForApprovedReports()
+        {
+            // Arrange: create test data with mixed statuses and image URLs
+            var reports = new List<ReportIssue>
+    {
+        new ReportIssue
+        {
+            Id = 1,
+            Status = "Approved",
+            CreatedAt = new DateTime(2026, 1, 1),
+            ImageUrl = "https://example.com/old.jpg"
+        },
+        new ReportIssue
+        {
+            Id = 2,
+            Status = "Approved",
+            CreatedAt = new DateTime(2026, 2, 1),
+            ImageUrl = "https://example.com/new.jpg"
+        },
+        new ReportIssue
+        {
+            Id = 3,
+            Status = "Pending",
+            CreatedAt = new DateTime(2026, 3, 1),
+            ImageUrl = "https://example.com/pending.jpg"
+        }
+    }.AsQueryable();
+
+            // Act: simulate repository pipeline for non-admin user
+            var query = ReportIssue.VisibleToUser(reports, isAdmin: false);
+            query = ReportIssue.OrderLatestFirst(query);
+            var result = query.ToList();
+
+            // Assert:
+            // 1. Only approved reports remain
+            Assert.That(result.Count, Is.EqualTo(2));
+
+            // 2. Newest approved report appears first
+            Assert.That(result[0].Id, Is.EqualTo(2));
+
+            // 3. ImageUrl is preserved correctly for modal display
+            Assert.That(result[0].ImageUrl, Is.EqualTo("https://example.com/new.jpg"));
+        }
     }
 }

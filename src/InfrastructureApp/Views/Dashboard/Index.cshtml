@@ -15,6 +15,11 @@
             <div class="card-body">
                 <p><strong>Username:</strong> @Model.Username</p>
                 <p><strong>Email:</strong> @Model.Email</p>
+                <a class="btn btn-outline-primary"
+                    asp-controller="Account"
+                    asp-action="ChooseAvatar">
+                    Choose / Change Avatar
+                </a>
             </div>
         </div>
     </div>

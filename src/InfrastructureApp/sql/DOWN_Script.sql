@@ -2,6 +2,7 @@
 DROP TABLE IF EXISTS [UserPoints];
 DROP TABLE IF EXISTS [Reports];
 DROP TABLE IF EXISTS [AspNetUserRoles];
+DROP TABLE IF EXISTS [AspNetUserClaims];
 
 -- Drop parent/identity tables last
 DROP TABLE IF EXISTS [AspNetUsers];
