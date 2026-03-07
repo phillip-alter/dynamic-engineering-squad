@@ -6,10 +6,11 @@ using InfrastructureApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using InfrastructureApp.Services.Moderation;
+using InfrastructureApp.Services.ContentModeration;
 
 namespace InfrastructureApp.Controllers
 {
+    [Authorize]
     public class ReportIssueController : Controller
     {
         //dependency injection (business logic + identity for users)
@@ -24,31 +25,14 @@ namespace InfrastructureApp.Controllers
 
         //landing page
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult ReportIssue() => View();
-        // Default Create page (no camera context)
-        public IActionResult Create()
-        {
-            return View(new ReportIssueViewModel());
-        }
+
         //shows the form to create a report +creates a fresh reportIssueViewModel and passes it into the view
         [HttpGet]
-        public IActionResult Create(string? cameraId, string? imageUrl, decimal? lat, decimal? lng)
-        {
-            var vm = new ReportIssueViewModel
-            {
-                CameraId = cameraId,
-                CameraImageUrl = imageUrl,
-                Latitude = lat,
-                Longitude = lng
-            };
-
-            return View(vm);
-        }
+        public IActionResult Create() => View(new ReportIssueViewModel());
 
         //runs when user submits the form
         [HttpPost]
-        [AllowAnonymous] // later: [Authorize for users]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ReportIssueViewModel vm)
         {
@@ -67,11 +51,15 @@ namespace InfrastructureApp.Controllers
             try
             {
                 //creating report
-                var reportId = await _reportService.CreateAsync(vm, userId);
-                TempData["Success"] = "XP gained! +10 points awarded.";
+                var (reportId, status) = await _reportService.CreateAsync(vm, userId);
+
+                TempData["Success"] = status == "Approved"
+                    ? "XP gained! +10 points awarded."
+                    : "Report submitted! It will appear on the map once moderation is complete.";
+
                 return RedirectToAction(nameof(Details), new { id = reportId });
             }
-            catch (ModerationRejectedException)
+            catch (ContentModerationRejectedException)
             {
                 // This comes from the service when content is unsafe.
                 // Put the error ON the Description field so it shows next to the textbox.
@@ -94,7 +82,6 @@ namespace InfrastructureApp.Controllers
 
         //Shows the details page for a specific report id.
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
             // Load report through the service layer; return 404 if it doesn't exist.
