@@ -140,7 +140,8 @@ namespace InfrastructureApp_Tests
             var controller = MakeController(principal);
 
             _userManager.GetUserId(Arg.Any<ClaimsPrincipal>()).Returns("user-abc");
-            _service.CreateAsync(Arg.Any<ReportIssueViewModel>(), "user-abc").Returns(123);
+            _service.CreateAsync(Arg.Any<ReportIssueViewModel>(), "user-abc")
+                .Returns(Task.FromResult((reportId: 123, status: "Approved")));
 
             var vm = new ReportIssueViewModel(); // ModelState is valid unless you add errors in unit tests
 
@@ -168,7 +169,8 @@ namespace InfrastructureApp_Tests
             var controller = MakeController(); // no user set
             _userManager.GetUserId(Arg.Any<ClaimsPrincipal>()).Returns((string?)null);
 
-            _service.CreateAsync(Arg.Any<ReportIssueViewModel>(), "user-guid-001").Returns(55);
+            _service.CreateAsync(Arg.Any<ReportIssueViewModel>(), "user-guid-001")
+                .Returns(Task.FromResult((reportId: 55, status: "Approved")));
 
             var vm = new ReportIssueViewModel();
 
@@ -190,8 +192,8 @@ namespace InfrastructureApp_Tests
             _userManager.GetUserId(Arg.Any<ClaimsPrincipal>()).Returns("user-123");
 
             _service.CreateAsync(Arg.Any<ReportIssueViewModel>(), Arg.Any<string>())
-                    .Returns<Task<int>>(_ => Task.FromException<int>(
-                        new InvalidOperationException("attach a photo")));
+                .Returns(_ => Task.FromException<(int reportId, string status)>(
+                    new InvalidOperationException("attach a photo")));
 
             var vm = new ReportIssueViewModel();
 
@@ -218,8 +220,8 @@ namespace InfrastructureApp_Tests
             _userManager.GetUserId(Arg.Any<ClaimsPrincipal>()).Returns("user-123");
 
             _service.CreateAsync(Arg.Any<ReportIssueViewModel>(), Arg.Any<string>())
-                    .Returns<Task<int>>(_ => Task.FromException<int>(
-                        new Exception("db down")));
+                .Returns(_ => Task.FromException<(int reportId, string status)>(
+                    new Exception("db down")));
 
             var vm = new ReportIssueViewModel();
 

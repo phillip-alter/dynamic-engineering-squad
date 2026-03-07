@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services;
 using Microsoft.Extensions.Options;
-using InfrastructureApp.Services.Moderation;
+using InfrastructureApp.Services.ContentModeration;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 
