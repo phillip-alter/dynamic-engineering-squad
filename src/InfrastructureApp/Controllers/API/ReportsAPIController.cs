@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InfrastructureApp.Controllers.API
 {
-    // API controller used by the Latest Reports search bar.
-    // Returns filtered reports as JSON so the page can update using AJAX (no refresh).
+    // API controller used by the Latest Reports page.
+    // Supports AJAX features like search, sort, and modal detail loading.
     [Route("api/reports")]
     [ApiController]
     public class ReportsAPIController : ControllerBase
@@ -21,10 +21,10 @@ namespace InfrastructureApp.Controllers.API
             _logger = logger;
         }
 
-        // GET: /api/reports/latest?query=keyword
-        // Called by JavaScript search bar to retrieve filtered Latest Reports
+        // GET: /api/reports/latest?query=keyword&sort=newest
+        // Called by JavaScript search/sort on the Latest Reports page
         [HttpGet("latest")]
-        public async Task<ActionResult<IEnumerable<object>>> Latest([FromQuery] string? query, [FromQuery] string? sort)//Added sort
+        public async Task<ActionResult<IEnumerable<object>>> Latest([FromQuery] string? query, [FromQuery] string? sort) // SCRUM-86 UPDATED: added sort parameter
         {
             // Check if current user is Admin (affects which reports are visible)
             bool isAdmin = User.IsInRole("Admin");
@@ -32,7 +32,7 @@ namespace InfrastructureApp.Controllers.API
             try
             {
                 // Get filtered reports from repository
-                var reports = await _repo.SearchLatestReportsAsync(isAdmin, query,sort); //added sort
+                var reports = await _repo.SearchLatestReportsAsync(isAdmin, query, sort);
 
                 // Return only the fields needed by the UI (security + performance)
                 var reportResults = reports.Select(r => new
@@ -49,7 +49,6 @@ namespace InfrastructureApp.Controllers.API
             }
             catch (Exception ex)
             {
-                
                 _logger.LogError(ex, "Error searching latest reports");
 
                 // Return empty list so UI does not crash
