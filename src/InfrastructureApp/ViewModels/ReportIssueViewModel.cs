@@ -28,5 +28,10 @@ namespace InfrastructureApp.ViewModels
         [Required(ErrorMessage = "Please select a location on the map to populate Longitude.")]
         [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180.")]
         public decimal? Longitude { get; set; }
+
+        public string? CameraId { get; set; }
+
+        public string? CameraImageUrl { get; set; }
+        
     }
 }
