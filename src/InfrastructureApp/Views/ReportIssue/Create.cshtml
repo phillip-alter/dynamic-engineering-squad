@@ -23,7 +23,7 @@
 <div class="container py-4">
     <h1 class="h3 mb-3">Issue Submission Form</h1>
 
-    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
 
     <form asp-action="Create" asp-controller="ReportIssue" method="post" enctype="multipart/form-data">   <!--enctype is required for photo uploads-->
@@ -51,11 +51,14 @@
         </div>
 
         <!--picture upload-->
-        <div class="mb-3 mt-3">
-            <label asp-for="Photo" class="form-label"></label>
-            <input asp-for="Photo" type="file" class="form-control" accept="image/*" />
-            <span asp-validation-for="Photo" class="text-danger"></span>
-        </div>
+       @if (string.IsNullOrWhiteSpace(Model.CameraImageUrl))
+        {
+            <div class="mb-3">
+                <label asp-for="Photo" class="form-label"></label>
+                <input asp-for="Photo" type="file" class="form-control" />
+                <span asp-validation-for="Photo" class="text-danger"></span>
+            </div>
+        }
 
         <!--map-->
         <div class="mb-3">
@@ -67,8 +70,8 @@
         </div>
 
         <!--hidden inputs that get populated by javascript-->
-        <input asp-for="Latitude" type="hidden" id="Latitude" value="" />
-        <input asp-for="Longitude" type="hidden" id="Longitude" value="" />
+        <input asp-for="Latitude" type="hidden" id="Latitude" />
+        <input asp-for="Longitude" type="hidden" id="Longitude" />
 
         <button type="submit"
                 class="btn report-action-btn report-action-btn--primary"
@@ -91,7 +94,8 @@
     <script src="~/js/reportIssue.js"></script>
 
     <script async defer
-        src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey&callback=initMap">
+            src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey&callback=initMap">
     </script>
 }
+
 

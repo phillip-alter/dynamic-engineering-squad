@@ -3,6 +3,7 @@ It is specifically designed for the UI layer (the form), not for the database. R
 Is separate from the database model.*/
 
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Http;
 
 namespace InfrastructureApp.ViewModels
@@ -17,9 +18,11 @@ namespace InfrastructureApp.ViewModels
         public string Description { get; set; } = "";
 
         //replaced URL with photo upload
-        [Required(ErrorMessage = "Please upload a photo of the damage.")]
-        [Display(Name = "Photo")]
-        public IFormFile? Photo {get; set;} = default!;
+       // [Required(ErrorMessage = "Please upload a photo of the damage.")]
+       // [Display(Name = "Photo")]
+       // public IFormFile? Photo {get; set;} = default!;
+
+        [Display(Name = "Photo")] public IFormFile? Photo { get; set; }
 
         [Required(ErrorMessage = "Please select a location on the map to populate Latitude.")]
         [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90.")]
