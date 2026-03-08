@@ -1,0 +1,26 @@
+name: PR Gatekeeper
+
+on:
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET 9
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.x'
+
+      - name: Restore dependencies
+        run: dotnet restore src/InfrastructureApp
+
+      - name: Build
+        run: dotnet build src/InfrastructureApp --no-restore
+
+      - name: Test
+        run: dotnet test src/InfrastructureApp --no-build --verbosity normal
