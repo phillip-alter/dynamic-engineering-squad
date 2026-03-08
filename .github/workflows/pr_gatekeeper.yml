@@ -17,10 +17,10 @@ jobs:
           dotnet-version: '9.x'
 
       - name: Restore dependencies
-        run: dotnet restore 
+        run: dotnet restore src/InfrastructureApp
 
       - name: Build
-        run: dotnet build --no-restore
+        run: dotnet build src/InfrastructureApp --no-restore
 
       - name: Test
-        run: dotnet test --no-build --verbosity normal
+        run: dotnet test src/InfrastructureApp --no-build --verbosity normal
