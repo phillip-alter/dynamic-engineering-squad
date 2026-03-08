@@ -55,5 +55,46 @@ namespace InfrastructureApp.Controllers.API
                 return Ok(Array.Empty<object>());
             }
         }
+
+        // GET: /api/reports/5
+        // SCRUM-98 ADDED: returns one report's details for the popup modal, including map coordinates
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<object>> GetReportById([FromRoute] int id)
+        {
+            bool isAdmin = User.IsInRole("Admin");
+
+            try
+            {
+                var report = await _repo.GetByIdAsync(id);
+
+                if (report == null)
+                {
+                    return NotFound();
+                }
+
+                // Non-admin users should not see non-approved reports
+                if (!isAdmin && report.Status != "Approved")
+                {
+                    return NotFound();
+                }
+
+                // Return the full details needed by the popup modal
+                return Ok(new
+                {
+                    report.Id,
+                    report.Description,
+                    report.Status,
+                    report.ImageUrl,
+                    report.CreatedAt,
+                    report.Latitude,
+                    report.Longitude
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving report details for report id {ReportId}", id);
+                return NotFound();
+            }
+        }
     }
 }
