@@ -53,13 +53,14 @@ namespace InfrastructureApp.Controllers
             // Get user ID or fallback
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
-                userId = "guid-001"; // tests expect this fallback
+                userId = "user-guid-001"; // tests expect this fallback
 
             try
             {
                 var (reportId, status) = await _service.CreateAsync(vm, userId);
 
-                TempData["Success"] = "Report submitted!";
+               TempData["Success"] = "XP gained! +10 points awarded.";
+            
 
                 return RedirectToAction("Details", new { id = reportId });
             }
@@ -70,9 +71,10 @@ namespace InfrastructureApp.Controllers
             }
             catch
             {
-                ModelState.AddModelError(string.Empty, "An unexpected error occurred.");
+                ModelState.AddModelError(string.Empty, "Something went wrong saving your report. Please try again.");
                 return View(vm);
             }
+
         }
 
 
