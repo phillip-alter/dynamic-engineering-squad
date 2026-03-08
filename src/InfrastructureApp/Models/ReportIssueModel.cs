@@ -39,7 +39,7 @@ namespace InfrastructureApp.Models
         [MaxLength(450)]
         public string? ImageUrl { get; set; }
 
-        public string PhotoPath { get; set; }
+        //public string PhotoPath { get; set; }
 
 
         // ----------------------------------------------------
