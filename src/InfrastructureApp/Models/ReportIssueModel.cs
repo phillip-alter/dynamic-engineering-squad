@@ -39,6 +39,8 @@ namespace InfrastructureApp.Models
         [MaxLength(450)]
         public string? ImageUrl { get; set; }
 
+        public IFormFile? Photo { get; set; }
+
         // ----------------------------------------------------
         // Report query helpers
         // Keep filtering and sorting logic here instead of the controller

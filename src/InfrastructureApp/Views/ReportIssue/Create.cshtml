@@ -3,7 +3,17 @@
 
 
 <!--injects API key, avoids using viewbag-->
-@inject IOptions<GoogleMapsOptions> GoogleMaps    
+@inject IOptions<GoogleMapsOptions> GoogleMaps  
+
+@if (!string.IsNullOrWhiteSpace(Model.CameraImageUrl))
+{
+    <div class="mb-4">
+        <h5>Reporting issue for this camera:</h5>
+        <img src="@Model.CameraImageUrl"
+            class="img-fluid rounded shadow-sm"
+            style="max-height: 300px;" />
+    </div>
+}      
 
 @model InfrastructureApp.ViewModels.ReportIssueViewModel
 @{
@@ -15,21 +25,14 @@
 
     <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
-        @if (!string.IsNullOrWhiteSpace(Model.CameraImageUrl))
-        {
-            <div class="mb-4">
-                <h5>Reporting issue for this camera:</h5>
-                <img src="@Model.CameraImageUrl"
-                    class="img-fluid rounded shadow-sm"
-                    style="max-height: 300px;" />
-            </div>
-        }
-
-        <input asp-for="CameraId" type="hidden" />
-        <input asp-for="CameraImageUrl" type="hidden" />
 
     <form asp-action="Create" asp-controller="ReportIssue" method="post" enctype="multipart/form-data">   <!--enctype is required for photo uploads-->
         @Html.AntiForgeryToken()
+
+        <input asp-for="CameraId" type="hidden" />
+        <input asp-for="CameraImageUrl" type="hidden" />
+        <input asp-for="Latitude" type="hidden" />
+        <input asp-for="Longitude" type="hidden" />
 
         <!--text box-->
         <div class="mb-3">

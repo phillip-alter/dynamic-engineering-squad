@@ -29,13 +29,30 @@ namespace InfrastructureApp.Controllers
 
         //shows the form to create a report +creates a fresh reportIssueViewModel and passes it into the view
         [HttpGet]
-        public IActionResult Create() => View(new ReportIssueViewModel());
+     public IActionResult Create(string cameraId, string imageUrl, decimal? lat, decimal? lng)
+        {
+            var vm = new ReportIssueViewModel
+            {
+                CameraId = cameraId,
+                CameraImageUrl = imageUrl,
+                Latitude = lat,
+                Longitude = lng
+            };
+
+            return View(vm);
+        }
 
         //runs when user submits the form
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ReportIssueViewModel vm)
         {
+
+            if (string.IsNullOrWhiteSpace(vm.CameraImageUrl) && vm.Photo == null)
+            {
+                ModelState.AddModelError("Photo", "Please upload a photo of the damage.");
+            }
+            
             if (!ModelState.IsValid)
                 return View(vm);
 
