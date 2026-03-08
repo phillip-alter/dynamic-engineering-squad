@@ -19,10 +19,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
 // Handles Google Maps interaction for reporting issues
 
 let map;
 let marker = null;
+
+function toNumber(val) {
+    if (val == null) return NaN;
+    return parseFloat(String(val).replace(",", "."));
+    }
+
 
 // Google Maps calls this automatically because of callback=initMap
 //window.initMap makes it global and allows it to work with modules/bundling
@@ -46,8 +53,8 @@ window.initMap = function initMap() {
       const latEl = document.getElementById("Latitude");
       const lngEl = document.getElementById("Longitude");
 
-      const lat = latEl ? parseFloat(latEl.value) : NaN;
-      const lng = lngEl ? parseFloat(lngEl.value) : NaN;
+      const lat = latEl ? toNumber(latEl.value) : NaN;
+      const lng = lngEl ? toNumber(lngEl.value) : NaN;
 
     if (!isNaN(lat) && !isNaN(lng)) {
         placeMarker(lat, lng);
