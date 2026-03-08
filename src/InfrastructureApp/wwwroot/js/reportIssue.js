@@ -19,10 +19,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
+
 // Handles Google Maps interaction for reporting issues
 
 let map;
 let marker = null;
+
+function toNumber(val) {
+    if (val == null) return NaN;
+    return parseFloat(String(val).replace(",", "."));
+    }
+
 
 // Google Maps calls this automatically because of callback=initMap
 //window.initMap makes it global and allows it to work with modules/bundling
@@ -42,6 +49,19 @@ window.initMap = function initMap() {
         streetViewControl: false,
         fullscreenControl: false
     });
+
+      const latEl = document.getElementById("Latitude");
+      const lngEl = document.getElementById("Longitude");
+
+      const lat = latEl ? toNumber(latEl.value) : NaN;
+      const lng = lngEl ? toNumber(lngEl.value) : NaN;
+
+    if (!isNaN(lat) && !isNaN(lng)) {
+        placeMarker(lat, lng);
+        map.setCenter({ lat, lng });
+        map.setZoom(15);
+        updateHiddenInputs(lat, lng); // keeps values consistent
+    }
 
     // When user clicks map
     map.addListener("click", function (event) {
@@ -74,7 +94,6 @@ function placeMarker(lat, lng) {
 
 // Hidden form fields
 function updateHiddenInputs(lat, lng) {
-
     const latInput = document.getElementById("Latitude");
     const lngInput = document.getElementById("Longitude");
 
@@ -83,6 +102,15 @@ function updateHiddenInputs(lat, lng) {
         lngInput.value = lng;
     }
 }
+
+
+
+    if (!isNaN(lat) && !isNaN(lng)) {
+        const pos = { lat, lng };
+        map.setCenter(pos);
+        map.setZoom(15);
+        marker.setPosition(pos);
+    }
 
 //block submission if no geolocation provided
 function shouldBlockSubmit(lat, lng) {

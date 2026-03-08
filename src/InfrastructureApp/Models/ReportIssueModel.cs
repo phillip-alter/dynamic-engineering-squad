@@ -12,7 +12,7 @@ namespace InfrastructureApp.Models
         //NVARCHAR(MAX)
         [Required]
         [StringLength(300)]
-        public string Description { get; set; } = "";
+        public string Description { get; set; } = string.Empty;
 
         //NVARCHAR(50): Pending, Approved, Rejected
         [Required]
@@ -38,6 +38,9 @@ namespace InfrastructureApp.Models
         //NVARCHAR(450) (URL to blob)
         [MaxLength(450)]
         public string? ImageUrl { get; set; }
+
+        public string PhotoPath { get; set; }
+
 
         // ----------------------------------------------------
         // Report query helpers
