@@ -97,20 +97,20 @@ function updateHiddenInputs(lat, lng) {
     const latInput = document.getElementById("Latitude");
     const lngInput = document.getElementById("Longitude");
 
-    if (latInput && lngInput) {
-        latInput.value = lat;
-        lngInput.value = lng;
-    }
-}
+    // Write values into the hidden inputs
+    latInput.value = lat;
+    lngInput.value = lng;
 
-
-
-    if (!isNaN(lat) && !isNaN(lng)) {
+    // Update map if marker + map exist (Jest mocks these)
+    if (!isNaN(lat) && !isNaN(lng) && map && marker) {
         const pos = { lat, lng };
         map.setCenter(pos);
         map.setZoom(15);
         marker.setPosition(pos);
     }
+}
+
+
 
 //block submission if no geolocation provided
 function shouldBlockSubmit(lat, lng) {
