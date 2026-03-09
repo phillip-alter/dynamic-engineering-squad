@@ -59,11 +59,22 @@ namespace InfrastructureApp.Controllers
             {
                 var (reportId, status) = await _service.CreateAsync(vm, userId);
 
-               TempData["Success"] = "XP gained! +10 points awarded.";
+              TempData["Success"] = status == "Approved"
+                    ? "XP gained! +10 points awarded."
+                    : "Report submitted! It will appear on the map once moderation is complete.";
             
 
                 return RedirectToAction("Details", new { id = reportId });
             }
+
+            catch (ContentModerationRejectedException)
+            {
+                // This comes from the service when content is unsafe.
+                // Put the error ON the Description field so it shows next to the textbox.
+                ModelState.AddModelError(nameof(vm.Description), "Your description contains unsafe content and cannot be submitted.");
+                return View(vm);
+            }
+
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
