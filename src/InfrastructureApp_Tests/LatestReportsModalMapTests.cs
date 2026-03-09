@@ -77,5 +77,22 @@ namespace InfrastructureApp_Tests
             // Assert: OK response should contain a value for the modal to use
             Assert.That(okResult.Value, Is.Not.Null);
         }
+
+        // -------------------------------------------------------
+        // SCRUM-98:
+        // Missing report should return NotFound
+        // -------------------------------------------------------
+        [Test]
+        public async Task GetReportById_WhenReportDoesNotExist_ReturnsNotFound()
+        {
+            // Arrange: repository returns null to simulate a missing report
+            _repo.GetByIdAsync(999).Returns((ReportIssue?)null);
+
+            // Act: request a report Id that does not exist
+            var result = await _controller.GetReportById(999);
+
+            // Assert: controller should return 404 NotFound for a missing report
+            Assert.That(result.Result, Is.TypeOf<NotFoundResult>());
+        }
     }
 }
