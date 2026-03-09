@@ -42,5 +42,40 @@ namespace InfrastructureApp_Tests
                 HttpContext = new DefaultHttpContext()
             };
         }
+
+        // -------------------------------------------------------
+        // SCRUM-98:
+        // Approved report should return OK for modal details API
+        // -------------------------------------------------------
+        [Test]
+        public async Task GetReportById_WhenApprovedReportExists_ReturnsOk()
+        {
+            // Arrange: create an approved report with map data that the modal can use
+            var report = new ReportIssue
+            {
+                Id = 5,
+                Description = "Pothole near school",
+                Status = "Approved",
+                ImageUrl = "/uploads/issues/pothole.jpg",
+                CreatedAt = new DateTime(2026, 3, 6, 10, 0, 0),
+                Latitude = 44.9429m,
+                Longitude = -123.0351m
+            };
+
+            // Arrange: repository should return this report when the controller asks for Id 5
+            _repo.GetByIdAsync(5).Returns(report);
+
+            // Act: call the modal details endpoint for this report
+            var result = await _controller.GetReportById(5);
+
+            // Assert: approved report should return HTTP 200 OK
+            Assert.That(result.Result, Is.TypeOf<OkObjectResult>());
+
+            // Convert the result to OkObjectResult so the test can check the data returned by the API
+            var okResult = (OkObjectResult)result.Result!;
+
+            // Assert: OK response should contain a value for the modal to use
+            Assert.That(okResult.Value, Is.Not.Null);
+        }
     }
 }
