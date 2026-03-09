@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using NSubstitute;
-using InfrastructureApp.Services.Moderation;
+using InfrastructureApp.Services.ContentModeration;
 using NUnit.Framework;
 using System.Threading;
 
@@ -82,7 +82,7 @@ namespace InfrastructureApp_Tests
 
             // Default behavior: allow all text (so existing tests keep working)
             moderation.CheckAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-              .Returns(Task.FromResult(new ModerationResult(IsAllowed: true, Flagged: false)));
+              .Returns(Task.FromResult(new ContentModerationResult(Performed: true, IsAllowed: true, Flagged: false)));
 
             return new ReportIssueService(db, repo, env, moderation);
         }
@@ -108,7 +108,8 @@ namespace InfrastructureApp_Tests
 
             var userId = "user-1";
 
-            var reportId = await service.CreateAsync(vm, userId);
+            var (reportId, status) = await service.CreateAsync(vm, userId);
+            Assert.That(status, Is.EqualTo("Approved"));
 
             // verify report saved (DbSet name is ReportIssue)
             var report = await db.ReportIssue.FirstOrDefaultAsync(r => r.Id == reportId);
@@ -148,9 +149,10 @@ namespace InfrastructureApp_Tests
                 Photo = null
             };
 
-            var reportId = await service.CreateAsync(vm, "user-2");
+            var (reportId, status) = await service.CreateAsync(vm, "user-2");
 
             Assert.That(reportId, Is.GreaterThan(0));
+            Assert.That(status, Is.EqualTo("Approved"));
 
             var points = await db.UserPoints.SingleAsync(p => p.UserId == "user-2");
             Assert.That(points.CurrentPoints, Is.EqualTo(15));
@@ -171,7 +173,8 @@ namespace InfrastructureApp_Tests
                 Photo = MakeFormFile(bytes, "sidewalk.png", "image/png")
             };
 
-            var reportId = await service.CreateAsync(vm, "user-3");
+            var (reportId, status) = await service.CreateAsync(vm, "user-3");
+            Assert.That(status, Is.EqualTo("Approved"));
 
             var report = await db.ReportIssue.SingleAsync(r => r.Id == reportId);
 
@@ -247,7 +250,7 @@ namespace InfrastructureApp_Tests
 
             var moderation = Substitute.For<IContentModerationService>();
             moderation.CheckAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns(Task.FromResult(new ModerationResult(IsAllowed: false, Flagged: true, ReasonCategory: "hate")));
+                    .Returns(Task.FromResult(new ContentModerationResult(Performed: true, IsAllowed: false, Flagged: true, Reason: "hate")));
 
             var service = new ReportIssueService(db, repo, env, moderation);
 
@@ -257,7 +260,7 @@ namespace InfrastructureApp_Tests
                 Photo = null
             };
 
-            Assert.ThrowsAsync<ModerationRejectedException>(() => service.CreateAsync(vm, "user-mod"));
+            Assert.ThrowsAsync<ContentModerationRejectedException>(() => service.CreateAsync(vm, "user-mod"));
 
             Assert.That(db.ReportIssue.Any(r => r.UserId == "user-mod"), Is.False);
             Assert.That(db.UserPoints.Any(p => p.UserId == "user-mod"), Is.False);

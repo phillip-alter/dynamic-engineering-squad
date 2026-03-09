@@ -1,4 +1,3 @@
-@using System.Globalization
 @model InfrastructureApp.ViewModels.RoadCameraDetailsViewModel
 <div class="container mt-4">
 <h1 class="text-center mb-4">Camera Details</h1>
@@ -61,13 +60,13 @@ else
                 </button>
 
                 <a class="btn btn-outline-danger"
-                    asp-controller="ReportIssue"
-                    asp-action="Create"
-                    asp-route-cameraId="@cam.CameraId"
-                    asp-route-imageUrl="@img"
-                    asp-route-lat="@cam.Latitude.ToString(CultureInfo.InvariantCulture)"
-                    asp-route-lng="@cam.Longitude.ToString(CultureInfo.InvariantCulture)">
-                        Report Issue From This Camera
+                   asp-controller="ReportIssue"
+                   asp-action="Create"
+                   asp-route-cameraId="@cam.CameraId"
+                   asp-route-lat="@cam.Latitude"
+                   asp-route-lng="@cam.Longitude"
+                   asp-route-capturedAt="@(cam.LastUpdated?.ToString() ?? "")">
+                    Report Issue From This Camera
                 </a>
             </div>
 
