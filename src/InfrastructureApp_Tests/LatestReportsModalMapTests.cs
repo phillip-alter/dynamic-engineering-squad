@@ -94,5 +94,32 @@ namespace InfrastructureApp_Tests
             // Assert: controller should return 404 NotFound for a missing report
             Assert.That(result.Result, Is.TypeOf<NotFoundResult>());
         }
+
+        // -------------------------------------------------------
+        // SCRUM-98:
+        // Non-approved report should not be returned to normal user
+        // -------------------------------------------------------
+        [Test]
+        public async Task GetReportById_WhenPendingReportExists_ReturnsNotFound()
+        {
+            // Arrange: create a pending report that should be hidden from a normal user
+            var report = new ReportIssue
+            {
+                Id = 7,
+                Description = "Streetlight issue",
+                Status = "Pending",
+                Latitude = 44.95m,
+                Longitude = -123.04m
+            };
+
+            // Arrange: repository returns the pending report
+            _repo.GetByIdAsync(7).Returns(report);
+
+            // Act: normal user requests the pending report
+            var result = await _controller.GetReportById(7);
+
+            // Assert: non-approved report should not be exposed, so return 404 NotFound
+            Assert.That(result.Result, Is.TypeOf<NotFoundResult>());
+        }
     }
 }
