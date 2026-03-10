@@ -1,9 +1,14 @@
+@model InfrastructureApp.Models.ReportIssue
 @using InfrastructureApp.Configuration
 @using Microsoft.Extensions.Options
 
 
 <!--injects API key, avoids using viewbag-->
 @inject IOptions<GoogleMapsOptions> GoogleMaps  
+
+@{
+    ViewData["Title"] = "Submit Issue";
+}
 
 @if (!string.IsNullOrWhiteSpace(Model.CameraImageUrl))
 {
@@ -14,12 +19,7 @@
             style="max-height: 300px;" />
     </div>
 }      
-
-@model InfrastructureApp.ViewModels.ReportIssueViewModel
-@{
-    ViewData["Title"] = "Submit Issue";
-}
-
+<!--report issue submission form-->
 <div class="container py-4">
     <h1 class="h3 mb-3">Issue Submission Form</h1>
 
