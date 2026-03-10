@@ -145,14 +145,15 @@ public class ReportIssueModelTests
             r.MemberNames.Contains(nameof(ReportIssue.Longitude))));
     }
 
-    //tests whether a photo was not uploaded
+    //tests whether a photo is uploaded when there is no camera image
     [Test]
-    public void Photo_IsRequired()
+    public void Photo_IsRequired_WhenNoCameraImageProvided()
     {
         var report = new ReportIssue
         {
             Description = "Valid",
-            Photo = null,   // invalid
+            Photo = null,
+            CameraImageUrl = null,
             Latitude = 0,
             Longitude = 0,
             UserId = "user-1",
@@ -165,6 +166,27 @@ public class ReportIssueModelTests
             r.MemberNames.Contains(nameof(ReportIssue.Photo)) &&
             r.ErrorMessage != null &&
             r.ErrorMessage.Contains("Please upload a photo of the damage.")));
+    }
+
+    //tests to make sure that photo is not required when camera image is present
+    [Test]
+    public void Photo_NotRequired_WhenCameraImageProvided()
+    {
+        var report = new ReportIssue
+        {
+            Description = "Valid",
+            Photo = null,
+            CameraImageUrl = "https://example.com/camera.jpg",
+            Latitude = 0,
+            Longitude = 0,
+            UserId = "user-1",
+            Status = "Pending"
+        };
+
+        var results = Validate(report);
+
+        Assert.That(results, Has.None.Matches<ValidationResult>(r =>
+            r.MemberNames.Contains(nameof(ReportIssue.Photo))));
     }
 
     //test whether a photo was provided

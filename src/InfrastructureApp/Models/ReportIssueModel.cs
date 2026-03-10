@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 namespace InfrastructureApp.Models
 {
     //This maps to the ERD's Report Table
-    public class ReportIssue
+    public class ReportIssue : IValidatableObject
     {
         //PK Identity
         public int Id { get; set; }
@@ -50,7 +50,6 @@ namespace InfrastructureApp.Models
         // Not mapped to the database
         // ----------------------------------------------------
 
-        [Required(ErrorMessage = "Please upload a photo of the damage.")]
         [Display(Name = "Photo")]
         [NotMapped]
         public IFormFile? Photo { get; set; }
@@ -60,6 +59,23 @@ namespace InfrastructureApp.Models
 
         [NotMapped]
         public string? CameraImageUrl { get; set; }
+
+        // ----------------------------------------------------
+        // Conditional validation for form submission
+        // Require either an uploaded photo OR a camera image URL
+        // ----------------------------------------------------
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            var hasUploadedPhoto = Photo != null && Photo.Length > 0;
+            var hasCameraImage = !string.IsNullOrWhiteSpace(CameraImageUrl);
+
+            if (!hasUploadedPhoto && !hasCameraImage)
+            {
+                yield return new ValidationResult(
+                    "Please upload a photo of the damage.",
+                    new[] { nameof(Photo) });
+            }
+        }
 
 
         // ----------------------------------------------------
