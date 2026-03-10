@@ -1,5 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Http;
 
 namespace InfrastructureApp.Models
 {
@@ -10,8 +12,10 @@ namespace InfrastructureApp.Models
         public int Id { get; set; }
 
         //NVARCHAR(MAX)
-        [Required]
-        [StringLength(300)]
+        [Required(ErrorMessage = "Please enter a description.")]
+        [StringLength(300, ErrorMessage = "Description must be 300 characters or less.")]
+        [MaxLength(300, ErrorMessage = "Description must be 300 characters or less.")]
+        [Display(Name = "Description")]
         public string Description { get; set; } = string.Empty;
 
         //NVARCHAR(50): Pending, Approved, Rejected
@@ -28,18 +32,34 @@ namespace InfrastructureApp.Models
         public string UserId { get; set; } = "";
 
         //DECIMAL(9,6)
-        [Range(-90, 90)]
+        [Required(ErrorMessage = "Please select a location on the map to populate Latitude.")]
+        [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90.")]
         public decimal? Latitude { get; set; }
 
         //DECIMAL (9,6)
-        [Range(-180, 180)]
+        [Required(ErrorMessage = "Please select a location on the map to populate Longitude.")]
+        [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180.")]
         public decimal? Longitude { get; set; }
 
         //NVARCHAR(450) (URL to blob)
         [MaxLength(450)]
         public string? ImageUrl { get; set; }
 
-        //public string PhotoPath { get; set; }
+        // ----------------------------------------------------
+        // UI-only properties for form submission
+        // Not mapped to the database
+        // ----------------------------------------------------
+
+        [Required(ErrorMessage = "Please upload a photo of the damage.")]
+        [Display(Name = "Photo")]
+        [NotMapped]
+        public IFormFile? Photo { get; set; }
+
+        [NotMapped]
+        public string? CameraId { get; set; }
+
+        [NotMapped]
+        public string? CameraImageUrl { get; set; }
 
 
         // ----------------------------------------------------
