@@ -2,7 +2,6 @@
 
 using InfrastructureApp.Data;
 using InfrastructureApp.Models;
-using InfrastructureApp.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services.ContentModeration;
 
@@ -28,7 +27,7 @@ namespace InfrastructureApp.Services
             => _reports.GetByIdAsync(id);
 
         //submit report workflow
-        public async Task<(int reportId, string status)> CreateAsync(ReportIssueViewModel vm, string userId)
+        public async Task<(int reportId, string status)> CreateAsync(ReportIssue report, string userId)
         {
             //hard coded point rule, can change later
             const int pointsForReport = 10;
@@ -37,7 +36,7 @@ namespace InfrastructureApp.Services
             // 1) Moderation gate (FAIL CLOSED)
             //    Do this BEFORE saving images or touching the DB.
             // ---------------------------------------------------------
-            var description = vm.Description ?? string.Empty;
+            var description = report.Description ?? string.Empty;
 
             // ContentModerationService should now return Performed=false instead of throwing
             var modResult = await _moderation.CheckAsync(description);
@@ -64,10 +63,10 @@ namespace InfrastructureApp.Services
             // ---------------------------------------------------------
             string? savedImagePath = null;
 
-            if (vm.Photo != null && vm.Photo.Length > 0)
+            if (report.Photo != null && report.Photo.Length > 0)
             {
                 var allowedExts = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-                var ext = Path.GetExtension(vm.Photo.FileName).ToLowerInvariant();
+                var ext = Path.GetExtension(report.Photo.FileName).ToLowerInvariant();
 
                 //validates extensions
                 if (!allowedExts.Contains(ext))
@@ -75,7 +74,7 @@ namespace InfrastructureApp.Services
 
                 //validates image size
                 const long maxBytes = 5 * 1024 * 1024;
-                if (vm.Photo.Length > maxBytes)
+                if (report.Photo.Length > maxBytes)
                     throw new InvalidOperationException("Image must be 5MB or smaller.");
 
                 //save folder for images
@@ -88,7 +87,7 @@ namespace InfrastructureApp.Services
                 //save the image
                 using (var stream = File.Create(fullPath))
                 {
-                    await vm.Photo.CopyToAsync(stream);
+                    await report.Photo.CopyToAsync(stream);
                 }
 
                 savedImagePath = $"/uploads/issues/{fileName}";
@@ -100,16 +99,10 @@ namespace InfrastructureApp.Services
 
             try
             {
-                var report = new ReportIssue
-                {
-                    Description = vm.Description,
-                    Latitude = vm.Latitude,
-                    Longitude = vm.Longitude,
-                    ImageUrl = savedImagePath,
-                    Status = modResult.Performed ? "Approved" : "Pending",
-                    CreatedAt = DateTime.UtcNow,
-                    UserId = userId
-                };
+                report.ImageUrl = savedImagePath;
+                report.Status = modResult.Performed ? "Approved" : "Pending";
+                report.CreatedAt = DateTime.UtcNow;
+                report.UserId = userId;
 
                 Console.WriteLine($"[ReportIssue] Saving report with Status={report.Status}");
 
