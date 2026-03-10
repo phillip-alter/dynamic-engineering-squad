@@ -19,7 +19,6 @@ namespace InfrastructureApp.Models
         public string Description { get; set; } = string.Empty;
 
         //NVARCHAR(50): Pending, Approved, Rejected
-        [Required]
         [MaxLength(50)]
 
         public string Status { get; set; } = "Approved";
@@ -28,16 +27,15 @@ namespace InfrastructureApp.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         //FK to ApsNetUser.Id (nvarchar(450))
-        [Required]
         public string UserId { get; set; } = "";
 
         //DECIMAL(9,6)
-        [Required(ErrorMessage = "Please select a location on the map to populate Latitude.")]
+        //[Required(ErrorMessage = "Please select a location on the map to populate Latitude.")]   //for testing
         [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90.")]
         public decimal? Latitude { get; set; }
 
         //DECIMAL (9,6)
-        [Required(ErrorMessage = "Please select a location on the map to populate Longitude.")]
+        //[Required(ErrorMessage = "Please select a location on the map to populate Longitude.")]   //for testing
         [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180.")]
         public decimal? Longitude { get; set; }
 
@@ -74,6 +72,20 @@ namespace InfrastructureApp.Models
                 yield return new ValidationResult(
                     "Please upload a photo of the damage.",
                     new[] { nameof(Photo) });
+            }
+
+            if (Latitude == null)
+            {
+                yield return new ValidationResult(
+                    "Please select a location on the map to populate Latitude.",
+                    new[] { nameof(Latitude) });
+            }
+
+            if (Longitude == null)
+            {
+                yield return new ValidationResult(
+                    "Please select a location on the map to populate Longitude.",
+                    new[] { nameof(Longitude) });
             }
         }
 

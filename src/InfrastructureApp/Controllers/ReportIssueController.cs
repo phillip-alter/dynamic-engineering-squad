@@ -46,34 +46,57 @@ namespace InfrastructureApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ReportIssue report)
         {
+            // Check if the submitted form data failed validation
+            // ModelState contains the results of all DataAnnotations validation
+            // (Required, Range, StringLength, custom validation, etc.)
             if (!ModelState.IsValid)
-                return View(report);
+            {
+                //for testing validation errors
+                // ModelState is a dictionary:
+                // Key   = the name of the property (ex: "UserId", "Description")
+                // Value = validation state + list of errors for that property
+                foreach (var kvp in ModelState)
+                {
+                    // kvp.Key = the property name that failed validation
+                    // Example: "UserId", "Latitude", "Photo"
+                    var key = kvp.Key;
 
-            // Get user ID or fallback
+                    // kvp.Value.Errors = a list of validation errors for that property
+                    // A property can have multiple errors (for example Required + Range)
+                    var errors = kvp.Value.Errors;
+
+                    foreach (var error in errors)
+                    {
+                        Console.WriteLine($"[ModelState] Key={key}, Error={error.ErrorMessage}");
+                    }
+                }
+
+
+                // If validation failed, return the form view again
+                // and pass the current model (report) back to the view.
+                // This allows the user to see validation errors and fix them.
+                return View(report);
+            }
+
             var userId = _userManager.GetUserId(User);
             if (string.IsNullOrEmpty(userId))
-                userId = "user-guid-001"; // tests expect this fallback
+                userId = "user-guid-001";
 
             try
             {
                 var (reportId, status) = await _service.CreateAsync(report, userId);
 
-              TempData["Success"] = status == "Approved"
+                TempData["Success"] = status == "Approved"
                     ? "XP gained! +10 points awarded."
                     : "Report submitted! It will appear on the map once moderation is complete.";
-            
 
                 return RedirectToAction("Details", new { id = reportId });
             }
-
             catch (ContentModerationRejectedException)
             {
-                // This comes from the service when content is unsafe.
-                // Put the error ON the Description field so it shows next to the textbox.
                 ModelState.AddModelError(nameof(report.Description), "Your description contains unsafe content and cannot be submitted.");
                 return View(report);
             }
-
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError(string.Empty, ex.Message);
@@ -84,7 +107,6 @@ namespace InfrastructureApp.Controllers
                 ModelState.AddModelError(string.Empty, "Something went wrong saving your report. Please try again.");
                 return View(report);
             }
-
         }
 
 
