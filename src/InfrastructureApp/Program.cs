@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services;
 using Microsoft.Extensions.Options;
 using InfrastructureApp.Services.ContentModeration;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +14,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults
+        .AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+    });
 
 
 //Leaderboard
@@ -80,7 +87,7 @@ builder.Services.AddHttpClient<IContentModerationService, ContentModerationServi
 
 
 builder.Services.AddScoped<InfrastructureApp.Services.IAvatarService, InfrastructureApp.Services.AvatarService>();
-
+builder.Services.AddScoped<IUserService, UserService>();
 
 var app = builder.Build();
 
@@ -112,3 +119,6 @@ app.MapControllerRoute(
 
 
 app.Run();
+
+// exposing the program class so that integration tests can use it
+public partial class Program { }

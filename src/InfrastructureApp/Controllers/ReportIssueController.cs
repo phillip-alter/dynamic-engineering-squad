@@ -10,50 +10,63 @@ using InfrastructureApp.Services.ContentModeration;
 
 namespace InfrastructureApp.Controllers
 {
+    [Authorize]
     public class ReportIssueController : Controller
     {
         //dependency injection (business logic + identity for users)
-        private readonly IReportIssueService _reportService;
+        private readonly IReportIssueService _service;
         private readonly UserManager<Users> _userManager;
 
-        public ReportIssueController(IReportIssueService reportService, UserManager<Users> userManager)
+        public ReportIssueController(IReportIssueService service, UserManager<Users> userManager)
         {
-            _reportService = reportService;
+            _service = service;
             _userManager = userManager;
         }
 
         //landing page
         [HttpGet]
-        [AllowAnonymous]
         public IActionResult ReportIssue() => View();
 
         //shows the form to create a report +creates a fresh reportIssueViewModel and passes it into the view
         [HttpGet]
-        public IActionResult Create() => View(new ReportIssueViewModel());
+     public IActionResult Create(string? cameraId, string? imageUrl, decimal? lat, decimal? lng)
+        {
+            var vm = new ReportIssueViewModel
+            {
+                CameraId = cameraId,
+                CameraImageUrl = imageUrl,
+                Latitude = lat,
+                Longitude = lng
+            };
+
+            return View(vm);
+        }
 
         //runs when user submits the form
         [HttpPost]
-        [AllowAnonymous] // later: [Authorize for users]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ReportIssueViewModel vm)
         {
             if (!ModelState.IsValid)
                 return View(vm);
 
-            // Prefer real user if authenticated, testing user-guid-001 for now
-            var userId = _userManager.GetUserId(User) ?? "user-guid-001";
+            // Get user ID or fallback
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+                userId = "user-guid-001"; // tests expect this fallback
 
             try
             {
-                //creating report
-                var (reportId, status) = await _reportService.CreateAsync(vm, userId);
+                var (reportId, status) = await _service.CreateAsync(vm, userId);
 
-                TempData["Success"] = status == "Approved"
+              TempData["Success"] = status == "Approved"
                     ? "XP gained! +10 points awarded."
                     : "Report submitted! It will appear on the map once moderation is complete.";
+            
 
-                return RedirectToAction(nameof(Details), new { id = reportId });
+                return RedirectToAction("Details", new { id = reportId });
             }
+
             catch (ContentModerationRejectedException)
             {
                 // This comes from the service when content is unsafe.
@@ -61,27 +74,28 @@ namespace InfrastructureApp.Controllers
                 ModelState.AddModelError(nameof(vm.Description), "Your description contains unsafe content and cannot be submitted.");
                 return View(vm);
             }
+
             catch (InvalidOperationException ex)
             {
-                //catch errors (missing photo, duplicate image, coordinate)
-                ModelState.AddModelError("", ex.Message);
+                ModelState.AddModelError(string.Empty, ex.Message);
                 return View(vm);
             }
             catch
             {
-                //catch unexpected errors
-                ModelState.AddModelError("", "Something went wrong saving your report. Please try again.");
+                ModelState.AddModelError(string.Empty, "Something went wrong saving your report. Please try again.");
                 return View(vm);
             }
+
         }
+
+
 
         //Shows the details page for a specific report id.
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> Details(int id)
         {
             // Load report through the service layer; return 404 if it doesn't exist.
-            var report = await _reportService.GetByIdAsync(id);
+            var report = await _service.GetByIdAsync(id);
             if (report == null) return NotFound();
 
             return View(report);

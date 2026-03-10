@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using NSubstitute;
 using NUnit.Framework;
 
@@ -96,18 +97,19 @@ namespace InfrastructureApp_Tests
             Assert.That(result, Is.TypeOf<ViewResult>());
         }
 
-        //get returns a view which has a model and the model is a fresh reportIssueViewModel
         [Test]
         public void Create_Get_ReturnsView_WithNewViewModel()
         {
             var controller = MakeController();
 
-            var result = controller.Create();
+            var result = controller.Create(null, null, null, null);
 
             Assert.That(result, Is.TypeOf<ViewResult>());
             var view = (ViewResult)result;
             Assert.That(view.Model, Is.TypeOf<ReportIssueViewModel>());
         }
+
+
 
         // -------------------------
         // POST Create tests
