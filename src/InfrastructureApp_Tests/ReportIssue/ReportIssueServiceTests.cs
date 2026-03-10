@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using InfrastructureApp.Data;
 using InfrastructureApp.Models;
 using InfrastructureApp.Services;
-using InfrastructureApp.ViewModels;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
@@ -98,7 +97,7 @@ namespace InfrastructureApp_Tests
             using var db = NewDb();
             var service = MakeService(db);
 
-            var vm = new ReportIssueViewModel
+            var report = new ReportIssue
             {
                 Description = "Pothole on Main",
                 Latitude = 44.85m,
@@ -108,16 +107,16 @@ namespace InfrastructureApp_Tests
 
             var userId = "user-1";
 
-            var (reportId, status) = await service.CreateAsync(vm, userId);
+            var (reportId, status) = await service.CreateAsync(report, userId);
             Assert.That(status, Is.EqualTo("Approved"));
 
             // verify report saved (DbSet name is ReportIssue)
-            var report = await db.ReportIssue.FirstOrDefaultAsync(r => r.Id == reportId);
-            Assert.That(report, Is.Not.Null);
-            Assert.That(report!.UserId, Is.EqualTo(userId));
-            Assert.That(report.Description, Is.EqualTo("Pothole on Main"));
-            Assert.That(report.Status, Is.EqualTo("Approved"));
-            Assert.That(report.ImageUrl, Is.Null);
+            var savedReport = await db.ReportIssue.FirstOrDefaultAsync(r => r.Id == reportId);
+            Assert.That(savedReport, Is.Not.Null);
+            Assert.That(savedReport!.UserId, Is.EqualTo(userId));
+            Assert.That(savedReport.Description, Is.EqualTo("Pothole on Main"));
+            Assert.That(savedReport.Status, Is.EqualTo("Approved"));
+            Assert.That(savedReport.ImageUrl, Is.Null);
 
             // verify points created + updated
             var points = await db.UserPoints.FirstOrDefaultAsync(p => p.UserId == userId);
@@ -143,13 +142,13 @@ namespace InfrastructureApp_Tests
 
             var service = MakeService(db);
 
-            var vm = new ReportIssueViewModel
+            var report = new ReportIssue
             {
                 Description = "Streetlight out",
                 Photo = null
             };
 
-            var (reportId, status) = await service.CreateAsync(vm, "user-2");
+            var (reportId, status) = await service.CreateAsync(report, "user-2");
 
             Assert.That(reportId, Is.GreaterThan(0));
             Assert.That(status, Is.EqualTo("Approved"));
@@ -167,20 +166,20 @@ namespace InfrastructureApp_Tests
             var service = MakeService(db);
 
             var bytes = new byte[] { 1, 2, 3, 4, 5 }; // tiny
-            var vm = new ReportIssueViewModel
+            var report = new ReportIssue
             {
                 Description = "Cracked sidewalk",
                 Photo = MakeFormFile(bytes, "sidewalk.png", "image/png")
             };
 
-            var (reportId, status) = await service.CreateAsync(vm, "user-3");
+            var (reportId, status) = await service.CreateAsync(report, "user-3");
             Assert.That(status, Is.EqualTo("Approved"));
 
-            var report = await db.ReportIssue.SingleAsync(r => r.Id == reportId);
+            var savedReport = await db.ReportIssue.SingleAsync(r => r.Id == reportId);
 
-            Assert.That(report.ImageUrl, Is.Not.Null);
-            Assert.That(report.ImageUrl, Does.StartWith("/uploads/issues/"));
-            Assert.That(report.ImageUrl, Does.EndWith(".png"));
+            Assert.That(savedReport.ImageUrl, Is.Not.Null);
+            Assert.That(savedReport.ImageUrl, Does.StartWith("/uploads/issues/"));
+            Assert.That(savedReport.ImageUrl, Does.EndWith(".png"));
 
             // verify file exists in webroot/uploads/issues
             var uploadsDir = Path.Combine(_webRoot, "uploads", "issues");
@@ -198,14 +197,14 @@ namespace InfrastructureApp_Tests
             using var db = NewDb();
             var service = MakeService(db);
 
-            var vm = new ReportIssueViewModel
+            var report = new ReportIssue
             {
                 Description = "Bad file",
                 Photo = MakeFormFile(new byte[] { 1, 2, 3 }, "evil.gif", "image/gif")
             };
 
             var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
-                await service.CreateAsync(vm, "user-4"));
+                await service.CreateAsync(report, "user-4"));
 
             Assert.That(ex!.Message, Does.Contain("Only JPG, PNG, or WEBP"));
 
@@ -222,14 +221,14 @@ namespace InfrastructureApp_Tests
             var service = MakeService(db);
 
             var big = new byte[5 * 1024 * 1024 + 1]; // 5MB + 1
-            var vm = new ReportIssueViewModel
+            var report = new ReportIssue
             {
                 Description = "Too big",
                 Photo = MakeFormFile(big, "big.jpg", "image/jpeg")
             };
 
             var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
-                await service.CreateAsync(vm, "user-5"));
+                await service.CreateAsync(report, "user-5"));
 
             Assert.That(ex!.Message, Does.Contain("5MB or smaller"));
 
@@ -254,13 +253,13 @@ namespace InfrastructureApp_Tests
 
             var service = new ReportIssueService(db, repo, env, moderation);
 
-            var vm = new ReportIssueViewModel
+            var report = new ReportIssue
             {
                 Description = "bad content",
                 Photo = null
             };
 
-            Assert.ThrowsAsync<ContentModerationRejectedException>(() => service.CreateAsync(vm, "user-mod"));
+            Assert.ThrowsAsync<ContentModerationRejectedException>(() => service.CreateAsync(report, "user-mod"));
 
             Assert.That(db.ReportIssue.Any(r => r.UserId == "user-mod"), Is.False);
             Assert.That(db.UserPoints.Any(p => p.UserId == "user-mod"), Is.False);
