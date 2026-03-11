@@ -57,10 +57,10 @@
             Back to Home
         </a>
     </div>
-    <canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;display:none;"></canvas>
 </div>
 
-
+<!-- Canvas is OUTSIDE the container so viewport units work correctly -->
+<canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;display:none;"></canvas>
 
 @section Scripts {
 
@@ -70,31 +70,27 @@
         src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey&callback=initSubmittedMap">
     </script>
 
-     <script>
-        (function () {
+   <script>
+        function launchConfetti() {
             const canvas = document.getElementById('confetti-canvas');
+            if (!canvas) return;
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            canvas.setAttribute('style', 'position:fixed;top:0;left:0;pointer-events:none;z-index:9999;display:block;');
+
             const ctx = canvas.getContext('2d');
-            let particles = [];
-            let animationId = null;
-
             const COLORS = ['#ff595e','#ffca3a','#6a4c93','#1982c4','#8ac926','#ff924c','#c77dff'];
-            const SHAPES = ['circle', 'rect', 'triangle'];
-
-            function resize() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
-            }
-            window.addEventListener('resize', resize);
+            const particles = [];
 
             function randomBetween(a, b) { return a + Math.random() * (b - a); }
 
             function createParticle() {
                 return {
                     x: randomBetween(0, canvas.width),
-                    y: randomBetween(-80, -10),
+                    y: randomBetween(-100, -10),
                     size: randomBetween(7, 16),
                     color: COLORS[Math.floor(Math.random() * COLORS.length)],
-                    shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
                     speedY: randomBetween(3, 7),
                     speedX: randomBetween(-2, 2),
                     rotation: randomBetween(0, Math.PI * 2),
@@ -103,68 +99,38 @@
                 };
             }
 
-            function drawParticle(p) {
-                ctx.save();
-                ctx.globalAlpha = p.opacity;
-                ctx.fillStyle = p.color;
-                ctx.translate(p.x, p.y);
-                ctx.rotate(p.rotation);
-
-                if (p.shape === 'circle') {
-                    ctx.beginPath();
-                    ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
-                    ctx.fill();
-                } else if (p.shape === 'rect') {
-                    ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
-                } else {
-                    ctx.beginPath();
-                    ctx.moveTo(0, -p.size / 2);
-                    ctx.lineTo(p.size / 2, p.size / 2);
-                    ctx.lineTo(-p.size / 2, p.size / 2);
-                    ctx.closePath();
-                    ctx.fill();
-                }
-                ctx.restore();
+            // Add ALL particles upfront before starting the loop
+            for (let i = 0; i < 200; i++) {
+                particles.push(createParticle());
             }
 
             function update() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                particles.forEach(p => {
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
                     p.y += p.speedY;
                     p.x += p.speedX;
                     p.rotation += p.rotationSpeed;
-                    if (p.y > canvas.height - 60) p.opacity -= 0.04;
-                    drawParticle(p);
-                });
-                particles = particles.filter(p => p.opacity > 0 && p.y < canvas.height + 20);
-
+                    if (p.y > canvas.height - 60) p.opacity -= 0.03;
+                    ctx.save();
+                    ctx.globalAlpha = p.opacity;
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                    if (p.opacity <= 0 || p.y > canvas.height + 20) particles.splice(i, 1);
+                }
                 if (particles.length > 0) {
-                    animationId = requestAnimationFrame(update);
+                    requestAnimationFrame(update);
                 } else {
-                    canvas.style.display = 'none';
-                    cancelAnimationFrame(animationId);
+                    canvas.setAttribute('style', 'position:fixed;top:0;left:0;pointer-events:none;z-index:9999;display:none;');
                 }
             }
 
-            function launchConfetti() {
-                resize();
-                canvas.style.display = 'block';
-                let waves = 0;
-                const interval = setInterval(() => {
-                    for (let i = 0; i < 30; i++) particles.push(createParticle());
-                    if (++waves >= 8) clearInterval(interval);
-                }, 150);
-                if (animationId) cancelAnimationFrame(animationId);
-                update();
-            }
-
-            window.launchConfetti = launchConfetti;
-        })();
-
-        @if (TempData["SubmissionSuccess"] != null && (bool)TempData["SubmissionSuccess"])
-        {
-            <text>document.addEventListener('DOMContentLoaded', function () { window.launchConfetti(); });</text>
+            update();
         }
-    </script>
 
+        setTimeout(launchConfetti, 500);
+    </script>
 }
