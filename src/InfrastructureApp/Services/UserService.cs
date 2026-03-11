@@ -17,29 +17,29 @@ public class UserService : IUserService
         _roleManager = roleManager;
     } 
 
-    public async Task<PaginatedList<AdminViewModel>> GetUsersWithRolesAsync(int page, int pageSize)
+    public async Task<PaginatedList<Users>> GetUsersWithRolesAsync(int page, int pageSize)
     {
-        var query = _userManager.Users.Select(u => new AdminViewModel
+        var query = _userManager.Users.Select(u => new Users
         {
-            UserId = u.Id,
+            Id = u.Id,
             UserName = u.UserName,
             Email = u.Email
         });
 
-        var pagedUsers = await PaginatedList<AdminViewModel>.CreateAsync(query, page, pageSize);
+        var pagedUsers = await PaginatedList<Users>.CreateAsync(query, page, pageSize);
         
         foreach (var user in pagedUsers)
         {
-            var identityUser = await _userManager.FindByIdAsync(user.UserId);
+            var identityUser = await _userManager.FindByIdAsync(user.Id);
             user.Roles = (await _userManager.GetRolesAsync(identityUser)).ToList();
         }
 
         return pagedUsers;
     }
     
-    public async Task<ManageUserRolesViewModel> GetManageRolesViewModelAsync(string userId)
+    public async Task<ManageUserRolesViewModel> GetManageRolesViewModelAsync(string Id)
     {
-        var user = await _userManager.FindByIdAsync(userId);
+        var user = await _userManager.FindByIdAsync(Id);
         if (user == null) return null;
 
         var allRoles = await _roleManager.Roles.ToListAsync();
