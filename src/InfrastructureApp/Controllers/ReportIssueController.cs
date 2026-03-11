@@ -90,6 +90,8 @@ namespace InfrastructureApp.Controllers
                     ? "XP gained! +10 points awarded."
                     : "Report submitted! It will appear on the map once moderation is complete.";
 
+                TempData["SubmissionSuccess"] = true;   
+
                 return RedirectToAction("Details", new { id = reportId });
             }
             catch (ContentModerationRejectedException)
@@ -107,6 +109,8 @@ namespace InfrastructureApp.Controllers
                 ModelState.AddModelError(string.Empty, "Something went wrong saving your report. Please try again.");
                 return View(report);
             }
+
+
         }
 
 
