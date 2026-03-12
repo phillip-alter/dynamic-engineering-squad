@@ -1,11 +1,11 @@
 README.txt
 DUMB.txt
 
-.jpg
-.jpeg
-.png
-.gif
-.bmp
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
 .DS_Store
 .idea
 .vs
