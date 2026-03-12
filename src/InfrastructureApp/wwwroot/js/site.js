@@ -19,6 +19,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const modalImageElement = document.getElementById("modalImage");
     const modalImageFallbackElement = document.getElementById("modalImageFallback");
 
+    // -------------------------------------------------------
+    // SCRUM-101 ADDED
+    // URL link that opens the existing ReportIssue details page
+    // Example: /ReportIssue/Details/5
+    // -------------------------------------------------------
+    const openFullReportLink = document.getElementById("openFullReportLink");
+
     // Get all clickable report items
     const reportItems = document.querySelectorAll(".report-item");
 
@@ -30,7 +37,21 @@ document.addEventListener("DOMContentLoaded", function () {
             const created = this.dataset.created || "";
             const status = this.dataset.status || "";
             const imageUrl = this.dataset.image || ""; // read image URL from data-image attribute
- 
+
+            // -------------------------------------------------------
+            // SCRUM-101 ADDED
+            // Read report id so the modal can show a unique URL link
+            // -------------------------------------------------------
+            const reportId = this.dataset.reportid || "";
+
+            // -------------------------------------------------------
+            // SCRUM-101 ADDED
+            // Point the modal link to Sunair's existing details page
+            // -------------------------------------------------------
+            if (openFullReportLink && reportId) {
+                openFullReportLink.href = `/ReportIssue/Details/${reportId}`;
+            }
+
             if (modalDescriptionElement) {
                 modalDescriptionElement.textContent = description;
             }
