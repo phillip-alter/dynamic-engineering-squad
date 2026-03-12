@@ -88,21 +88,22 @@ public class AuthenticationIntegrationTests
         Assert.That(redirectLoc,
             Does.Contain("/Login"));
     }
-    
-    [Test]
-    public async Task
-        UnauthedUser_AccessingReportIssuesDetails_RedirectsToLogin()
-    {
-        var protectedUrl = "/ReportIssue/Details/1";
-        
-        var response = await _client.GetAsync(protectedUrl);
-        Assert.That(response.StatusCode,
-            Is.EqualTo(HttpStatusCode.Redirect));
 
-        var redirectLoc = response.Headers.Location?.ToString();
-        Assert.That(redirectLoc,
-            Does.Contain("/Login"));
-    }
+    // Test removed due to team discussion deciding details should be publicly accessible.
+    // [Test]
+    // public async Task
+    //     UnauthedUser_AccessingReportIssuesDetails_RedirectsToLogin()
+    // {
+    //     var protectedUrl = "/ReportIssue/Details/1";
+    //     
+    //     var response = await _client.GetAsync(protectedUrl);
+    //     Assert.That(response.StatusCode,
+    //         Is.EqualTo(HttpStatusCode.Redirect));
+    //
+    //     var redirectLoc = response.Headers.Location?.ToString();
+    //     Assert.That(redirectLoc,
+    //         Does.Contain("/Login"));
+    // }
 
     [Test]
     public async Task AuthedUser_AccessingDashboard_ReturnsOk()
@@ -141,7 +142,7 @@ public class AuthenticationIntegrationTests
     public async Task AuthedUser_AccessingReportIssueDetails_ReturnsOk()
     {
         var protectedUrl = "/ReportIssue/Details/1";
-
+    
         var response = await _authedClient.GetAsync(protectedUrl);
         
         Assert.That(response.StatusCode,
