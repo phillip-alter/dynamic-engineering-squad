@@ -9,7 +9,6 @@ using InfrastructureApp.Services.ContentModeration;
 
 namespace InfrastructureApp.Controllers
 {
-    [Authorize]
     public class ReportIssueController : Controller
     {
         //dependency injection (business logic + identity for users)
@@ -24,10 +23,12 @@ namespace InfrastructureApp.Controllers
 
         //landing page
         [HttpGet]
+        [Authorize]
         public IActionResult ReportIssue() => View();
 
         //shows the form to create a report +creates a fresh reportIssueViewModel and passes it into the view
         [HttpGet]
+        [Authorize]
         public IActionResult Create(string? cameraId, string? imageUrl, decimal? lat, decimal? lng)
         {
             var report = new ReportIssue
@@ -44,6 +45,7 @@ namespace InfrastructureApp.Controllers
         //runs when user submits the form
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Create(ReportIssue report)
         {
             // Check if the submitted form data failed validation
@@ -90,6 +92,8 @@ namespace InfrastructureApp.Controllers
                     ? "XP gained! +10 points awarded."
                     : "Report submitted! It will appear on the map once moderation is complete.";
 
+                TempData["SubmissionSuccess"] = true;   
+
                 return RedirectToAction("Details", new { id = reportId });
             }
             catch (ContentModerationRejectedException)
@@ -107,6 +111,8 @@ namespace InfrastructureApp.Controllers
                 ModelState.AddModelError(string.Empty, "Something went wrong saving your report. Please try again.");
                 return View(report);
             }
+
+
         }
 
 
