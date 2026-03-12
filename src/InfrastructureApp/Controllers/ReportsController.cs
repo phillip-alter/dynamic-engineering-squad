@@ -33,32 +33,6 @@ namespace InfrastructureApp.Controllers
 
             return View(vm);
         }
-
-        // -------------------------------------------------------
-        // SCRUM-101
-        // GET: /Reports/Details/{id}
-        // Each report has a unique URL that can be shared
-        // -------------------------------------------------------
-        [HttpGet]
-        public async Task<IActionResult> Details(int id)
-        {
-            bool isAdmin = User.IsInRole("Admin");
-
-            var report = await _repo.GetByIdAsync(id);
-
-            if (report == null)
-            {
-                return NotFound();
-            }
-
-            // Enforce visibility rule
-            if (!isAdmin && report.Status != "Approved")
-            {
-                return NotFound();
-            }
-
-            return View(report);
-        }
     }
 }
 
