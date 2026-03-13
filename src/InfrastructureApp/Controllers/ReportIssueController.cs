@@ -6,10 +6,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using InfrastructureApp.Services.ContentModeration;
+using InfrastructureApp.Services.ImageHashing;
 
 namespace InfrastructureApp.Controllers
 {
-    [Authorize]
     public class ReportIssueController : Controller
     {
         //dependency injection (business logic + identity for users)
@@ -24,10 +24,12 @@ namespace InfrastructureApp.Controllers
 
         //landing page
         [HttpGet]
+        [Authorize]
         public IActionResult ReportIssue() => View();
 
         //shows the form to create a report +creates a fresh reportIssueViewModel and passes it into the view
         [HttpGet]
+        [Authorize]
         public IActionResult Create(string? cameraId, string? imageUrl, decimal? lat, decimal? lng)
         {
             var report = new ReportIssue
@@ -44,6 +46,7 @@ namespace InfrastructureApp.Controllers
         //runs when user submits the form
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize]
         public async Task<IActionResult> Create(ReportIssue report)
         {
             // Check if the submitted form data failed validation
@@ -84,13 +87,22 @@ namespace InfrastructureApp.Controllers
 
             try
             {
+                
                 var (reportId, status) = await _service.CreateAsync(report, userId);
 
                 TempData["Success"] = status == "Approved"
                     ? "XP gained! +10 points awarded."
                     : "Report submitted! It will appear on the map once moderation is complete.";
 
+                TempData["SubmissionSuccess"] = true;   
+
                 return RedirectToAction("Details", new { id = reportId });
+            }
+            catch (DuplicateImageException ex)
+            {
+                // Attach the message to the Photo field so it shows near the upload UI.
+                ModelState.AddModelError(nameof(report.Photo), ex.Message);
+                return View(report);
             }
             catch (ContentModerationRejectedException)
             {
@@ -107,9 +119,9 @@ namespace InfrastructureApp.Controllers
                 ModelState.AddModelError(string.Empty, "Something went wrong saving your report. Please try again.");
                 return View(report);
             }
+
+
         }
-
-
 
         //Shows the details page for a specific report id.
         [HttpGet]

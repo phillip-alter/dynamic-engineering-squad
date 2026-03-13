@@ -56,10 +56,18 @@
         aria-label="Return to the home page">
             Back to Home
         </a>
+
+        <a class="btn report-action-btn"
+        asp-controller="Reports"
+        asp-action="Latest"
+        aria-label="Return to latest reports">
+            View Another Report
+        </a>
     </div>
 </div>
 
-
+<!-- Canvas is OUTSIDE the container so viewport units work correctly -->
+<canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;display:none;"></canvas>
 
 @section Scripts {
 
@@ -69,4 +77,11 @@
         src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey&callback=initSubmittedMap">
     </script>
 
+     <script src="~/js/confetti.js"></script>
+
+        @if (TempData["Success"] != null)
+        {
+            <text><script>setTimeout(launchConfetti, 500);</script></text>
+        }
+    
 }

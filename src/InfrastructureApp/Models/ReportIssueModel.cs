@@ -43,6 +43,17 @@ namespace InfrastructureApp.Models
         [MaxLength(450)]
         public string? ImageUrl { get; set; }
 
+        // SHA-256 hash stored as a 64-character hex string.
+        // This is for EXACT duplicate detection.
+        [MaxLength(64)]
+        public string? ImageSha256 { get; set; }
+
+        // Stores the perceptual hash as a signed 64-bit integer.
+        // Perceptual hash stored as long (SQL bigint).
+        // This is for VISUAL similarity detection.
+        public long? ImagePHash { get; set; }
+
+
         // ----------------------------------------------------
         // UI-only properties for form submission
         // Not mapped to the database
