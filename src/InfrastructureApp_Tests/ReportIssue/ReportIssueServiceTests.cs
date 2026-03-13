@@ -15,6 +15,8 @@ using NSubstitute;
 using InfrastructureApp.Services.ContentModeration;
 using NUnit.Framework;
 using System.Threading;
+using InfrastructureApp.Services.ImageHashing;
+using System.Collections.Generic;
 
 namespace InfrastructureApp_Tests
 {
@@ -70,20 +72,51 @@ namespace InfrastructureApp_Tests
             };
         }
 
-        private ReportIssueService MakeService(ApplicationDbContext db)
+        //makeService now includes description moderation and image hash
+        private ReportIssueService MakeService(
+            ApplicationDbContext db,
+            IContentModerationService? moderationOverride = null,
+            IImageHashService? imageHashOverride = null)
         {
             var env = Substitute.For<IWebHostEnvironment>();
             env.WebRootPath.Returns(_webRoot);
 
             IReportIssueRepository repo = new TestReportIssueRepository(db);
 
-            var moderation = Substitute.For<IContentModerationService>();
+            IContentModerationService moderation;
+            if (moderationOverride != null)
+            {
+                moderation = moderationOverride;
+            }
+            else
+            {
+                moderation = Substitute.For<IContentModerationService>();
+                moderation.CheckAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                    .Returns(Task.FromResult(
+                        new ContentModerationResult(
+                            Performed: true,
+                            IsAllowed: true,
+                            Flagged: false)));
+            }
 
-            // Default behavior: allow all text (so existing tests keep working)
-            moderation.CheckAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-              .Returns(Task.FromResult(new ContentModerationResult(Performed: true, IsAllowed: true, Flagged: false)));
+            IImageHashService imageHash;
+            if (imageHashOverride != null)
+            {
+                imageHash = imageHashOverride;
+            }
+            else
+            {
+                imageHash = Substitute.For<IImageHashService>();
+                imageHash.ComputeHashesAsync(Arg.Any<Stream>(), Arg.Any<CancellationToken>())
+                    .Returns(Task.FromResult(new ImageHashResult(
+                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        123456789L)));
 
-            return new ReportIssueService(db, repo, env, moderation);
+                imageHash.HammingDistance(Arg.Any<long>(), Arg.Any<long>())
+                    .Returns(32);
+            }
+
+            return new ReportIssueService(db, repo, env, moderation, imageHash);
         }
 
         // -------
@@ -160,12 +193,22 @@ namespace InfrastructureApp_Tests
 
         //when valid image is provided, file is saved in wwwroot/uploads/issues and imageurl is set
         [Test]
-        public async Task CreateAsync_WithValidPhoto_SavesFile_SetsImageUrl()
+        public async Task CreateAsync_WithValidPhoto_SavesFile_SetsImageUrl_AndHashes()
         {
             using var db = NewDb();
-            var service = MakeService(db);
 
-            var bytes = new byte[] { 1, 2, 3, 4, 5 }; // tiny
+            var imageHash = Substitute.For<IImageHashService>();
+            imageHash.ComputeHashesAsync(Arg.Any<Stream>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(new ImageHashResult(
+                    Sha256: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+                    PHash: 987654321L)));
+
+            imageHash.HammingDistance(Arg.Any<long>(), Arg.Any<long>())
+                .Returns(32);
+
+            var service = MakeService(db, imageHashOverride: imageHash);
+
+            var bytes = new byte[] { 1, 2, 3, 4, 5 };
             var report = new ReportIssue
             {
                 Description = "Cracked sidewalk",
@@ -181,13 +224,161 @@ namespace InfrastructureApp_Tests
             Assert.That(savedReport.ImageUrl, Does.StartWith("/uploads/issues/"));
             Assert.That(savedReport.ImageUrl, Does.EndWith(".png"));
 
-            // verify file exists in webroot/uploads/issues
+            // NEW: verify hashes saved
+            Assert.That(savedReport.ImageSha256,
+                Is.EqualTo("bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"));
+            Assert.That(savedReport.ImagePHash, Is.EqualTo(987654321L));
+
             var uploadsDir = Path.Combine(_webRoot, "uploads", "issues");
             Assert.That(Directory.Exists(uploadsDir), Is.True);
 
             var files = Directory.GetFiles(uploadsDir);
             Assert.That(files.Length, Is.EqualTo(1));
             Assert.That(Path.GetExtension(files[0]).ToLowerInvariant(), Is.EqualTo(".png"));
+        }
+
+        //this tests to see if images are exact duplicates
+        [Test]
+        public void CreateAsync_ExactDuplicateImageForSameUser_ThrowsDuplicateImageException()
+        {
+            using var db = NewDb();
+
+            db.ReportIssue.Add(new ReportIssue
+            {
+                Description = "Existing report",
+                Status = "Approved",
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UserId = "user-dup",
+                Latitude = 44.85m,
+                Longitude = -123.23m,
+                ImageUrl = "/uploads/issues/existing.png",
+                ImageSha256 = "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                ImagePHash = 111111111L
+            });
+            db.SaveChanges();
+
+            var imageHash = Substitute.For<IImageHashService>();
+            imageHash.ComputeHashesAsync(Arg.Any<Stream>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(new ImageHashResult(
+                    Sha256: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+                    PHash: 999999999L)));
+
+            imageHash.HammingDistance(Arg.Any<long>(), Arg.Any<long>())
+                .Returns(32);
+
+            var service = MakeService(db, imageHashOverride: imageHash);
+
+            var report = new ReportIssue
+            {
+                Description = "Trying same image again",
+                Photo = MakeFormFile(new byte[] { 9, 8, 7 }, "dup.png", "image/png"),
+                Latitude = 44.85m,
+                Longitude = -123.23m
+            };
+
+            var ex = Assert.ThrowsAsync<DuplicateImageException>(async () =>
+                await service.CreateAsync(report, "user-dup"));
+
+            Assert.That(ex!.Message, Does.Contain("already used this image"));
+
+            Assert.That(db.ReportIssue.Count(r => r.UserId == "user-dup"), Is.EqualTo(1));
+            Assert.That(db.UserPoints.Any(p => p.UserId == "user-dup"), Is.False);
+        }
+
+        //this tests the pHash and Hamming distance to see if images are similar
+        [Test]
+        public void CreateAsync_VisuallySimilarImageForSameUser_ThrowsDuplicateImageException()
+        {
+            using var db = NewDb();
+
+            db.ReportIssue.Add(new ReportIssue
+            {
+                Description = "Previous report",
+                Status = "Approved",
+                CreatedAt = DateTime.UtcNow.AddDays(-2),
+                UserId = "user-phash",
+                Latitude = 44.85m,
+                Longitude = -123.23m,
+                ImageUrl = "/uploads/issues/old.png",
+                ImageSha256 = "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+                ImagePHash = 555555555L
+            });
+            db.SaveChanges();
+
+            var imageHash = Substitute.For<IImageHashService>();
+            imageHash.ComputeHashesAsync(Arg.Any<Stream>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(new ImageHashResult(
+                    Sha256: "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                    PHash: 777777777L)));
+
+            // Force similarity by returning <= threshold (threshold is 8)
+            imageHash.HammingDistance(777777777L, 555555555L).Returns(4);
+
+            var service = MakeService(db, imageHashOverride: imageHash);
+
+            var report = new ReportIssue
+            {
+                Description = "Looks too similar",
+                Photo = MakeFormFile(new byte[] { 4, 5, 6 }, "similar.png", "image/png"),
+                Latitude = 44.85m,
+                Longitude = -123.23m
+            };
+
+            var ex = Assert.ThrowsAsync<DuplicateImageException>(async () =>
+                await service.CreateAsync(report, "user-phash"));
+
+            Assert.That(ex!.Message, Does.Contain("looks too similar"));
+
+            Assert.That(db.ReportIssue.Count(r => r.UserId == "user-phash"), Is.EqualTo(1));
+            Assert.That(db.UserPoints.Any(p => p.UserId == "user-phash"), Is.False);
+        }
+
+        //tests to see if duplicates are blocked by the same user
+        [Test]
+        public async Task CreateAsync_SameExactImageDifferentUser_IsAllowed()
+        {
+            using var db = NewDb();
+
+            db.ReportIssue.Add(new ReportIssue
+            {
+                Description = "Existing report",
+                Status = "Approved",
+                CreatedAt = DateTime.UtcNow.AddDays(-1),
+                UserId = "user-a",
+                Latitude = 44.85m,
+                Longitude = -123.23m,
+                ImageUrl = "/uploads/issues/existing.png",
+                ImageSha256 = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                ImagePHash = 123123123L
+            });
+            db.SaveChanges();
+
+            var imageHash = Substitute.For<IImageHashService>();
+            imageHash.ComputeHashesAsync(Arg.Any<Stream>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(new ImageHashResult(
+                    Sha256: "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+                    PHash: 123123123L)));
+
+            imageHash.HammingDistance(Arg.Any<long>(), Arg.Any<long>())
+                .Returns(0);
+
+            var service = MakeService(db, imageHashOverride: imageHash);
+
+            var report = new ReportIssue
+            {
+                Description = "Same image but different user",
+                Photo = MakeFormFile(new byte[] { 1, 1, 1 }, "same.png", "image/png"),
+                Latitude = 44.85m,
+                Longitude = -123.23m
+            };
+
+            var (reportId, status) = await service.CreateAsync(report, "user-b");
+
+            Assert.That(reportId, Is.GreaterThan(0));
+            Assert.That(status, Is.EqualTo("Approved"));
+
+            var saved = await db.ReportIssue.SingleAsync(r => r.Id == reportId);
+            Assert.That(saved.UserId, Is.EqualTo("user-b"));
         }
 
         //Reject unsupported formats (like GIF) and ensure it’s all-or-nothing (no partial saves).
@@ -251,7 +442,15 @@ namespace InfrastructureApp_Tests
             moderation.CheckAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
                     .Returns(Task.FromResult(new ContentModerationResult(Performed: true, IsAllowed: false, Flagged: true, Reason: "hate")));
 
-            var service = new ReportIssueService(db, repo, env, moderation);
+            var imageHash = Substitute.For<IImageHashService>();
+            imageHash.ComputeHashesAsync(Arg.Any<Stream>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(new ImageHashResult(
+                    Sha256: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    PHash: 123456789L)));
+            imageHash.HammingDistance(Arg.Any<long>(), Arg.Any<long>())
+                .Returns(32);
+
+            var service = new ReportIssueService(db, repo, env, moderation, imageHash);
 
             var report = new ReportIssue
             {
