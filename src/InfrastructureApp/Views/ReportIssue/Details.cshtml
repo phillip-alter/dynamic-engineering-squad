@@ -131,6 +131,11 @@
             update();
         }
 
-        setTimeout(launchConfetti, 500);
+        //setTimeout(launchConfetti, 500);
+
+        @if (TempData["Success"] != null)
+        {
+            <text>setTimeout(launchConfetti, 500);</text>
+        }
     </script>
 }
