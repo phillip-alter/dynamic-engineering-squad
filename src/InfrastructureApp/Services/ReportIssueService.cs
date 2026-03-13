@@ -30,6 +30,7 @@ namespace InfrastructureApp.Services
             => _reports.GetByIdAsync(id);
 
         //submit report workflow
+        //create a report, moderate it, validate image, hash image, reject duplicates, save image, award points
         public async Task<(int reportId, string status)> CreateAsync(ReportIssue report, string userId)
         {
             //hard coded point rule, can change later

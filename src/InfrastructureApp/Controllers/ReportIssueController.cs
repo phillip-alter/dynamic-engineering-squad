@@ -87,6 +87,7 @@ namespace InfrastructureApp.Controllers
 
             try
             {
+                
                 var (reportId, status) = await _service.CreateAsync(report, userId);
 
                 TempData["Success"] = status == "Approved"
@@ -121,8 +122,6 @@ namespace InfrastructureApp.Controllers
 
 
         }
-
-
 
         //Shows the details page for a specific report id.
         [HttpGet]
