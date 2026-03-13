@@ -147,3 +147,59 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+
+// SCRUM-101 test helper
+// Sets the modal link to the correct report details page
+function setReportDetailsLink(linkElement, reportId) {
+
+    // Only update the link if both values exist
+    if (linkElement && reportId) {
+
+        // Create the URL for the report details page
+        linkElement.href = `/ReportIssue/Details/${reportId}`;
+    }
+}
+
+// SCRUM-101 test helper
+// Stores the URL for the Latest Reports page
+const latestReportsUrl = "/Reports/Latest";
+
+// SCRUM-101 test helper
+// Updates the browser URL when a report is opened in the modal
+function pushReportUrl(reportId) {
+
+    // Do nothing if reportId is missing
+    if (!reportId) return;
+
+    // Build the new report details URL
+    const newUrl = `/ReportIssue/Details/${reportId}`;
+
+    // Avoid pushing the same URL multiple times
+    if (window.location.pathname !== newUrl) {
+
+        // Update the browser history without reloading the page
+        history.pushState({ reportId: reportId }, "", newUrl);
+    }
+}
+
+// SCRUM-101 test helper
+// Restores the browser URL back to the Latest Reports page
+function restoreLatestReportsUrl() {
+
+    // Only change the URL if it is not already Latest Reports
+    if (window.location.pathname !== latestReportsUrl) {
+
+        // Replace the current history entry with the Latest Reports URL
+        history.replaceState({}, "", latestReportsUrl);
+    }
+}
+
+// SCRUM-101 test exports
+// Allows Jest tests to import these helper functions
+if (typeof module !== "undefined") {
+    module.exports = {
+        setReportDetailsLink,
+        pushReportUrl,
+        restoreLatestReportsUrl
+    };
+}
