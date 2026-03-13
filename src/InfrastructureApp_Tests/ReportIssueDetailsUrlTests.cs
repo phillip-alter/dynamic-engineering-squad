@@ -27,7 +27,14 @@ namespace InfrastructureApp_Tests
             // Initialize the controller used to test the Details URL behavior.
             _controller = new ReportIssueController(_service, null!);
         }
-        
+
+        [TearDown]
+        public void TearDown()
+        {
+            // Dispose controller after each test to keep the test lifecycle clean.
+            _controller?.Dispose();
+        }
+
         // -------------------------------------------------------
         // SCRUM-101
         // Test that a valid report URL loads the report details page.
