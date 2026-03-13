@@ -126,7 +126,20 @@ document.addEventListener("DOMContentLoaded", function () {
             // Image handling logic 
             if (modalImageElement && modalImageFallbackElement) {
 
+                //SCRUM-102 ADDED
+                //Clear any old error handler before setting a new image
+                modalImageElement.onerror = null;
+
                 if (imageUrl.trim().length > 0) {
+
+                    //SCRUM-102 ADDDED
+                    //If the image file fails to load, hide the broken image
+                    // and show a clear fallback message instead.
+                    modalImageElement.onerror = function(){
+                        modalImageElement.classList.add("d-none");
+                        modalImageFallbackElement.textContent = "Image could not be loaded."
+                        modalImageFallbackElement.classList.remove("d-none");
+                    }
 
                     // Show image if URL exists
                     modalImageElement.src = imageUrl;
