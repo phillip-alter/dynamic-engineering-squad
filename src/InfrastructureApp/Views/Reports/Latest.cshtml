@@ -39,8 +39,8 @@ else
         {
             <button type="button"
                     class="list-group-item list-group-item-action d-flex justify-content-between align-items-start report-item"
-                    data-bs-toggle="modal"                   data-bs-target="#reportModal"                 data-reportid="@r.Id"              data-description="@r.Description"
-                    data-created="@r.CreatedAt.ToLocalTime().ToString("f")"  data-status="@r.Status"           data-image="@r.ImageUrl">
+                    data-bs-toggle="modal" data-bs-target="#reportModal" data-reportid="@r.Id" data-description="@r.Description"
+                    data-created="@r.CreatedAt.ToLocalTime().ToString("f")" data-status="@r.Status" data-image="@r.ImageUrl">
 
                 <div class="me-3">
                     <div class="fw-bold">@r.Description</div>
@@ -90,19 +90,21 @@ else
             </div>
 
             <div class="modal-footer">
+                <!-- SCRUM-101 ADDED: unique URL link to existing ReportIssue details page -->
+                <a id="openFullReportLink" class="btn btn-link" href="#" target="_blank"> View Details </a>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
-
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script src="~/js/latestReportsSearch.js" asp-append-version="true"></script>
-    <script src="~/js/latestReportsSort.js" asp-append-version="true"></script> <!-- SCRUM-86 ADDED: enables newest/oldest sorting -->
+    <script src="~/js/latestReportsSort.js" asp-append-version="true"></script>
+    <script src="~/js/latestReportsModal.js" asp-append-version="true"></script> <!-- Added the JS file for the LatestReportsModal seperately to site.js -->
+    <!-- SCRUM-86 ADDED: enables newest/oldest sorting -->
     <script src="~/js/latestReportsMap.js" asp-append-version="true"></script> <!-- SCRUM-98 ADDED -->
 
-    <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey">
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey">
     </script>
 }
