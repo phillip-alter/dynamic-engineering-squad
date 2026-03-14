@@ -136,8 +136,10 @@ document.addEventListener("DOMContentLoaded", function () {
                     //If the image file fails to load, hide the broken image
                     // and show a clear fallback message instead.
                     modalImageElement.onerror = function(){
+                        modalImageElement.removeAttribute("src")
                         modalImageElement.classList.add("d-none");
-                        modalImageFallbackElement.textContent = "Image could not be loaded."
+
+                        modalImageFallbackElement.innerHTML = "<strong>⚠ Image could not be loaded.</strong> The image file may be missing.";
                         modalImageFallbackElement.classList.remove("d-none");
                     }
 
@@ -146,14 +148,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     modalImageElement.classList.remove("d-none");
 
                     modalImageFallbackElement.classList.add("d-none");
-                    modalImageFallbackElement.textContent = "";
+                    modalImageFallbackElement.innerHTML = "";
                 }
                 else {
                     // Show fallback message if no image
                     modalImageElement.removeAttribute("src");
                     modalImageElement.classList.add("d-none");
 
-                    modalImageFallbackElement.textContent = "No image was provided for this report.";
+                    modalImageFallbackElement.innerHTML = "<strong>📷 No image available.</strong> This report was submitted without an image.";
                     modalImageFallbackElement.classList.remove("d-none");
                 }
             }
@@ -207,12 +209,46 @@ function restoreLatestReportsUrl() {
     }
 }
 
-// SCRUM-101 test exports
-// Allows Jest tests to import these helper functions
+
+// -------------------------------------------------------
+// SCRUM-102 test helpers
+// These functions allow Jest tests to verify image fallback behavior
+// -------------------------------------------------------
+
+// Shows fallback when a report has no image URL
+function showMissingImageFallback(modalImageElement, modalImageFallbackElement) {
+
+    modalImageElement.removeAttribute("src");
+    modalImageElement.classList.add("d-none");
+
+    modalImageFallbackElement.innerHTML =
+        "<strong>📷 No image available.</strong> This report was submitted without an image.";
+
+    modalImageFallbackElement.classList.remove("d-none");
+}
+
+// Shows fallback when an image file fails to load
+function showBrokenImageFallback(modalImageElement, modalImageFallbackElement) {
+
+    modalImageElement.removeAttribute("src");
+    modalImageElement.classList.add("d-none");
+
+    modalImageFallbackElement.innerHTML =
+        "<strong>⚠ Image could not be loaded.</strong> The image file may be missing.";
+
+    modalImageFallbackElement.classList.remove("d-none");
+}
+
+
+
+// SCRUM-101 / SCRUM-102 test exports
+// Allows Jest tests to import helper functions
 if (typeof module !== "undefined") {
     module.exports = {
         setReportDetailsLink,
         pushReportUrl,
-        restoreLatestReportsUrl
+        restoreLatestReportsUrl,
+        showMissingImageFallback,
+        showBrokenImageFallback
     };
 }
