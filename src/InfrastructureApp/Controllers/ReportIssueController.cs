@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using InfrastructureApp.Services.ContentModeration;
+using InfrastructureApp.Services.ImageHashing;
 
 namespace InfrastructureApp.Controllers
 {
@@ -86,6 +87,7 @@ namespace InfrastructureApp.Controllers
 
             try
             {
+                
                 var (reportId, status) = await _service.CreateAsync(report, userId);
 
                 TempData["Success"] = status == "Approved"
@@ -95,6 +97,12 @@ namespace InfrastructureApp.Controllers
                 TempData["SubmissionSuccess"] = true;   
 
                 return RedirectToAction("Details", new { id = reportId });
+            }
+            catch (DuplicateImageException ex)
+            {
+                // Attach the message to the Photo field so it shows near the upload UI.
+                ModelState.AddModelError(nameof(report.Photo), ex.Message);
+                return View(report);
             }
             catch (ContentModerationRejectedException)
             {
@@ -114,8 +122,6 @@ namespace InfrastructureApp.Controllers
 
 
         }
-
-
 
         //Shows the details page for a specific report id.
         [HttpGet]

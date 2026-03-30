@@ -7,6 +7,7 @@ using InfrastructureApp.Services;
 using Microsoft.Extensions.Options;
 using InfrastructureApp.Services.ContentModeration;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using InfrastructureApp.Services.ImageHashing;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -86,6 +87,9 @@ builder.Services.AddScoped<IGeocodingService, GeocodingService>();
 
 //OpenAI moderation service
 builder.Services.AddHttpClient<IContentModerationService, ContentModerationService>();
+
+//Image Hashing service
+builder.Services.AddScoped<IImageHashService, ImageHashService>();
 
 
 builder.Services.AddScoped<InfrastructureApp.Services.IAvatarService, InfrastructureApp.Services.AvatarService>();
