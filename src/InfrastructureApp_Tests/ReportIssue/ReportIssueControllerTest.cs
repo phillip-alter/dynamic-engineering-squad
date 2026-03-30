@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using NSubstitute;
 using NUnit.Framework;
+using InfrastructureApp.Services.ImageHashing;
 
 namespace InfrastructureApp_Tests
 {
@@ -262,6 +263,31 @@ namespace InfrastructureApp_Tests
             Assert.That(errors, Is.Not.Empty);
             Assert.That(errors[0].ErrorMessage,
                 Is.EqualTo("Something went wrong saving your report. Please try again."));
+        }
+
+        //tests the error when a user submits duplicate images
+        [Test]
+        public async Task Create_Post_WhenServiceThrowsDuplicateImage_AddsPhotoModelError_ReturnsView()
+        {
+            var controller = MakeController();
+            _userManager.GetUserId(Arg.Any<ClaimsPrincipal>()).Returns("user-123");
+
+            _service.CreateAsync(Arg.Any<ReportIssue>(), Arg.Any<string>())
+                .Returns(_ => Task.FromException<(int reportId, string status)>(
+                    new DuplicateImageException("You already used this image in a previous report. Please upload a different image.")));
+
+            var report = new ReportIssue();
+
+            var result = await controller.Create(report);
+
+            Assert.That(result, Is.TypeOf<ViewResult>());
+            Assert.That(controller.ModelState.IsValid, Is.False);
+
+            Assert.That(controller.ModelState.ContainsKey(nameof(report.Photo)), Is.True);
+
+            var errors = controller.ModelState[nameof(report.Photo)]!.Errors;
+            Assert.That(errors, Is.Not.Empty);
+            Assert.That(errors[0].ErrorMessage, Does.Contain("already used this image"));
         }
 
         // -------------------------
