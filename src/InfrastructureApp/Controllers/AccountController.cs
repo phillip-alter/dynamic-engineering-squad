@@ -145,11 +145,23 @@ namespace InfrastructureApp.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login");
 
-            var (success, error) = await _avatarService.SaveAvatarAsync(user, vm.SelectedAvatarKey);
-            if (!success)
-                return View(_avatarService.BuildChooseAvatarViewModel(user, vm.SelectedAvatarKey, error));
+            (bool success, string? error) result;
 
-            await _signInManager.RefreshSignInAsync(user); 
+            if (vm.UseUploadedImage)
+            {
+                result = await _avatarService.SaveUploadedAvatarAsync(user, vm.UploadedImage);
+            }
+            else
+            {
+                result = await _avatarService.SaveAvatarAsync(user, vm.SelectedAvatarKey);
+            }
+
+            if (!result.success)
+            {
+                return View(_avatarService.BuildChooseAvatarViewModel(user, vm.SelectedAvatarKey, result.error));
+            }
+
+            await _signInManager.RefreshSignInAsync(user);
             return RedirectToAction("Index", "Home");
         }
     }
