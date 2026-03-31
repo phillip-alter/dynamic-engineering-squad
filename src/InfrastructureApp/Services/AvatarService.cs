@@ -10,9 +10,10 @@ namespace InfrastructureApp.Services
         private readonly UserManager<Users> _userManager;
         private readonly IWebHostEnvironment _env;
 
-        public AvatarService(UserManager<Users> userManager)
+        public AvatarService(UserManager<Users> userManager, IWebHostEnvironment env)
         {
             _userManager = userManager;
+            _env = env;
         }
 
         public ChooseAvatarViewModel BuildChooseAvatarViewModel(Users user, string? selectedKey = null, string? error = null)
