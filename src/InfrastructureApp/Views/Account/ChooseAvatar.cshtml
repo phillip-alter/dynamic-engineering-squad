@@ -8,14 +8,14 @@
         <div class="alert alert-warning">@Model.ErrorMessage</div>
     }
 
-    {{!-- Single form, multipart so it can carry the file if needed --}}
+   
     <form asp-action="ChooseAvatar" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
 
         <input type="hidden" asp-for="SelectedAvatarKey" />
         <input type="hidden" asp-for="UseUploadedImage" id="useUploadedImageFlag" value="false" />
 
-        {{!-- ── Preset avatars ── --}}
+        
         <div class="row g-3" id="avatarGrid">
             @foreach (var opt in Model.Options)
             {
@@ -29,7 +29,7 @@
             }
         </div>
 
-        {{!-- ── Upload section ── --}}
+        
         <hr class="my-4" />
         <h5 class="mb-3">Or upload your own photo</h5>
 
@@ -59,7 +59,7 @@
             </div>
         </div>
 
-        {{!-- ── Submit ── --}}
+       
         <div class="mt-4 d-flex gap-2">
             <button class="btn btn-primary" type="submit" id="saveBtn">Save Avatar</button>
             <a class="btn btn-secondary" asp-controller="Home" asp-action="Index">Cancel</a>
