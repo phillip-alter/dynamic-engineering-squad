@@ -44,5 +44,31 @@ namespace InfrastructureApp.Services
 
             return (true, null);
         }
+
+        public async Task<(bool Success, string? ErrorMessage)> SaveUploadedAvatarAsync(Users user, IFormFile file)
+        {
+            const long maxBytes = 5 * 1024 * 1024;
+            var allowedTypes = new[] { "image/jpeg", "image/png" };
+
+            if (file == null || file.Length == 0)
+                return (false, "Please select an image file to upload.");
+            if (!allowedTypes.Contains(file.ContentType))
+                return (false, "Only JPG and PNG files are accepted.");
+            if (file.Length > maxBytes)
+                return (false, "File exceeds the 5 MB size limit.");
+
+
+            var ext = Path.GetExtension(file.FileName);  
+            var fileName = $"{Guid.NewGuid()}{ext}";
+            var savePath = Path.Combine("wwwroot", "uploads", "avatars", fileName);
+            Directory.CreateDirectory(Path.GetDirectoryName(savePath)!);
+
+            await using var stream = System.IO.File.Create(savePath);
+            await file.CopyToAsync(stream);   
+
+            user.AvatarUrl = $"/uploads/avatars/{fileName}";
+            await _userManager.UpdateAsync(user);
+            return (true, null);      
+        }
     }
 }
