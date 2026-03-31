@@ -60,7 +60,7 @@ namespace InfrastructureApp.Services
 
             var ext      = file.ContentType == "image/png" ? ".png" : ".jpg";
             var fileName = $"{Guid.NewGuid()}{ext}";
-            var folder   = Path.Combine(_env.WebRootPath, "uploads", "avatars");
+            var folder   = Path.Combine(_env.ContentRootPath, "wwwroot", "uploads", "avatars");
             Directory.CreateDirectory(folder);
 
             var savePath = Path.Combine(folder, fileName);
