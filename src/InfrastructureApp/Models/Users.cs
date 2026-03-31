@@ -8,5 +8,7 @@ namespace InfrastructureApp.Models
     {
         public string? AvatarKey { get; set; } // e.g. "avatar01", "avatar02"
         public List<string>? Roles { get; set; }
+
+        
     }
 }
