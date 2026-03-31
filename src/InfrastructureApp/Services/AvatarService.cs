@@ -8,6 +8,7 @@ namespace InfrastructureApp.Services
     
     {
         private readonly UserManager<Users> _userManager;
+        private readonly IWebHostEnvironment _env;
 
         public AvatarService(UserManager<Users> userManager)
         {
@@ -57,18 +58,23 @@ namespace InfrastructureApp.Services
             if (file.Length > maxBytes)
                 return (false, "File exceeds the 5 MB size limit.");
 
-
-            var ext = Path.GetExtension(file.FileName);  
+            var ext      = file.ContentType == "image/png" ? ".png" : ".jpg";
             var fileName = $"{Guid.NewGuid()}{ext}";
-            var savePath = Path.Combine("wwwroot", "uploads", "avatars", fileName);
-            Directory.CreateDirectory(Path.GetDirectoryName(savePath)!);
+            var folder   = Path.Combine(_env.WebRootPath, "uploads", "avatars");
+            Directory.CreateDirectory(folder);
 
+            var savePath = Path.Combine(folder, fileName);
             await using var stream = System.IO.File.Create(savePath);
-            await file.CopyToAsync(stream);   
+            await file.CopyToAsync(stream);
 
             user.AvatarUrl = $"/uploads/avatars/{fileName}";
-            await _userManager.UpdateAsync(user);
-            return (true, null);      
+            user.AvatarKey = null;
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                return (false, "Could not save your photo. Please try again.");
+
+            return (true, null);
         }
     }
 }
