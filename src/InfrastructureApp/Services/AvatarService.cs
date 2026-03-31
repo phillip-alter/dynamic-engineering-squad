@@ -39,6 +39,7 @@ namespace InfrastructureApp.Services
                 return (false, "Please select an avatar.");
 
             user.AvatarKey = selectedAvatarKey;
+            user.AvatarUrl = null; 
 
             var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
