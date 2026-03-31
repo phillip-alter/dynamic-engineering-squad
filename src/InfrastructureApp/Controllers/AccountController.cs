@@ -136,7 +136,6 @@ namespace InfrastructureApp.Controllers
             var vm = _avatarService.BuildChooseAvatarViewModel(user);
             return View(vm);
         }
-
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -145,11 +144,23 @@ namespace InfrastructureApp.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login");
 
-            var (success, error) = await _avatarService.SaveAvatarAsync(user, vm.SelectedAvatarKey);
-            if (!success)
-                return View(_avatarService.BuildChooseAvatarViewModel(user, vm.SelectedAvatarKey, error));
+            (bool Success, string? ErrorMessage) result;
 
-            await _signInManager.RefreshSignInAsync(user); 
+            if (vm.UseUploadedImage)
+            {
+                result = await _avatarService.SaveUploadedAvatarAsync(user, vm.UploadedImage);
+            }
+            else
+            {
+                result = await _avatarService.SaveAvatarAsync(user, vm.SelectedAvatarKey);
+            }
+
+            if (!result.Success)
+            {
+                return View(_avatarService.BuildChooseAvatarViewModel(user, vm.SelectedAvatarKey, result.ErrorMessage));
+            }
+
+            await _signInManager.RefreshSignInAsync(user);
             return RedirectToAction("Index", "Home");
         }
     }
