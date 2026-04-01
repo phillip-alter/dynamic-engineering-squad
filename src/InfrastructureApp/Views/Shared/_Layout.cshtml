@@ -53,13 +53,18 @@
                 <a class="navbar-brand" href="#">
                     <i class="fa-solid fa-city"></i> PatchNotes
                 </a>
-               @{
-                    string avatarUrl = AvatarCatalog.ToUrl(null);
+                
+                @{
+                    string avatarUrl = AvatarCatalog.ToUrl(null); // default fallback
 
                     if (User?.Identity?.IsAuthenticated == true)
                     {
                         var currentUser = await UserManager.GetUserAsync(User);
-                        avatarUrl = AvatarCatalog.ToUrl(currentUser?.AvatarKey);
+
+                        if (!string.IsNullOrWhiteSpace(currentUser?.AvatarUrl))
+                            avatarUrl = currentUser.AvatarUrl;          // uploaded photo wins
+                        else
+                            avatarUrl = AvatarCatalog.ToUrl(currentUser?.AvatarKey); // preset fallback
                     }
                 }
                 @if (User.Identity.IsAuthenticated)
