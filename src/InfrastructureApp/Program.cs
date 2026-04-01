@@ -8,6 +8,7 @@ using Microsoft.Extensions.Options;
 using InfrastructureApp.Services.ContentModeration;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using InfrastructureApp.Services.ImageHashing;
+using Azure.Communication.Email;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,12 +40,15 @@ builder.Services.AddIdentity<Users, IdentityRole>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 6;
     options.User.RequireUniqueEmail = true;
-    options.SignIn.RequireConfirmedAccount = false; // until we set up email api we don't need confirmation
-    options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedAccount = true;
+    options.SignIn.RequireConfirmedEmail = true;
     options.SignIn.RequireConfirmedPhoneNumber = false;
 })
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection("Email"));
+builder.Services.AddScoped<IEmailService, AzureEmailService>();
 
 builder.Services.AddScoped<ILeaderboardRepository, LeaderboardRepositoryEf>();
 builder.Services.AddScoped<LeaderboardService>();
@@ -93,6 +97,20 @@ builder.Services.AddScoped<IImageHashService, ImageHashService>();
 
 builder.Services.AddScoped<IAvatarService, AvatarService>();
 
+
+
+//Email
+string? emailConnStr = builder.Configuration.GetConnectionString("CommunicationServicesConnectionString");
+if (!string.IsNullOrWhiteSpace(emailConnStr) && emailConnStr.Contains("endpoint="))
+{
+    var emailClient = new EmailClient(emailConnStr);
+    builder.Services.AddSingleton(emailClient);
+    Console.WriteLine("[STARTUP] Azure EmailClient registered successfully.");
+}
+else
+{
+    Console.WriteLine("[STARTUP] Azure EmailClient NOT registered (missing or invalid connection string).");
+}
 
 builder.Services.AddScoped<InfrastructureApp.Services.IAvatarService, InfrastructureApp.Services.AvatarService>();
 builder.Services.AddScoped<IUserService, UserService>();
