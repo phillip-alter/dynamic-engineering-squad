@@ -91,9 +91,12 @@ builder.Services.AddHttpClient<IContentModerationService, ContentModerationServi
 //Image Hashing service
 builder.Services.AddScoped<IImageHashService, ImageHashService>();
 
+builder.Services.AddScoped<IAvatarService, AvatarService>();
+
 
 builder.Services.AddScoped<InfrastructureApp.Services.IAvatarService, InfrastructureApp.Services.AvatarService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
