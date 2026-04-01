@@ -10,7 +10,7 @@ Feature: Road Camera
         Given the TripCheck API returns no cameras
         When a user visits the Road Camera index page
         Then the view model should contain no cameras
-        And the error message should be "Road camera data is temporarily unavailable."
+        And the camera error message should be "Road camera data is temporarily unavailable."
 
     Scenario: User views details for a valid camera
         Given the TripCheck API returns a camera with id "CAM001"
@@ -22,7 +22,7 @@ Feature: Road Camera
         Given the TripCheck API returns no camera with id "INVALID"
         When a user views the details for camera "INVALID"
         Then the details view model camera should be null
-        And the error message should be "Road camera data is temporarily unavailable."
+        And the camera error message should be "Road camera data is temporarily unavailable."
 
     Scenario: Refresh image returns data for a valid camera
         Given the TripCheck API returns a camera with id "CAM001"

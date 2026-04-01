@@ -135,7 +135,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
             }
         }
 
-        [Then("the error message should be {string}")]
+        [Then("the camera error message should be {string}")]
         public void ThenErrorMessageShouldBe(string expected)
         {
             if (_result is ViewResult vr)
