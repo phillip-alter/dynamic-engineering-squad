@@ -33,19 +33,22 @@
         <input asp-for="CameraImageUrl" type="hidden" />
 
         <!--text box-->
-        <div class="mb-3">
+        <div class="mb-3 position-relative">
             <label asp-for="Description" class="form-label"></label>
             <textarea asp-for="Description"
                       id="Description"
                       class="form-control"
                       maxlength="300"
-                      rows="4"
+                      rows="5"
                       placeholder="Describe the infrastructure issue here. Add a clear description and the location. (300 charactes max)"
                       aria-label="Issue description"></textarea>
             <span asp-validation-for="Description" class="text-danger"></span>
+            
             <div class="form-text">
                 <span id="descCount">0</span>/300
             </div>
+
+            <div id="descriptionSuggestions" class="autocomplete-dropdown d-none"></div>
         </div>
 
         <!--picture upload-->
