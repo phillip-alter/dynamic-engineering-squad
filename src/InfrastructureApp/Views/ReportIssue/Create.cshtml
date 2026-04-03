@@ -43,7 +43,7 @@
                       placeholder="Describe the infrastructure issue here. Add a clear description and the location. (300 charactes max)"
                       aria-label="Issue description"></textarea>
             <span asp-validation-for="Description" class="text-danger"></span>
-            
+
             <div class="form-text">
                 <span id="descCount">0</span>/300
             </div>
@@ -93,6 +93,7 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/reportIssue.js"></script>
+    <script src="~/js/reportAssist.js"></script>
 
     <script async defer
             src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey&callback=initMap">
