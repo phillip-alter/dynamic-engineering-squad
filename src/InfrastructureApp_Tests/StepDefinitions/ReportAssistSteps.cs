@@ -139,6 +139,15 @@ namespace InfrastructureApp_Tests.StepDefinitions
             Assert.That(content == "[]" || string.IsNullOrWhiteSpace(content), Is.True);
         }
 
+        [Then("no autocomplete suggestions should be returned")]
+        public async Task ThenNoAutocompleteSuggestionsShouldBeReturned()
+        {
+            var content = await _response.Content.ReadAsStringAsync();
+            var suggestions = System.Text.Json.JsonSerializer.Deserialize<List<string>>(content) ?? new List<string>();
+
+            Assert.That(suggestions, Is.Empty);
+        }
+
         [Then("the description box should contain the selected suggestion")]
         public void ThenTheDescriptionBoxShouldContainTheSelectedSuggestion()
         {
