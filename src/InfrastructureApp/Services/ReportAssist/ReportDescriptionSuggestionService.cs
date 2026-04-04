@@ -48,11 +48,22 @@ namespace InfrastructureApp.Services.ReportAssist
             return suggestions where either:
             the whole input appears in the suggestion, or
             the last typed word appears in the suggestion
-            limit the result to 5 to prevent dropdown from getting too long**/
+            limit the result to 5 to prevent dropdown from getting too long
+            ranking version so prefix matches come first**/
             var matches = _suggestions.Value
-                .Where(s =>
-                    s.Contains(normalizedInput, StringComparison.OrdinalIgnoreCase) ||
-                    s.Contains(lastToken, StringComparison.OrdinalIgnoreCase))
+                .Select(s => new
+                {
+                    Suggestion = s,
+                    Score =
+                        s.StartsWith(normalizedInput, StringComparison.OrdinalIgnoreCase) ? 0 :
+                        s.StartsWith(lastToken, StringComparison.OrdinalIgnoreCase) ? 1 :
+                        s.Contains(normalizedInput, StringComparison.OrdinalIgnoreCase) ? 2 :
+                        s.Contains(lastToken, StringComparison.OrdinalIgnoreCase) ? 3 : 999
+                })
+                .Where(x => x.Score < 999)
+                .OrderBy(x => x.Score)
+                .ThenBy(x => x.Suggestion)
+                .Select(x => x.Suggestion)
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .Take(5)
                 .ToList();

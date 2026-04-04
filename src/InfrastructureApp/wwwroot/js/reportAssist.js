@@ -184,6 +184,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // Replace only the last word/phrase with the suggestion
         descriptionInput.value = prefix + suggestion;
 
+        // Update anything listening for typing, like word/character count
+        descriptionInput.dispatchEvent(new Event("input"));
+
         // Hide dropdown after selection
         hideSuggestions();
 
