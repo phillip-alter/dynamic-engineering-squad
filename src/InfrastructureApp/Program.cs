@@ -9,6 +9,7 @@ using InfrastructureApp.Services.ContentModeration;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using InfrastructureApp.Services.ImageHashing;
 using Azure.Communication.Email;
+using InfrastructureApp.Services.ReportAssist;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -94,6 +95,9 @@ builder.Services.AddHttpClient<IContentModerationService, ContentModerationServi
 
 //Image Hashing service
 builder.Services.AddScoped<IImageHashService, ImageHashService>();
+
+//ReportAssist
+builder.Services.AddScoped<IReportDescriptionSuggestionService, ReportDescriptionSuggestionService>();
 
 builder.Services.AddScoped<IAvatarService, AvatarService>();
 
