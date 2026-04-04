@@ -24,7 +24,7 @@ namespace InfrastructureApp.Controllers.Api
         [HttpGet("suggestions")]
         public async Task<IActionResult> GetSuggestions([FromQuery] string? q, CancellationToken ct)
         {
-            if (string.IsNullOrWhiteSpace(q))
+            if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
             {
                 return Ok(Array.Empty<string>());
             }

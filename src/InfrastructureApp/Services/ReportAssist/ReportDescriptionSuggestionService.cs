@@ -30,7 +30,7 @@ namespace InfrastructureApp.Services.ReportAssist
         public Task<IReadOnlyList<string>> GetSuggestionsAsync(string input, CancellationToken ct = default)
         {
             //If the user hasn’t typed anything meaningful, return an empty list.
-            if (string.IsNullOrWhiteSpace(input))
+            if (string.IsNullOrWhiteSpace(input) || input.Trim().Length < 2)
             {
                 return Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
             }
