@@ -184,5 +184,49 @@ namespace InfrastructureApp_Tests.Controllers.Api
             // Verify the SAME token was passed into the service
             await _suggestionService.Received(1).GetSuggestionsAsync(query, ct);
         }
+
+        /**
+        * TEST 7:
+        * Short last token (e.g., "p a") → should return empty and NOT call service
+        */
+        [Test]
+        public async Task GetSuggestions_ShortLastToken_ReturnsOkWithEmptyArray()
+        {
+            var result = await _controller.GetSuggestions("p a", CancellationToken.None);
+
+            Assert.That(result, Is.TypeOf<OkObjectResult>());
+
+            var okResult = (OkObjectResult)result;
+            Assert.That(okResult.Value, Is.InstanceOf<string[]>());
+
+            var values = (string[])okResult.Value!;
+            Assert.That(values, Is.Empty);
+
+            await _suggestionService
+                .DidNotReceive()
+                .GetSuggestionsAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+        }
+
+        /**
+        * TEST 8:
+        * Single character input → should return empty and NOT call service
+        */
+        [Test]
+        public async Task GetSuggestions_OneCharacterQuery_ReturnsOkWithEmptyArray()
+        {
+            var result = await _controller.GetSuggestions("p", CancellationToken.None);
+
+            Assert.That(result, Is.TypeOf<OkObjectResult>());
+
+            var okResult = (OkObjectResult)result;
+            Assert.That(okResult.Value, Is.InstanceOf<string[]>());
+
+            var values = (string[])okResult.Value!;
+            Assert.That(values, Is.Empty);
+
+            await _suggestionService
+                .DidNotReceive()
+                .GetSuggestionsAsync(Arg.Any<string>(), Arg.Any<CancellationToken>());
+        }
     }
 }

@@ -29,27 +29,35 @@ namespace InfrastructureApp.Services.ReportAssist
         //this method returns suggestions when typing in description box
         public Task<IReadOnlyList<string>> GetSuggestionsAsync(string input, CancellationToken ct = default)
         {
-            //If the user hasn’t typed anything meaningful, return an empty list.
-            if (string.IsNullOrWhiteSpace(input) || input.Trim().Length < 2)
+            // If input is null, empty, or whitespace, return no suggestions.
+            if (string.IsNullOrWhiteSpace(input))
             {
                 return Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
             }
 
-            //This removes extra spaces at the ends.
+            // Remove spaces from the beginning/end.
             string normalizedInput = input.Trim();
 
-            //find the last token - If the user types: There is a brok the last token becomes: brok
-            //This helps match suggestions using what the user is currently typing.
+            // Find the last word the user is currently typing.
+            // Example:
+            // "There is a brok" -> "brok"
             string lastToken = normalizedInput
                 .Split(' ', StringSplitOptions.RemoveEmptyEntries)
-                .LastOrDefault() ?? normalizedInput;
+                .LastOrDefault() ?? string.Empty;
 
-            /** This says:
-            return suggestions where either:
-            the whole input appears in the suggestion, or
-            the last typed word appears in the suggestion
-            limit the result to 5 to prevent dropdown from getting too long
-            ranking version so prefix matches come first**/
+            // If the current word is too short, do not return suggestions.
+            if (lastToken.Length < 2)
+            {
+                return Task.FromResult<IReadOnlyList<string>>(Array.Empty<string>());
+            }
+
+            /** Return suggestions where either:
+            *  - the whole input matches, or
+            *  - the last typed word matches
+            *
+            * Prefix matches rank highest.
+            * Limit to 5 suggestions.
+            */
             var matches = _suggestions.Value
                 .Select(s => new
                 {
@@ -70,7 +78,6 @@ namespace InfrastructureApp.Services.ReportAssist
 
             return Task.FromResult<IReadOnlyList<string>>(matches);
         }
-
         //loads the list of autocomplete suggestions
         private List<string> LoadSuggestions()
         {
