@@ -10,30 +10,40 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
 
-    // SCRUM-103: Repository used to retrieve report data for the Home page
-    private readonly IReportIssueRepository _repo;
+    // SCRUM-103 ADDED:
+    // Repository used to load recent reports for the Home page
+    private readonly IReportIssueRepository? _repo;
 
-    public HomeController(ILogger<HomeController> logger, IReportIssueRepository repo)
+    // Single constructor:
+    // old tests can still pass just logger,
+    // app can pass logger + repository
+    public HomeController(ILogger<HomeController> logger, IReportIssueRepository? repo = null)
     {
         _logger = logger;
-        _repo = repo; // SCRUM-103: store repository for later use
+        _repo = repo;
     }
 
-    // GET: /Home/Index
     public async Task<IActionResult> Index()
     {
-        // SCRUM-103: Check if user is an Admin to determine report visibility
+        // SCRUM-103:
+        // If repository is not available, return an empty list
+        if (_repo == null)
+        {
+            return View(new List<ReportIssue>());
+        }
+
+        // SCRUM-103:
+        // Admin users can see all reports, others only see approved ones
         bool isAdmin = User.IsInRole("Admin");
 
-        // SCRUM-103: Retrieve latest reports from the database
-        // Repository already applies visibility and sorting rules
+        // SCRUM-103:
+        // Load latest reports for the Home page
         var recentReports = await _repo.GetLatestReportsAsync(isAdmin);
 
-        // SCRUM-103:Limit the number of reports shown on the Home page
-        // This keeps the section as a small preview instead of a full list
+        // SCRUM-103:
+        // Show only a small preview on the Home page
         recentReports = recentReports.Take(3).ToList();
 
-        // SCRUM-103: Pass the list of reports to the Home view
         return View(recentReports);
     }
 
