@@ -8,15 +8,13 @@ namespace InfrastructureApp.Controllers;
 
 public class HomeController : Controller
 {
+    // Logger for debugging/errors
     private readonly ILogger<HomeController> _logger;
 
-    // SCRUM-103 ADDED:
-    // Repository used to load recent reports for the Home page
+    // SCRUM-103: Repository to get reports
     private readonly IReportIssueRepository? _repo;
 
-    // Single constructor:
-    // old tests can still pass just logger,
-    // app can pass logger + repository
+    // Constructor (supports logger + optional repo for tests)
     public HomeController(ILogger<HomeController> logger, IReportIssueRepository? repo = null)
     {
         _logger = logger;
@@ -25,23 +23,19 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        // SCRUM-103:
-        // If repository is not available, return an empty list
+        // If repository isn't available, show empty data to avoid errors
         if (_repo == null)
         {
             return View(new List<ReportIssue>());
         }
 
-        // SCRUM-103:
-        // Admin users can see all reports, others only see approved ones
-        bool isAdmin = User.IsInRole("Admin");
+        // Check if current user is Admin (defaults to false if user/context is null)
+        bool isAdmin = HttpContext?.User?.IsInRole("Admin") ?? false;
 
-        // SCRUM-103:
-        // Load latest reports for the Home page
+        // Get latest reports (filtered by role)
         var recentReports = await _repo.GetLatestReportsAsync(isAdmin);
 
-        // SCRUM-103:
-        // Show only a small preview on the Home page
+        // Show only top 3 on homepage
         recentReports = recentReports.Take(3).ToList();
 
         return View(recentReports);
@@ -56,7 +50,10 @@ public class HomeController : Controller
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        return View(new ErrorViewModel 
+        { 
+            RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier 
+        });
     }
 
     public IActionResult About()
