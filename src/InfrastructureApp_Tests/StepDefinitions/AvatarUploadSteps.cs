@@ -96,7 +96,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
             Assert.That(_result.Success, Is.False);
         }
 
-        [Then("the error message should be {string}")]
+        [Then("the avatar error message should be {string}")]
         public void ThenTheErrorMessageShouldBe(string expectedMessage)
         {
             Assert.That(_result.ErrorMessage, Is.EqualTo(expectedMessage));
