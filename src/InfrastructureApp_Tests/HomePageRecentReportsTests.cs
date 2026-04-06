@@ -36,7 +36,7 @@ namespace InfrastructureApp_Tests
             // Act: call Index method to load Home page
             var result = await controller.Index();
 
-              // Assert: verify that the result is a ViewResult (page loads correctly)
+            // Assert: verify that the result is a ViewResult (page loads correctly)
             Assert.That(result, Is.TypeOf<ViewResult>());
         }
 
@@ -47,7 +47,7 @@ namespace InfrastructureApp_Tests
         [Test]
         public async Task Index_ReturnsOnlyThreeReports_WhenMoreThanThreeExist()
         {
-            /// Arrange: add 4 reports to repo to test limit behavior
+            // Arrange: add 4 reports to repo to test limit behavior
             _fakeRepo.LatestReports = new List<ReportIssue>
             {
                 new ReportIssue { Id = 1, Description = "Report 1", Status = "Approved" },
@@ -112,7 +112,6 @@ namespace InfrastructureApp_Tests
                 _fakeRepo
             );
 
-            // Act: call Index which checks user role and passes value to repo
             controller.ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext
@@ -135,7 +134,7 @@ namespace InfrastructureApp_Tests
         [Test]
         public async Task Index_ReturnsEmptyList_WhenRepositoryIsNotProvided()
         {
-             // Arrange: create controller without repo to simulate missing dependency
+            // Arrange: create controller without repo to simulate missing dependency
             var controller = new HomeController(
                 NullLogger<HomeController>.Instance
             );
