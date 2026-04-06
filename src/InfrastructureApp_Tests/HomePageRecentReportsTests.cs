@@ -27,16 +27,16 @@ namespace InfrastructureApp_Tests
         [Test]
         public async Task Index_ReturnsViewResult()
         {
-            // Arrange
+            // Arrange: create controller with fake logger and repo to simulate environment
             var controller = new HomeController(
                 NullLogger<HomeController>.Instance,
                 _fakeRepo
             );
 
-            // Act
+            // Act: call Index method to load Home page
             var result = await controller.Index();
 
-            // Assert
+              // Assert: verify that the result is a ViewResult (page loads correctly)
             Assert.That(result, Is.TypeOf<ViewResult>());
         }
 
@@ -47,7 +47,7 @@ namespace InfrastructureApp_Tests
         [Test]
         public async Task Index_ReturnsOnlyThreeReports_WhenMoreThanThreeExist()
         {
-            // Arrange
+            /// Arrange: add 4 reports to repo to test limit behavior
             _fakeRepo.LatestReports = new List<ReportIssue>
             {
                 new ReportIssue { Id = 1, Description = "Report 1", Status = "Approved" },
@@ -61,11 +61,11 @@ namespace InfrastructureApp_Tests
                 _fakeRepo
             );
 
-            // Act
+            // Act: call Index and get model data from View
             var result = await controller.Index() as ViewResult;
             var model = result?.Model as List<ReportIssue>;
 
-            // Assert
+            // Assert: verify only 3 reports are returned (homepage preview limit)
             Assert.That(model, Is.Not.Null);
             Assert.That(model!.Count, Is.EqualTo(3));
         }
@@ -77,7 +77,7 @@ namespace InfrastructureApp_Tests
         [Test]
         public async Task Index_ReturnsEmptyList_WhenRepositoryReturnsNoReports()
         {
-            // Arrange
+            // Arrange: set repo to return empty list (no reports exist)
             _fakeRepo.LatestReports = new List<ReportIssue>();
 
             var controller = new HomeController(
@@ -85,11 +85,11 @@ namespace InfrastructureApp_Tests
                 _fakeRepo
             );
 
-            // Act
+            // Act: call Index and get model from View
             var result = await controller.Index() as ViewResult;
             var model = result?.Model as List<ReportIssue>;
 
-            // Assert
+            // Assert: verify model exists and contains 0 reports (no crash)
             Assert.That(model, Is.Not.Null);
             Assert.That(model!.Count, Is.EqualTo(0));
         }
@@ -101,7 +101,7 @@ namespace InfrastructureApp_Tests
         [Test]
         public async Task Index_PassesAdminTrue_WhenUserIsAdmin()
         {
-            // Arrange
+            // Arrange: create fake admin user and assign to HttpContext
             var adminUser = new ClaimsPrincipal(
                 new ClaimsIdentity(
                     new[] { new Claim(ClaimTypes.Role, "Admin") },
@@ -112,7 +112,7 @@ namespace InfrastructureApp_Tests
                 _fakeRepo
             );
 
-            // Set fake logged-in admin user
+            // Act: call Index which checks user role and passes value to repo
             controller.ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext
@@ -121,10 +121,10 @@ namespace InfrastructureApp_Tests
                 }
             };
 
-            // Act
+            // Act: call Index which checks user role and passes value to repo
             await controller.Index();
 
-            // Assert
+            // Assert: verify repo received true for isAdmin (admin behavior works)
             Assert.That(_fakeRepo.LastIsAdminValue, Is.True);
         }
 
@@ -135,16 +135,16 @@ namespace InfrastructureApp_Tests
         [Test]
         public async Task Index_ReturnsEmptyList_WhenRepositoryIsNotProvided()
         {
-            // Arrange
+             // Arrange: create controller without repo to simulate missing dependency
             var controller = new HomeController(
                 NullLogger<HomeController>.Instance
             );
 
-            // Act
+            // Act: call Index and get model from View
             var result = await controller.Index() as ViewResult;
             var model = result?.Model as List<ReportIssue>;
 
-            // Assert
+            // Assert: verify it safely returns empty list instead of crashing
             Assert.That(model, Is.Not.Null);
             Assert.That(model!.Count, Is.EqualTo(0));
         }
