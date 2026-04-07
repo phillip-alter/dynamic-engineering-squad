@@ -38,7 +38,6 @@ namespace InfrastructureApp_Tests.StepDefinitions
                 builder.UseEnvironment("Development");
                 builder.ConfigureServices(services =>
                 {
-                    // Use In-Memory Database for isolation and to avoid provider conflicts
                     var descriptors = services.Where(d => 
                         d.ServiceType == typeof(DbContextOptions<ApplicationDbContext>) || 
                         d.ServiceType == typeof(ApplicationDbContext) ||
@@ -51,7 +50,6 @@ namespace InfrastructureApp_Tests.StepDefinitions
                         options.UseInMemoryDatabase(dbName);
                     });
 
-                    // Configure Identity for testing
                     services.Configure<IdentityOptions>(options =>
                     {
                         options.Password.RequireDigit = false;
@@ -62,19 +60,16 @@ namespace InfrastructureApp_Tests.StepDefinitions
                         options.SignIn.RequireConfirmedAccount = true;
                     });
 
-                    // Mock UserConfirmation to ensure result.IsNotAllowed is triggered correctly
                     var mockConfirmation = new Mock<IUserConfirmation<Users>>();
                     mockConfirmation.Setup(c => c.IsConfirmedAsync(It.IsAny<UserManager<Users>>(), It.IsAny<Users>()))
                         .ReturnsAsync((UserManager<Users> um, Users u) => u.EmailConfirmed);
                     services.AddScoped(_ => mockConfirmation.Object);
 
-                    // Disable Anti-Forgery for testing POST requests
                     services.AddAntiforgery(options => 
                     {
                         options.HeaderName = "X-XSRF-TOKEN";
                     });
                     
-                    // Mock Antiforgery properly for Razor
                     var mockAntiforgery = new Mock<Microsoft.AspNetCore.Antiforgery.IAntiforgery>();
                     mockAntiforgery.Setup(a => a.GetAndStoreTokens(It.IsAny<Microsoft.AspNetCore.Http.HttpContext>()))
                         .Returns(new Microsoft.AspNetCore.Antiforgery.AntiforgeryTokenSet("token", "cookie", "field", "header"));
@@ -89,7 +84,6 @@ namespace InfrastructureApp_Tests.StepDefinitions
                         options.Filters.Add(new Microsoft.AspNetCore.Mvc.IgnoreAntiforgeryTokenAttribute());
                     });
 
-                    // Mock Email Service
                     services.AddScoped(_ => _mockEmailService.Object);
 
                     _mockEmailService
@@ -104,10 +98,8 @@ namespace InfrastructureApp_Tests.StepDefinitions
                 });
             });
 
-            // AllowAutoRedirect = true makes it easier to verify final page content
             _client = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = true });
 
-            // Ensure roles exist
             using (var scope = _factory.Services.CreateScope())
             {
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
@@ -123,7 +115,6 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Given("I am on the registration page")]
         public void GivenIAmOnTheRegistrationPage()
         {
-            // WebApplicationFactory handles this internally, but we can verify the GET
         }
 
         [Given("a user {string} with email {string} exists but is not confirmed")]
@@ -159,9 +150,6 @@ namespace InfrastructureApp_Tests.StepDefinitions
                 new KeyValuePair<string, string>("UserName", username),
                 new KeyValuePair<string, string>("Password", "Password123!")
             });
-            // Use a separate client that follows redirects for this specific check if needed, 
-            // or just use the current client and check the result of the POST.
-            // Our current client has AllowAutoRedirect = false.
             _response = await _client.PostAsync("/Account/Login", content);
             
             if (_response.StatusCode == HttpStatusCode.OK)
@@ -232,7 +220,6 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Then("I should be redirected to the registration confirmation page")]
         public void ThenIShouldBeRedirectedToRegistrationConfirmation()
         {
-            // Since AutoRedirect is true, we should be at the target page
             Assert.That(_response.RequestMessage?.RequestUri?.ToString(), Does.Contain("RegisterConfirmation"));
         }
 

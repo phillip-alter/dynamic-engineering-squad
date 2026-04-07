@@ -16,6 +16,11 @@ jobs:
         with:
           dotnet-version: '9.x'
 
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@latest
+        with:
+          chrome-version: stable
+          
       - name: Restore dependencies
         run: dotnet restore src/InfrastructureApp_Tests
 
@@ -24,6 +29,8 @@ jobs:
 
       - name: Test
         run: dotnet test src/InfrastructureApp_Tests --no-build --verbosity normal
+        env:
+          CHROME_HEADLESS: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
