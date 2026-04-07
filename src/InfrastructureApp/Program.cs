@@ -9,6 +9,7 @@ using InfrastructureApp.Services.ContentModeration;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using InfrastructureApp.Services.ImageHashing;
 using Azure.Communication.Email;
+using InfrastructureApp.Services.ReportAssist;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -95,6 +96,13 @@ builder.Services.AddHttpClient<IContentModerationService, ContentModerationServi
 //Image Hashing service
 builder.Services.AddScoped<IImageHashService, ImageHashService>();
 
+//ReportAssist
+builder.Services.AddScoped<IReportDescriptionSuggestionService, ReportDescriptionSuggestionService>();
+
+builder.Services.AddScoped<IAvatarService, AvatarService>();
+
+
+
 //Email
 string? emailConnStr = builder.Configuration.GetConnectionString("CommunicationServicesConnectionString");
 if (!string.IsNullOrWhiteSpace(emailConnStr) && emailConnStr.Contains("endpoint="))
@@ -110,6 +118,7 @@ else
 
 builder.Services.AddScoped<InfrastructureApp.Services.IAvatarService, InfrastructureApp.Services.AvatarService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
