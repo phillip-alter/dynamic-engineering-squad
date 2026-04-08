@@ -28,7 +28,7 @@ jobs:
         run: dotnet build src/InfrastructureApp_Tests --no-restore
 
       - name: Start Application in Background
-        run: dotnet run --project src/YourMainAppProjectName --no-build & 
+        run: dotnet run --project src/InfrastructureApp --no-build & 
 
       - name: Wait for App to be Ready
         run: |
