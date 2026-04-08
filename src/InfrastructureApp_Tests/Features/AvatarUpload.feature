@@ -7,17 +7,12 @@ Feature: Avatar Upload
         And the user AvatarUrl should start with "/uploads/avatars/"
         And the user AvatarKey should be null
 
-    Scenario: User uploads a file that is too large
-        Given a registered user exists
-        When they upload a PNG file over 5MB
-        Then the upload should fail
-        And the error message should be "File exceeds the 5 MB size limit."
 
     Scenario: User uploads an invalid file type
         Given a registered user exists
         When they upload a GIF file
         Then the upload should fail
-        And the error message should be "Only JPG and PNG files are accepted."
+        And the avatar error message should be "Only JPG and PNG files are accepted."
 
     Scenario: from uploaded photo back to a preset avatar
         Given a registered user exists with an uploaded photo

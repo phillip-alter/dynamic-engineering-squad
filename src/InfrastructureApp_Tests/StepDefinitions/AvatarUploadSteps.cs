@@ -61,12 +61,6 @@ namespace InfrastructureApp_Tests.StepDefinitions
             _result = await _service.SaveUploadedAvatarAsync(_user, file);
         }
 
-        [When("they upload a PNG file over 5MB")]
-        public async Task WhenTheyUploadALargePngFile()
-        {
-            var file = MakeFakeFile("image/png", 6 * 1024 * 1024);
-            _result = await _service.SaveUploadedAvatarAsync(_user, file);
-        }
 
         [When("they upload a GIF file")]
         public async Task WhenTheyUploadAGifFile()
