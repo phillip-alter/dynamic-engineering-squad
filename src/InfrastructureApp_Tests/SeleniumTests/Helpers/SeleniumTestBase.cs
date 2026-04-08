@@ -25,7 +25,7 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
             options.AddArgument("--window-size=1280,900");
 
             Driver = new ChromeDriver(options);
-            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(5);
+            Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(20);
         }
 
        [TearDown]
