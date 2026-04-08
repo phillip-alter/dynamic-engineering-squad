@@ -16,14 +16,29 @@ jobs:
         with:
           dotnet-version: '9.x'
 
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@latest
+        with:
+          chrome-version: stable
+          
       - name: Restore dependencies
         run: dotnet restore src/InfrastructureApp_Tests
 
       - name: Build
         run: dotnet build src/InfrastructureApp_Tests --no-restore
 
+      - name: Start Application in Background
+        run: dotnet run --project src/InfrastructureApp --no-build & 
+
+      - name: Wait for App to be Ready
+        run: |
+          npm install -g wait-on
+          wait-on http://localhost:5044 --timeout 60000 
+
       - name: Test
         run: dotnet test src/InfrastructureApp_Tests --no-build --verbosity normal
+        env:
+          CHROME_HEADLESS: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
