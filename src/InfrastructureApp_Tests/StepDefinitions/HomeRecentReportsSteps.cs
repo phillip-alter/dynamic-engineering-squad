@@ -1,4 +1,5 @@
 using System.Net;
+using Microsoft.AspNetCore.Hosting;
 using InfrastructureApp.Data;
 using InfrastructureApp.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
