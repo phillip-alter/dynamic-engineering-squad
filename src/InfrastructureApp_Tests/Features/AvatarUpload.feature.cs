@@ -139,46 +139,13 @@ namespace InfrastructureApp_Tests.Features
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("User uploads a file that is too large")]
-        public async global::System.Threading.Tasks.Task UserUploadsAFileThatIsTooLarge()
-        {
-            string[] tagsOfScenario = ((string[])(null));
-            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User uploads a file that is too large", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 10
-    this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 11
-        await testRunner.GivenAsync("a registered user exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 12
-        await testRunner.WhenAsync("they upload a PNG file over 5MB", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 13
-        await testRunner.ThenAsync("the upload should fail", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 14
-        await testRunner.AndAsync("the error message should be \"File exceeds the 5 MB size limit.\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-            }
-            await this.ScenarioCleanupAsync();
-        }
-        
-        [NUnit.Framework.TestAttribute()]
         [NUnit.Framework.DescriptionAttribute("User uploads an invalid file type")]
         public async global::System.Threading.Tasks.Task UserUploadsAnInvalidFileType()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User uploads an invalid file type", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 16
+#line 11
     this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -188,17 +155,17 @@ namespace InfrastructureApp_Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 17
+#line 12
         await testRunner.GivenAsync("a registered user exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 18
+#line 13
         await testRunner.WhenAsync("they upload a GIF file", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 19
+#line 14
         await testRunner.ThenAsync("the upload should fail", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 20
-        await testRunner.AndAsync("the error message should be \"Only JPG and PNG files are accepted.\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line 15
+        await testRunner.AndAsync("the avatar error message should be \"Only JPG and PNG files are accepted.\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
@@ -211,7 +178,7 @@ namespace InfrastructureApp_Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("from uploaded photo back to a preset avatar", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 22
+#line 17
     this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -221,19 +188,19 @@ namespace InfrastructureApp_Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 23
+#line 18
         await testRunner.GivenAsync("a registered user exists with an uploaded photo", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 24
+#line 19
         await testRunner.WhenAsync("they select a preset avatar key", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 25
+#line 20
         await testRunner.ThenAsync("the avatar should be saved successfully", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 26
+#line 21
         await testRunner.AndAsync("the user AvatarKey should be set to the selected key", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 27
+#line 22
         await testRunner.AndAsync("the user AvatarUrl should be null", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
