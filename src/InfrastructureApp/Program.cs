@@ -30,8 +30,19 @@ builder.Services
 
 //Leaderboard
 // Leaderboard (DB-backed)
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+if (builder.Environment.IsEnvironment("Testing"))
+{
+    var testDbPath = Environment.GetEnvironmentVariable("TEST_DB_PATH") ?? builder.Configuration.GetConnectionString("DefaultConnection");
+    if (testDbPath != null && !testDbPath.StartsWith("Data Source=")) testDbPath = $"Data Source={testDbPath}";
+    
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlite(testDbPath));
+}
+else
+{
+    builder.Services.AddDbContext<ApplicationDbContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+}
 
 
 builder.Services.AddIdentity<Users, IdentityRole>(options =>
