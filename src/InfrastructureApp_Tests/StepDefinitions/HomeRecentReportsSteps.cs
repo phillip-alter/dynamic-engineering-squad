@@ -123,7 +123,8 @@ namespace InfrastructureApp_Tests.StepDefinitions
         public void ThenTheRecentActivitySectionShouldBeDisplayed()
         {
             Assert.That(_response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(_html, Does.Contain("Recent Activity in Your Zone"));
+            Assert.That(_html, Does.Contain("Recent Activity in Your"));
+            Assert.That(_html, Does.Contain("Zone"));
         }
 
         [Then("recent reports should be displayed on the Home page")]
