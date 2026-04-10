@@ -36,7 +36,11 @@ namespace InfrastructureApp_Tests.SeleniumTests
         {
             Driver.Navigate().GoToUrl($"{BaseUrl}/");
 
-            Driver.FindElement(By.Id("viewAllLatestReportsButton")).Click();
+            var button = Driver.FindElement(By.Id("viewAllLatestReportsButton"));
+
+            ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView(true);", button);
+            Thread.Sleep(500);
+            button.Click();
 
             var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(5));
             wait.Until(d => d.Url.Contains("/Reports/Latest"));
