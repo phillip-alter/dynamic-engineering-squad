@@ -18,18 +18,20 @@ namespace InfrastructureApp_Tests.Features
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "2.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Avatar Upload")]
+    [NUnit.Framework.DescriptionAttribute("Home Page Recent Reports")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
-    public partial class AvatarUploadFeature
+    public partial class HomePageRecentReportsFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Avatar Upload", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Home Page Recent Reports", "  As a user\r\n  I want to see a small list of recent reports on the Home page\r\n  S" +
+                "o that I can quickly view recent issues without going to the full Latest Reports" +
+                " page", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "AvatarUpload.feature"
+#line 1 "HomeRecentReports.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -103,14 +105,14 @@ namespace InfrastructureApp_Tests.Features
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("User uploads a valid PNG file")]
-        public async global::System.Threading.Tasks.Task UserUploadsAValidPNGFile()
+        [NUnit.Framework.DescriptionAttribute("Recent Activity section appears on the Home page")]
+        public async global::System.Threading.Tasks.Task RecentActivitySectionAppearsOnTheHomePage()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User uploads a valid PNG file", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 3
-    this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Recent Activity section appears on the Home page", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 6
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -119,34 +121,25 @@ namespace InfrastructureApp_Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
-#line 4
-        await testRunner.GivenAsync("a registered user exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 5
-        await testRunner.WhenAsync("they upload a valid PNG file under 5MB", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 6
-        await testRunner.ThenAsync("the avatar should be saved successfully", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
 #line 7
-        await testRunner.AndAsync("the user AvatarUrl should start with \"/uploads/avatars/\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.GivenAsync("I am on the Home page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 8
-        await testRunner.AndAsync("the user AvatarKey should be null", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("the Recent Activity section should be displayed", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("User uploads an invalid file type")]
-        public async global::System.Threading.Tasks.Task UserUploadsAnInvalidFileType()
+        [NUnit.Framework.DescriptionAttribute("Recent reports are displayed when reports exist")]
+        public async global::System.Threading.Tasks.Task RecentReportsAreDisplayedWhenReportsExist()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User uploads an invalid file type", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 11
-    this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Recent reports are displayed when reports exist", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 10
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -155,31 +148,28 @@ namespace InfrastructureApp_Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
+#line 11
+    await testRunner.GivenAsync("recent reports exist in the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
 #line 12
-        await testRunner.GivenAsync("a registered user exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.WhenAsync("I visit the Home page", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 13
-        await testRunner.WhenAsync("they upload a GIF file", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 14
-        await testRunner.ThenAsync("the upload should fail", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 15
-        await testRunner.AndAsync("the avatar error message should be \"Only JPG and PNG files are accepted.\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("recent reports should be displayed on the Home page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("from uploaded photo back to a preset avatar")]
-        public async global::System.Threading.Tasks.Task FromUploadedPhotoBackToAPresetAvatar()
+        [NUnit.Framework.DescriptionAttribute("Home page only shows three recent reports")]
+        public async global::System.Threading.Tasks.Task HomePageOnlyShowsThreeRecentReports()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("from uploaded photo back to a preset avatar", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 17
-    this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Home page only shows three recent reports", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 15
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -188,20 +178,44 @@ namespace InfrastructureApp_Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
+#line 16
+    await testRunner.GivenAsync("more than three recent reports exist in the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 17
+    await testRunner.WhenAsync("I visit the Home page", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
 #line 18
-        await testRunner.GivenAsync("a registered user exists with an uploaded photo", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.ThenAsync("only three recent reports should be displayed", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 19
-        await testRunner.WhenAsync("they select a preset avatar key", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Friendly message is shown when no reports exist")]
+        public async global::System.Threading.Tasks.Task FriendlyMessageIsShownWhenNoReportsExist()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Friendly message is shown when no reports exist", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 20
-        await testRunner.ThenAsync("the avatar should be saved successfully", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
 #line 21
-        await testRunner.AndAsync("the user AvatarKey should be set to the selected key", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.GivenAsync("no recent reports exist in the system", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 22
-        await testRunner.AndAsync("the user AvatarUrl should be null", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("I visit the Home page", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 23
+    await testRunner.ThenAsync("a no recent reports message should be displayed", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();

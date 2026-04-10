@@ -96,6 +96,7 @@
 
 
 
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/reportIssue.js"></script>
@@ -104,6 +105,15 @@
     <script async defer
             src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey&callback=initMap">
     </script>
+
+     @if (Model.Latitude.HasValue && Model.Longitude.HasValue)
+    {
+        <script>
+            // Pre-fill coordinates from camera so user doesn't have to click the map
+            window.presetLat = @Model.Latitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            window.presetLng = @Model.Longitude.Value.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        </script>
+    }
 }
 
 

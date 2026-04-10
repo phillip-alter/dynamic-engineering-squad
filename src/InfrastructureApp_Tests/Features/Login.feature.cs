@@ -18,18 +18,19 @@ namespace InfrastructureApp_Tests.Features
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("Reqnroll", "2.0.0.0")]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     [NUnit.Framework.TestFixtureAttribute()]
-    [NUnit.Framework.DescriptionAttribute("Avatar Upload")]
+    [NUnit.Framework.DescriptionAttribute("Login")]
     [NUnit.Framework.FixtureLifeCycleAttribute(NUnit.Framework.LifeCycle.InstancePerTestCase)]
-    public partial class AvatarUploadFeature
+    public partial class LoginFeature
     {
         
         private global::Reqnroll.ITestRunner testRunner;
         
         private static string[] featureTags = ((string[])(null));
         
-        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Avatar Upload", null, global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
+        private static global::Reqnroll.FeatureInfo featureInfo = new global::Reqnroll.FeatureInfo(new global::System.Globalization.CultureInfo("en-US"), "Features", "Login", "  As a registered user\r\n  I want to be able to log in to my account\r\n  So that I " +
+                "can access personalized features", global::Reqnroll.ProgrammingLanguage.CSharp, featureTags);
         
-#line 1 "AvatarUpload.feature"
+#line 1 "Login.feature"
 #line hidden
         
         [NUnit.Framework.OneTimeSetUpAttribute()]
@@ -102,51 +103,27 @@ namespace InfrastructureApp_Tests.Features
             await testRunner.CollectScenarioErrorsAsync();
         }
         
-        [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("User uploads a valid PNG file")]
-        public async global::System.Threading.Tasks.Task UserUploadsAValidPNGFile()
+        public virtual async global::System.Threading.Tasks.Task FeatureBackgroundAsync()
         {
-            string[] tagsOfScenario = ((string[])(null));
-            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User uploads a valid PNG file", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 3
-    this.ScenarioInitialize(scenarioInfo);
-#line hidden
-            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
-            {
-                testRunner.SkipScenario();
-            }
-            else
-            {
-                await this.ScenarioStartAsync();
-#line 4
-        await testRunner.GivenAsync("a registered user exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
-#line hidden
-#line 5
-        await testRunner.WhenAsync("they upload a valid PNG file under 5MB", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
 #line 6
-        await testRunner.ThenAsync("the avatar should be saved successfully", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
+  #line hidden
 #line 7
-        await testRunner.AndAsync("the user AvatarUrl should start with \"/uploads/avatars/\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.GivenAsync("a user with username \"testuser\" and password \"Password123!\" exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
 #line 8
-        await testRunner.AndAsync("the user AvatarKey should be null", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("the user\'s email is confirmed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-            }
-            await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("User uploads an invalid file type")]
-        public async global::System.Threading.Tasks.Task UserUploadsAnInvalidFileType()
+        [NUnit.Framework.DescriptionAttribute("Successful login with valid credentials")]
+        public async global::System.Threading.Tasks.Task SuccessfulLoginWithValidCredentials()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("User uploads an invalid file type", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 11
-    this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Successful login with valid credentials", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 10
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -155,31 +132,31 @@ namespace InfrastructureApp_Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 11
+    await testRunner.WhenAsync("I log in with username \"testuser\" and password \"Password123!\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
 #line 12
-        await testRunner.GivenAsync("a registered user exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.ThenAsync("I should be redirected to the home page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 13
-        await testRunner.WhenAsync("they upload a GIF file", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 14
-        await testRunner.ThenAsync("the upload should fail", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
-#line hidden
-#line 15
-        await testRunner.AndAsync("the avatar error message should be \"Only JPG and PNG files are accepted.\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("I should be authenticated", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
         }
         
         [NUnit.Framework.TestAttribute()]
-        [NUnit.Framework.DescriptionAttribute("from uploaded photo back to a preset avatar")]
-        public async global::System.Threading.Tasks.Task FromUploadedPhotoBackToAPresetAvatar()
+        [NUnit.Framework.DescriptionAttribute("Failed login with invalid password")]
+        public async global::System.Threading.Tasks.Task FailedLoginWithInvalidPassword()
         {
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
-            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("from uploaded photo back to a preset avatar", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 17
-    this.ScenarioInitialize(scenarioInfo);
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Failed login with invalid password", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 15
+  this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
             {
@@ -188,20 +165,89 @@ namespace InfrastructureApp_Tests.Features
             else
             {
                 await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 16
+    await testRunner.WhenAsync("I log in with username \"testuser\" and password \"WrongPassword\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 17
+    await testRunner.ThenAsync("I should see an error message \"Invalid login attempt.\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
 #line 18
-        await testRunner.GivenAsync("a registered user exists with an uploaded photo", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+    await testRunner.AndAsync("I should not be authenticated", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
-#line 19
-        await testRunner.WhenAsync("they select a preset avatar key", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Failed login with non-existent user")]
+        public async global::System.Threading.Tasks.Task FailedLoginWithNon_ExistentUser()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Failed login with non-existent user", null, tagsOfScenario, argumentsOfScenario, featureTags);
 #line 20
-        await testRunner.ThenAsync("the avatar should be saved successfully", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+  this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
 #line hidden
 #line 21
-        await testRunner.AndAsync("the user AvatarKey should be set to the selected key", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("I log in with username \"nonexistent\" and password \"Password123!\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 22
-        await testRunner.AndAsync("the user AvatarUrl should be null", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("I should see an error message \"Invalid login attempt.\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 23
+    await testRunner.AndAsync("I should not be authenticated", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+            }
+            await this.ScenarioCleanupAsync();
+        }
+        
+        [NUnit.Framework.TestAttribute()]
+        [NUnit.Framework.DescriptionAttribute("Failed login with unconfirmed email")]
+        public async global::System.Threading.Tasks.Task FailedLoginWithUnconfirmedEmail()
+        {
+            string[] tagsOfScenario = ((string[])(null));
+            global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
+            global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Failed login with unconfirmed email", null, tagsOfScenario, argumentsOfScenario, featureTags);
+#line 25
+  this.ScenarioInitialize(scenarioInfo);
+#line hidden
+            if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
+            {
+                testRunner.SkipScenario();
+            }
+            else
+            {
+                await this.ScenarioStartAsync();
+#line 6
+  await this.FeatureBackgroundAsync();
+#line hidden
+#line 26
+    await testRunner.GivenAsync("a user with username \"unconfirmeduser\" and password \"Password123!\" exists", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
+#line hidden
+#line 27
+    await testRunner.AndAsync("the user\'s email is not confirmed", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 28
+    await testRunner.WhenAsync("I log in with username \"unconfirmeduser\" and password \"Password123!\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 29
+    await testRunner.ThenAsync("I should see an error message \"You must confirm your email before logging in.\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 30
+    await testRunner.AndAsync("I should not be authenticated", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
             await this.ScenarioCleanupAsync();
