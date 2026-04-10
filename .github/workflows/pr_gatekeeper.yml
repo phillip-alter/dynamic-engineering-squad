@@ -28,7 +28,7 @@ jobs:
         run: dotnet build src/InfrastructureApp_Tests --no-restore
 
       - name: Test
-        run: dotnet test src/InfrastructureApp_Tests --no-build --verbosity normal --filter "FullyQualifiedName!~SeleniumTests"
+        run: dotnet test src/InfrastructureApp_Tests --no-build --verbosity normal
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
