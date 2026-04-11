@@ -92,6 +92,7 @@ namespace InfrastructureApp.Services
 
             // Default severity for all reports unless AI successfully classifies it.
             report.SeverityStatus = ImageSeverityStatuses.Pending;
+            report.SeverityReason = null;
 
             if (report.Photo != null && report.Photo.Length > 0)
             {
@@ -211,6 +212,7 @@ namespace InfrastructureApp.Services
                         if (severityResult.Performed)
                         {
                             report.SeverityStatus = severityResult.SeverityStatus;
+                            report.SeverityReason = severityResult.Reason;
                         }
                     }
                 }
