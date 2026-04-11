@@ -52,3 +52,12 @@ function navigateToRecentReport(item) {
 
     window.location.href = detailsUrl;
 }
+
+// SCRUM-113:
+// Export helpers for JavaScript unit tests
+if (typeof module !== "undefined") {
+    module.exports = {
+        buildRecentReportDetailsUrl,
+        navigateToRecentReport
+    };
+}
