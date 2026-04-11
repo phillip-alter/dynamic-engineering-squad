@@ -1,51 +1,61 @@
+// SCRUM113
+
 const {
     buildRecentReportDetailsUrl,
     navigateToRecentReport
 } = require("../InfrastructureApp/wwwroot/js/homeRecentReports");
 
 describe("SCRUM-113 homeRecentReports.js", () => {
-    let originalLocation;
 
-    beforeEach(() => {
-        originalLocation = window.location;
-        delete window.location;
-        window.location = { href: "" };
-    });
-
-    afterEach(() => {
-        window.location = originalLocation;
-    });
-
+    // -------------------------------------------------------
+    // TEST 1: Build correct details URL
+    // -------------------------------------------------------
     test("buildRecentReportDetailsUrl returns correct details path", () => {
         const result = buildRecentReportDetailsUrl("25");
 
         expect(result).toBe("/ReportIssue/Details/25");
     });
 
+    // -------------------------------------------------------
+    // TEST 2: Return empty string when ID is missing
+    // -------------------------------------------------------
     test("buildRecentReportDetailsUrl returns empty string when report id is missing", () => {
         expect(buildRecentReportDetailsUrl("")).toBe("");
         expect(buildRecentReportDetailsUrl(null)).toBe("");
         expect(buildRecentReportDetailsUrl(undefined)).toBe("");
     });
 
-    test("navigateToRecentReport updates window location when report id exists", () => {
+    // -------------------------------------------------------
+    // TEST 3: Navigation happens when valid report ID exists
+    // -------------------------------------------------------
+    test("navigateToRecentReport redirects when report id exists", () => {
         const item = {
             dataset: {
                 reportid: "42"
             }
         };
 
-        navigateToRecentReport(item);
+        const fakeNavigate = jest.fn();
 
-        expect(window.location.href).toBe("/ReportIssue/Details/42");
+        navigateToRecentReport(item, fakeNavigate);
+
+        expect(fakeNavigate).toHaveBeenCalledWith("/ReportIssue/Details/42");
     });
 
+    // -------------------------------------------------------
+    // TEST 4: No navigation when item is null
+    // -------------------------------------------------------
     test("navigateToRecentReport does nothing when item is missing", () => {
-        navigateToRecentReport(null);
+        const fakeNavigate = jest.fn();
 
-        expect(window.location.href).toBe("");
+        navigateToRecentReport(null, fakeNavigate);
+
+        expect(fakeNavigate).not.toHaveBeenCalled();
     });
 
+    // -------------------------------------------------------
+    // TEST 5: No navigation when report ID is empty
+    // -------------------------------------------------------
     test("navigateToRecentReport does nothing when report id is missing", () => {
         const item = {
             dataset: {
@@ -53,8 +63,10 @@ describe("SCRUM-113 homeRecentReports.js", () => {
             }
         };
 
-        navigateToRecentReport(item);
+        const fakeNavigate = jest.fn();
 
-        expect(window.location.href).toBe("");
+        navigateToRecentReport(item, fakeNavigate);
+
+        expect(fakeNavigate).not.toHaveBeenCalled();
     });
 });
