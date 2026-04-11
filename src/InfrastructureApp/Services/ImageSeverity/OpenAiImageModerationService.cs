@@ -27,7 +27,7 @@ namespace InfrastructureApp.Services.ImageSeverity
             if (string.IsNullOrWhiteSpace(imageUrl))
                 return ImageModerationResult.Failed("Image URL was empty.");
 
-            var apiKey = _configuration["OpenAI:ApiKey"];
+            var apiKey = _configuration["OpenAIModerationAPIkey"];
             var model = _configuration["OpenAI:ModerationModel"] ?? "omni-moderation-latest";
 
             if (string.IsNullOrWhiteSpace(apiKey))

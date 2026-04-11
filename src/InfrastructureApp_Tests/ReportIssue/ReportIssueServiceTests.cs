@@ -17,6 +17,7 @@ using NUnit.Framework;
 using System.Threading;
 using InfrastructureApp.Services.ImageHashing;
 using System.Collections.Generic;
+using InfrastructureApp.Services.ImageSeverity;
 
 namespace InfrastructureApp_Tests
 {
@@ -26,6 +27,9 @@ namespace InfrastructureApp_Tests
         private SqliteConnection _conn = null!;
         private DbContextOptions<ApplicationDbContext> _dbOptions = null!;
         private string _webRoot = null!;
+        private IImageModerationService _imageModerationService = null!;
+        private IImageSeverityEstimationService _imageSeverityEstimationService = null!;
+        private IHttpContextAccessor _httpContextAccessor = null!;
 
         [SetUp]
         public void SetUp()
@@ -41,6 +45,24 @@ namespace InfrastructureApp_Tests
             // temp web root for file save tests
             _webRoot = Path.Combine(Path.GetTempPath(), "InfraAppTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(_webRoot);
+
+            //setup for image moderation
+            _imageModerationService = Substitute.For<IImageModerationService>();
+            _imageSeverityEstimationService = Substitute.For<IImageSeverityEstimationService>();
+            _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+
+            _imageModerationService
+                .ModerateImageAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(ImageModerationResult.Failed("Test default")));
+
+            _imageSeverityEstimationService
+                .EstimateSeverityAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(SeverityEstimationResult.Failed("Test default")));
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Scheme = "https";
+            httpContext.Request.Host = new HostString("localhost:5001");
+            _httpContextAccessor.HttpContext.Returns(httpContext);
 
             // create schema
             using var db = new ApplicationDbContext(_dbOptions);
@@ -74,50 +96,65 @@ namespace InfrastructureApp_Tests
 
         //makeService now includes description moderation and image hash
         private ReportIssueService MakeService(
-            ApplicationDbContext db,
-            IContentModerationService? moderationOverride = null,
-            IImageHashService? imageHashOverride = null)
+        ApplicationDbContext db,
+        IContentModerationService? moderationOverride = null,
+        IImageHashService? imageHashOverride = null,
+        IImageModerationService? imageModerationOverride = null,
+        IImageSeverityEstimationService? imageSeverityOverride = null,
+        IHttpContextAccessor? httpContextAccessorOverride = null)
+    {
+        var env = Substitute.For<IWebHostEnvironment>();
+        env.WebRootPath.Returns(_webRoot);
+
+        IReportIssueRepository repo = new TestReportIssueRepository(db);
+
+        IContentModerationService moderation;
+        if (moderationOverride != null)
         {
-            var env = Substitute.For<IWebHostEnvironment>();
-            env.WebRootPath.Returns(_webRoot);
-
-            IReportIssueRepository repo = new TestReportIssueRepository(db);
-
-            IContentModerationService moderation;
-            if (moderationOverride != null)
-            {
-                moderation = moderationOverride;
-            }
-            else
-            {
-                moderation = Substitute.For<IContentModerationService>();
-                moderation.CheckAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                    .Returns(Task.FromResult(
-                        new ContentModerationResult(
-                            Performed: true,
-                            IsAllowed: true,
-                            Flagged: false)));
-            }
-
-            IImageHashService imageHash;
-            if (imageHashOverride != null)
-            {
-                imageHash = imageHashOverride;
-            }
-            else
-            {
-                imageHash = Substitute.For<IImageHashService>();
-                imageHash.ComputeHashesAsync(Arg.Any<Stream>(), Arg.Any<CancellationToken>())
-                    .Returns(Task.FromResult(new ImageHashResult(
-                        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-                        123456789L)));
-
-                imageHash.HammingDistance(Arg.Any<long>(), Arg.Any<long>())
-                    .Returns(32);
-            }
-
-            return new ReportIssueService(db, repo, env, moderation, imageHash);
+            moderation = moderationOverride;
         }
+        else
+        {
+            moderation = Substitute.For<IContentModerationService>();
+            moderation.CheckAsync(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(
+                    new ContentModerationResult(
+                        Performed: true,
+                        IsAllowed: true,
+                        Flagged: false)));
+        }
+
+        IImageHashService imageHash;
+        if (imageHashOverride != null)
+        {
+            imageHash = imageHashOverride;
+        }
+        else
+        {
+            imageHash = Substitute.For<IImageHashService>();
+            imageHash.ComputeHashesAsync(Arg.Any<Stream>(), Arg.Any<CancellationToken>())
+                .Returns(Task.FromResult(new ImageHashResult(
+                    "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                    123456789L)));
+
+            imageHash.HammingDistance(Arg.Any<long>(), Arg.Any<long>())
+                .Returns(32);
+        }
+
+        var imageModeration = imageModerationOverride ?? _imageModerationService;
+        var imageSeverity = imageSeverityOverride ?? _imageSeverityEstimationService;
+        var httpContextAccessor = httpContextAccessorOverride ?? _httpContextAccessor;
+
+        return new ReportIssueService(
+            db,
+            repo,
+            env,
+            moderation,
+            imageHash,
+            imageModeration,
+            imageSeverity,
+            httpContextAccessor);
+    }
 
         // -------
         // Tests
@@ -450,7 +487,7 @@ namespace InfrastructureApp_Tests
             imageHash.HammingDistance(Arg.Any<long>(), Arg.Any<long>())
                 .Returns(32);
 
-            var service = new ReportIssueService(db, repo, env, moderation, imageHash);
+            var service = new ReportIssueService(db, repo, env, moderation, imageHash, _imageModerationService, _imageSeverityEstimationService, _httpContextAccessor);
 
             var report = new ReportIssue
             {

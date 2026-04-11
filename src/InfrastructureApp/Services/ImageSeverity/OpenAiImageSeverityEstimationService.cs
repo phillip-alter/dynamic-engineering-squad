@@ -27,7 +27,7 @@ namespace InfrastructureApp.Services.ImageSeverity
             if (string.IsNullOrWhiteSpace(imageUrl))
                 return SeverityEstimationResult.Failed("Image URL was empty.");
 
-            var apiKey = _configuration["OpenAI:ApiKey"];
+            var apiKey = _configuration["OpenAIModerationAPIkey"];
             var model = _configuration["OpenAI:SeverityModel"] ?? "gpt-5.4";
 
             if (string.IsNullOrWhiteSpace(apiKey))
