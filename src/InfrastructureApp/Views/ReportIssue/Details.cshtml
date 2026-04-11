@@ -25,7 +25,23 @@
 
     <div class="report-card">
         <p><strong>Status:</strong> @Model.Status</p>
-        <p><strong>Severity:</strong> @Model.SeverityStatus</p>
+        @{
+            var severityClass = Model.SeverityStatus switch
+            {
+                "Low" => "bg-success",
+                "Medium" => "bg-warning text-dark",
+                "High" => "bg-danger",
+                "Critical" => "bg-dark",
+                _ => "bg-secondary"
+            };
+        }
+
+        <p>
+            <strong>Severity:</strong>
+            <span class="badge @severityClass px-3 py-2">
+                @Model.SeverityStatus
+            </span>
+        </p>
         <p><strong>Created:</strong> @Model.CreatedAt</p>
         <p><strong>Description:</strong><br />@Model.Description</p>
         <p><strong>Location:</strong> (@Model.Latitude, @Model.Longitude)</p>
