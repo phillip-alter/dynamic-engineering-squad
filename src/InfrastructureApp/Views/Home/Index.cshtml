@@ -74,8 +74,10 @@
         <div id="recentReportsList" class="list-group">
             @foreach (var report in Model)
             {
-                <!-- SCRUM-103: display only (NOT clickable yet) -->
-                <div class="list-group-item d-flex gap-3 py-3">
+                <!-- SCRUM-113 ADDED:
+                 Each report row is now interactive and stores report Id for JS navigation -->
+                <div class="list-group-item d-flex gap-3 py-3 home-report-item" data-reportid="@report.Id" tabindex="0"
+                     role="button" aria-label="Open details for report @report.Id">
 
                     <!-- Icon -->
                     <div class="d-flex align-items-center justify-content-center bg-light rounded-circle"
@@ -84,7 +86,7 @@
                     </div>
 
                     <!-- Content -->
-                    <div class="d-flex gap-2 w-100 justify-content-between">
+                    <div class="d-flex gap-2 w-100 justify-content-between align-items-start">
                         <div>
                             <h6 class="mb-0">@report.Description</h6>
                             <p class="mb-0 opacity-75">
@@ -92,9 +94,14 @@
                             </p>
                         </div>
 
-                        <small class="opacity-50 text-nowrap">
-                            @report.CreatedAt.ToLocalTime().ToString("g")
-                        </small>
+                        <!-- SCRUM-113 ADDED:
+                         Added View Details text so users know row is clickable -->
+                        <div class="text-end">
+                            <small class="opacity-50 text-nowrap d-block">
+                                @report.CreatedAt.ToLocalTime().ToString("g")
+                            </small>
+                            <small class="text-primary fw-semibold home-report-link-text">View Details</small>
+                        </div>
                     </div>
                 </div>
             }
@@ -107,3 +114,9 @@
             View All Latest Reports
         </a>
     </div>
+
+    @section Scripts {
+        <!-- SCRUM-113 ADDED:
+         Handles click and keyboard navigation for Home page recent reports -->
+        <script src="~/js/homeRecentReports.js" asp-append-version="true"></script>
+    }
