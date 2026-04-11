@@ -60,15 +60,32 @@ namespace InfrastructureApp.Services
             if (file.Length > maxBytes)
                 return (false, "File exceeds the 5 MB size limit.");
 
+            //Derives the file extension from the validated content type
+            //and avoid trusting the original filename from the client
             var ext      = file.ContentType == "image/png" ? ".png" : ".jpg";
+
+            //Creates a unique filename using a GUID 
+            //and prevents collisions if two users upload iles with the same name
             var fileName = $"{Guid.NewGuid()}{ext}";
+
+            //Builds the full folder path on disk
+            //Contentrootpath is the project root, so this resolves to 
+            //C:\InfrastructureApp\wwwroot\uploads\avatars\
             var folder   = Path.Combine(_env.ContentRootPath, "wwwroot", "uploads", "avatars");
+
+            //Creates the folder if it doesn't exist yet
             Directory.CreateDirectory(folder);
 
+            //Combines the folder path with the filename to get the full save path
             var savePath = Path.Combine(folder, fileName);
+
+            //Creates the file on disk and copies the uploaded bytes into it
             await using var stream = System.IO.File.Create(savePath);
             await file.CopyToAsync(stream);
 
+            //Saves the web-accessible URL path to the database
+            //this is what the browser uses to display the image
+            //note it uses forward slashes, not the OS file path
             user.AvatarUrl = $"/uploads/avatars/{fileName}";
             user.AvatarKey = null;
 

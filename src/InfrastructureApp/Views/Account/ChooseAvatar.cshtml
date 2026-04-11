@@ -149,10 +149,12 @@
     function activateUpload(file) {
         if (!ALLOWED.includes(file.type)) {
             alert('Only JPG and PNG files are accepted.');
+            fileInput.value = '';
             return;
         }
         if (file.size > MAX_BYTES) {
             alert('File exceeds the 5 MB size limit.');
+            fileInput.value = '';
             return;
         }
 
