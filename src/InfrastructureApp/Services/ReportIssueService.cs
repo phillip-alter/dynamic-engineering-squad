@@ -186,19 +186,34 @@ namespace InfrastructureApp.Services
 
                 // Build absolute URL for OpenAI
                 var absoluteImageUrl = BuildAbsoluteImageUrl(savedImagePath);
+                Console.WriteLine($"[Severity] savedImagePath = {savedImagePath}");
+                Console.WriteLine($"[Severity] absoluteImageUrl = {absoluteImageUrl ?? "(null)"}");
 
                 if (!string.IsNullOrWhiteSpace(absoluteImageUrl))
                 {
                     var moderationResult = await _imageModerationService.ModerateImageAsync(absoluteImageUrl);
+
+                    Console.WriteLine(
+                        $"[Severity] ImageModeration: Performed={moderationResult.Performed}, " +
+                        $"IsViable={moderationResult.IsViable}, Reason={moderationResult.Reason ?? "(none)"}");
 
                     if (moderationResult.Performed && moderationResult.IsViable)
                     {
                         var severityResult = await _imageSeverityEstimationService
                             .EstimateSeverityAsync(absoluteImageUrl);
 
+                        Console.WriteLine(
+                            $"[Severity] SeverityEstimate: Performed={severityResult.Performed}, " +
+                            $"Severity={severityResult.SeverityStatus}, Reason={severityResult.Reason ?? "(none)"}");
+
+
                         if (severityResult.Performed)
                         {
                             report.SeverityStatus = severityResult.SeverityStatus;
+                        }
+                        else
+                        {
+                            Console.WriteLine("[Severity] Skipped because absoluteImageUrl was null or empty.");
                         }
                     }
                 }
