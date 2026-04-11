@@ -50,15 +50,6 @@ namespace InfrastructureApp.Services
         public Task<ReportIssue?> GetByIdAsync(int id)
             => _reports.GetByIdAsync(id);
 
-        //used during report creation when processing uploaded images
-        private string? BuildAbsoluteImageUrl(string relativePath)
-{
-        var httpContext = _httpContextAccessor.HttpContext;
-        if (httpContext == null)
-            return null;
-
-        return $"{httpContext.Request.Scheme}://{httpContext.Request.Host}{relativePath}";
-}
 
         //submit report workflow
         //create a report, moderate it, validate image, hash image, reject duplicates, save image, award points
@@ -98,6 +89,9 @@ namespace InfrastructureApp.Services
             // ---------------------------------------------------------
 
             string? savedImagePath = null;
+
+            // Default severity for all reports unless AI successfully classifies it.
+            report.SeverityStatus = ImageSeverityStatuses.Pending;
 
             if (report.Photo != null && report.Photo.Length > 0)
             {
@@ -178,49 +172,53 @@ namespace InfrastructureApp.Services
 
                 savedImagePath = $"/uploads/issues/{fileName}";
 
+                // Save hashes for future duplicate detection.
+                report.ImageSha256 = hashes.Sha256;
+                report.ImagePHash = hashes.PHash;
+
                 // -----------------------------------------------------
-                // 3) Image severity estimation (AI)
+                // 3) Image severity estimation using base64 data URL (AI)
                 // -----------------------------------------------------
 
                 report.SeverityStatus = ImageSeverityStatuses.Pending;
 
-                // Build absolute URL for OpenAI
-                var absoluteImageUrl = BuildAbsoluteImageUrl(savedImagePath);
-                Console.WriteLine($"[Severity] savedImagePath = {savedImagePath}");
-                Console.WriteLine($"[Severity] absoluteImageUrl = {absoluteImageUrl ?? "(null)"}");
+                // Build base64 data URL for OpenAI
+                 var imageDataUrl = BuildImageDataUrl(fullPath);
 
-                if (!string.IsNullOrWhiteSpace(absoluteImageUrl))
+                Console.WriteLine($"[Severity] savedImagePath = {savedImagePath}");
+                Console.WriteLine($"[Severity] imageDataUrl is null? {imageDataUrl == null}");
+
+                if (!string.IsNullOrWhiteSpace(imageDataUrl))
                 {
-                    var moderationResult = await _imageModerationService.ModerateImageAsync(absoluteImageUrl);
+                    var imageModerationResult = await _imageModerationService.ModerateImageAsync(imageDataUrl);
 
                     Console.WriteLine(
-                        $"[Severity] ImageModeration: Performed={moderationResult.Performed}, " +
-                        $"IsViable={moderationResult.IsViable}, Reason={moderationResult.Reason ?? "(none)"}");
+                        $"[Severity] ImageModeration: Performed={imageModerationResult.Performed}, " +
+                        $"IsViable={imageModerationResult.IsViable}, " +
+                        $"Reason={imageModerationResult.Reason ?? "(none)"}");
 
-                    if (moderationResult.Performed && moderationResult.IsViable)
+                    if (imageModerationResult.Performed && imageModerationResult.IsViable)
                     {
                         var severityResult = await _imageSeverityEstimationService
-                            .EstimateSeverityAsync(absoluteImageUrl);
+                            .EstimateSeverityAsync(imageDataUrl);
 
                         Console.WriteLine(
                             $"[Severity] SeverityEstimate: Performed={severityResult.Performed}, " +
-                            $"Severity={severityResult.SeverityStatus}, Reason={severityResult.Reason ?? "(none)"}");
+                            $"Severity={severityResult.SeverityStatus}, " +
+                            $"Reason={severityResult.Reason ?? "(none)"}");
 
 
                         if (severityResult.Performed)
                         {
                             report.SeverityStatus = severityResult.SeverityStatus;
                         }
-                        else
-                        {
-                            Console.WriteLine("[Severity] Skipped because absoluteImageUrl was null or empty.");
-                        }
                     }
                 }
 
-                // Save the hashes onto the report row so we can compare future uploads.
-                report.ImageSha256 = hashes.Sha256;
-                report.ImagePHash = hashes.PHash;
+                else
+                {
+                    Console.WriteLine("[Severity] Skipped because imageDataUrl was null or empty.");
+                }
             }
 
             //starts database transaction, saves it if everything completes otherwise gives an error
@@ -271,6 +269,30 @@ namespace InfrastructureApp.Services
                 await tx.RollbackAsync();
                 throw;
             }
+        }
+
+        //helper function to build imagedataurl
+        private static string? BuildImageDataUrl(string fullPath)
+        {
+            if (string.IsNullOrWhiteSpace(fullPath) || !File.Exists(fullPath))
+                return null;
+
+            var ext = Path.GetExtension(fullPath).ToLowerInvariant();
+            var mimeType = ext switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".webp" => "image/webp",
+                _ => null
+            };
+
+            if (mimeType == null)
+                return null;
+
+            var bytes = File.ReadAllBytes(fullPath);
+            var base64 = Convert.ToBase64String(bytes);
+
+            return $"data:{mimeType};base64,{base64}";
         }
     }
 }
