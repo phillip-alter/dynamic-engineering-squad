@@ -9,8 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     reportItems.forEach(function (item) {
-        // SCRUM-113:
-        
+
         // Navigate when the user clicks a recent report row
         item.addEventListener("click", function () {
             navigateToRecentReport(item);
@@ -39,7 +38,7 @@ function buildRecentReportDetailsUrl(reportId) {
 
 // SCRUM-113:
 // Navigate to the existing details page for the selected report
-function navigateToRecentReport(item) {
+function navigateToRecentReport(item, navigateFn = window.location.assign.bind(window.location)) {
     if (!item) {
         return;
     }
@@ -51,7 +50,9 @@ function navigateToRecentReport(item) {
         return;
     }
 
-    window.location.href = detailsUrl;
+    // SCRUM-113:
+    // Use a navigation function so JS tests can pass in a fake redirect
+    navigateFn(detailsUrl);
 }
 
 // SCRUM-113:
