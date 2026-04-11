@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     reportItems.forEach(function (item) {
         // SCRUM-113:
+        
         // Navigate when the user clicks a recent report row
         item.addEventListener("click", function () {
             navigateToRecentReport(item);
