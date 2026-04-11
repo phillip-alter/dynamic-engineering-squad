@@ -181,8 +181,6 @@ namespace InfrastructureApp.Services
                 // 3) Image severity estimation using base64 data URL (AI)
                 // -----------------------------------------------------
 
-                report.SeverityStatus = ImageSeverityStatuses.Pending;
-
                 // Build base64 data URL for OpenAI
                  var imageDataUrl = BuildImageDataUrl(fullPath);
 
@@ -197,6 +195,14 @@ namespace InfrastructureApp.Services
                         $"[Severity] ImageModeration: Performed={imageModerationResult.Performed}, " +
                         $"IsViable={imageModerationResult.IsViable}, " +
                         $"Reason={imageModerationResult.Reason ?? "(none)"}");
+
+                    if (imageModerationResult.Performed && !imageModerationResult.IsViable)
+                    {
+                        throw new ContentModerationRejectedException(
+                            "The uploaded image contains inappropriate content and cannot be submitted.",
+                            imageModerationResult.Reason
+                        );
+                    }
 
                     if (imageModerationResult.Performed && imageModerationResult.IsViable)
                     {
