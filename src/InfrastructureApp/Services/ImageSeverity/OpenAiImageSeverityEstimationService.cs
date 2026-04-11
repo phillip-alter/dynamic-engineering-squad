@@ -1,5 +1,3 @@
-//shows the severity of the damage
-
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -22,13 +20,13 @@ namespace InfrastructureApp.Services.ImageSeverity
             _configuration = configuration;
         }
 
-        public async Task<SeverityEstimationResult> EstimateSeverityAsync(string imageUrl, CancellationToken ct = default)
+        public async Task<SeverityEstimationResult> EstimateSeverityAsync(string imageSource, CancellationToken ct = default)
         {
-            if (string.IsNullOrWhiteSpace(imageUrl))
-                return SeverityEstimationResult.Failed("Image URL was empty.");
+            if (string.IsNullOrWhiteSpace(imageSource))
+                return SeverityEstimationResult.Failed("Image source was empty.");
 
             var apiKey = _configuration["OpenAIModerationAPIkey"];
-            var model = _configuration["OpenAI:SeverityModel"] ?? "gpt-5.4";
+            var model = _configuration["OpenAI:SeverityModel"] ?? "gpt-4.1-mini";
 
             if (string.IsNullOrWhiteSpace(apiKey))
                 return SeverityEstimationResult.Failed("OpenAI API key is missing.");
@@ -37,17 +35,17 @@ namespace InfrastructureApp.Services.ImageSeverity
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
             var rubric = """
-                        Classify the uploaded infrastructure-damage image into exactly one severity level.
+            Classify the uploaded infrastructure-damage image into exactly one severity level.
 
-                        Rubric:
-                        - Low: cosmetic/minor visible issue, no immediate hazard
-                        - Medium: clear damage, should be scheduled
-                        - High: major damage, likely safety risk
-                        - Critical: immediate danger or severe infrastructure failure
+            Rubric:
+            - Low: cosmetic/minor visible issue, no immediate hazard
+            - Medium: clear damage, should be scheduled
+            - High: major damage, likely safety risk
+            - Critical: immediate danger or severe infrastructure failure
 
-                        Return only valid JSON matching the schema.
-                        If the image does not clearly show infrastructure damage, choose Low unless the image is unusable.
-                        """;
+            Return only valid JSON matching the schema.
+            If the image does not clearly show infrastructure damage, choose Low unless the image is unusable.
+            """;
 
             var payload = new
             {
@@ -67,7 +65,7 @@ namespace InfrastructureApp.Services.ImageSeverity
                             new
                             {
                                 type = "input_image",
-                                image_url = imageUrl
+                                image_url = imageSource
                             }
                         }
                     }
@@ -112,16 +110,19 @@ namespace InfrastructureApp.Services.ImageSeverity
                 var json = await response.Content.ReadAsStringAsync(ct);
 
                 if (!response.IsSuccessStatusCode)
-                    return SeverityEstimationResult.Failed($"Severity API returned {(int)response.StatusCode}.");
+                {
+                    return SeverityEstimationResult.Failed(
+                        $"Severity API returned {(int)response.StatusCode}. Body: {json}");
+                }
 
                 using var doc = JsonDocument.Parse(json);
 
                 if (!doc.RootElement.TryGetProperty("output_text", out var outputTextElement))
-                    return SeverityEstimationResult.Failed("No structured output was returned.");
+                    return SeverityEstimationResult.Failed($"No structured output was returned. Body: {json}");
 
                 var outputJson = outputTextElement.GetString();
                 if (string.IsNullOrWhiteSpace(outputJson))
-                    return SeverityEstimationResult.Failed("Structured output text was empty.");
+                    return SeverityEstimationResult.Failed($"Structured output text was empty. Body: {json}");
 
                 using var resultDoc = JsonDocument.Parse(outputJson);
                 var root = resultDoc.RootElement;
@@ -130,9 +131,9 @@ namespace InfrastructureApp.Services.ImageSeverity
                 var reason = root.GetProperty("reason").GetString();
 
                 if (severityStatus is not ("Low" or "Medium" or "High" or "Critical"))
-                    return SeverityEstimationResult.Failed("Model returned an invalid severity.");
+                    return SeverityEstimationResult.Failed($"Model returned invalid severity '{severityStatus}'.");
 
-                return SeverityEstimationResult.Success(severityStatus, reason);
+                return SeverityEstimationResult.Success(severityStatus!, reason);
             }
             catch (Exception ex)
             {

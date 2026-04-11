@@ -1,5 +1,3 @@
-//implements image moderation through OpenAI's moderation service
-
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -22,10 +20,10 @@ namespace InfrastructureApp.Services.ImageSeverity
             _configuration = configuration;
         }
 
-        public async Task<ImageModerationResult> ModerateImageAsync(string imageUrl, CancellationToken ct = default)
+        public async Task<ImageModerationResult> ModerateImageAsync(string imageSource, CancellationToken ct = default)
         {
-            if (string.IsNullOrWhiteSpace(imageUrl))
-                return ImageModerationResult.Failed("Image URL was empty.");
+            if (string.IsNullOrWhiteSpace(imageSource))
+                return ImageModerationResult.Failed("Image source was empty.");
 
             var apiKey = _configuration["OpenAIModerationAPIkey"];
             var model = _configuration["OpenAI:ModerationModel"] ?? "omni-moderation-latest";
@@ -46,7 +44,7 @@ namespace InfrastructureApp.Services.ImageSeverity
                         type = "image_url",
                         image_url = new
                         {
-                            url = imageUrl
+                            url = imageSource
                         }
                     }
                 }
@@ -63,22 +61,21 @@ namespace InfrastructureApp.Services.ImageSeverity
                 var json = await response.Content.ReadAsStringAsync(ct);
 
                 if (!response.IsSuccessStatusCode)
-                    return ImageModerationResult.Failed($"Moderation API returned {(int)response.StatusCode}.");
+                {
+                    return ImageModerationResult.Failed(
+                        $"Moderation API returned {(int)response.StatusCode}. Body: {json}");
+                }
 
                 using var doc = JsonDocument.Parse(json);
 
-                var results = doc.RootElement.GetProperty("results");
-                if (results.GetArrayLength() == 0)
+                if (!doc.RootElement.TryGetProperty("results", out var results) || results.GetArrayLength() == 0)
                     return ImageModerationResult.Failed("Moderation API returned no results.");
 
                 var first = results[0];
-
                 var flagged = first.TryGetProperty("flagged", out var flaggedProp) && flaggedProp.GetBoolean();
 
                 if (flagged)
-                {
                     return ImageModerationResult.Rejected("Image was flagged by moderation.");
-                }
 
                 return ImageModerationResult.Passed();
             }
