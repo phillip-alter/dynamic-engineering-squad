@@ -1,10 +1,21 @@
 /* Contains the core business logic for submitting a report + saving an image + awarding points. */
 
+/**The logic for image moderation should be:
+save image first
+build image URL
+set SeverityStatus = Pending
+call moderation
+if moderation passes, call severity estimator
+if severity succeeds, overwrite Pending
+if anything fails, leave as Pending
+save report anyway **/
+
 using InfrastructureApp.Data;
 using InfrastructureApp.Models;
 using Microsoft.EntityFrameworkCore;
 using InfrastructureApp.Services.ContentModeration;
 using InfrastructureApp.Services.ImageHashing;
+using InfrastructureApp.Services.ImageSeverity;
 
 namespace InfrastructureApp.Services
 {
@@ -16,13 +27,23 @@ namespace InfrastructureApp.Services
         private readonly IContentModerationService _moderation; //for openAI moderation of user description
         private readonly IImageHashService _imageHashService; // computes SHA-256 + pHash for duplicate image detection
 
-        public ReportIssueService(ApplicationDbContext db, IReportIssueRepository reports, IWebHostEnvironment env, IContentModerationService moderation, IImageHashService imageHashService)
+        private readonly IImageModerationService _imageModerationService; //image severity moderation
+        private readonly IImageSeverityEstimationService _imageSeverityEstimationService; //image severity estimation
+        private readonly IHttpContextAccessor _httpContextAccessor; //image severity
+
+        public ReportIssueService(ApplicationDbContext db, IReportIssueRepository reports, IWebHostEnvironment env, IContentModerationService moderation, 
+                                    IImageHashService imageHashService, IImageModerationService imageModerationService, IImageSeverityEstimationService imageSeverityEstimationService,
+                                    IHttpContextAccessor httpContextAccessor)
         {
             _db = db;
             _reports = reports;
             _env = env;
             _moderation = moderation;
             _imageHashService = imageHashService;
+            _imageModerationService = imageModerationService;
+            _imageSeverityEstimationService = imageSeverityEstimationService;
+            _httpContextAccessor = httpContextAccessor;
+
         }
 
         //service gets delegated to the repo
