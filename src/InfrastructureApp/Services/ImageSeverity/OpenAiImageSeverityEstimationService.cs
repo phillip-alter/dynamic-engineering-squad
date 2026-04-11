@@ -117,12 +117,34 @@ namespace InfrastructureApp.Services.ImageSeverity
 
                 using var doc = JsonDocument.Parse(json);
 
-                if (!doc.RootElement.TryGetProperty("output_text", out var outputTextElement))
-                    return SeverityEstimationResult.Failed($"No structured output was returned. Body: {json}");
+                if (!doc.RootElement.TryGetProperty("output", out var outputArray) ||
+                    outputArray.ValueKind != JsonValueKind.Array ||
+                    outputArray.GetArrayLength() == 0)
+                {
+                    return SeverityEstimationResult.Failed($"No output array was returned. Body: {json}");
+                }
 
-                var outputJson = outputTextElement.GetString();
+                var firstOutput = outputArray[0];
+
+                if (!firstOutput.TryGetProperty("content", out var contentArray) ||
+                    contentArray.ValueKind != JsonValueKind.Array ||
+                    contentArray.GetArrayLength() == 0)
+                {
+                    return SeverityEstimationResult.Failed($"No content array was returned. Body: {json}");
+                }
+
+                var firstContent = contentArray[0];
+
+                if (!firstContent.TryGetProperty("text", out var textElement))
+                {
+                    return SeverityEstimationResult.Failed($"No text field was returned in content. Body: {json}");
+                }
+
+                var outputJson = textElement.GetString();
                 if (string.IsNullOrWhiteSpace(outputJson))
+                {
                     return SeverityEstimationResult.Failed($"Structured output text was empty. Body: {json}");
+                }
 
                 using var resultDoc = JsonDocument.Parse(outputJson);
                 var root = resultDoc.RootElement;
