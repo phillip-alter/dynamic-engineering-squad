@@ -7,10 +7,11 @@ namespace InfrastructureApp.Services.ImageSeverity
         public bool IsViable { get; init; }
         public string? Reason { get; init; }
 
-        public static ImageModerationResult Passed() => new()
+        public static ImageModerationResult Passed(string? reason = null) => new()
         {
             Performed = true,
-            IsViable = true
+            IsViable = true,
+            Reason = reason
         };
 
         public static ImageModerationResult Rejected(string? reason = null) => new()
