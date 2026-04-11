@@ -53,6 +53,10 @@ namespace InfrastructureApp.Models
         // This is for VISUAL similarity detection.
         public long? ImagePHash { get; set; }
 
+        //severity status of image
+        [MaxLength(20)]
+        public string SeverityStatus { get; set; } = "Pending";
+
 
         // ----------------------------------------------------
         // UI-only properties for form submission
