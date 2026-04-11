@@ -50,6 +50,16 @@ namespace InfrastructureApp.Services
         public Task<ReportIssue?> GetByIdAsync(int id)
             => _reports.GetByIdAsync(id);
 
+        //used during report creation when processing uploaded images
+        private string? BuildAbsoluteImageUrl(string relativePath)
+{
+        var httpContext = _httpContextAccessor.HttpContext;
+        if (httpContext == null)
+            return null;
+
+        return $"{httpContext.Request.Scheme}://{httpContext.Request.Host}{relativePath}";
+}
+
         //submit report workflow
         //create a report, moderate it, validate image, hash image, reject duplicates, save image, award points
         public async Task<(int reportId, string status)> CreateAsync(ReportIssue report, string userId)
@@ -167,6 +177,31 @@ namespace InfrastructureApp.Services
                 }
 
                 savedImagePath = $"/uploads/issues/{fileName}";
+
+                // -----------------------------------------------------
+                // 3) Image severity estimation (AI)
+                // -----------------------------------------------------
+
+                report.SeverityStatus = ImageSeverityStatuses.Pending;
+
+                // Build absolute URL for OpenAI
+                var absoluteImageUrl = BuildAbsoluteImageUrl(savedImagePath);
+
+                if (!string.IsNullOrWhiteSpace(absoluteImageUrl))
+                {
+                    var moderationResult = await _imageModerationService.ModerateImageAsync(absoluteImageUrl);
+
+                    if (moderationResult.Performed && moderationResult.IsViable)
+                    {
+                        var severityResult = await _imageSeverityEstimationService
+                            .EstimateSeverityAsync(absoluteImageUrl);
+
+                        if (severityResult.Performed)
+                        {
+                            report.SeverityStatus = severityResult.SeverityStatus;
+                        }
+                    }
+                }
 
                 // Save the hashes onto the report row so we can compare future uploads.
                 report.ImageSha256 = hashes.Sha256;
