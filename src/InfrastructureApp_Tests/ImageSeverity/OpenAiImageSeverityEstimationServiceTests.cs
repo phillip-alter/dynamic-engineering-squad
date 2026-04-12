@@ -282,6 +282,7 @@ namespace InfrastructureApp_Tests.Services.ImageSeverity
         public async Task EstimateSeverityAsync_SendsBearerHeader_AndExpectedRequestBody()
         {
             HttpRequestMessage? capturedRequest = null;
+            string? capturedBody = null;
 
             var nestedOutput = """
             {"severityStatus":"Medium","reason":"Visible crack requiring scheduled repair"}
@@ -289,26 +290,27 @@ namespace InfrastructureApp_Tests.Services.ImageSeverity
 
             var json = $$"""
             {
-              "output": [
+            "output": [
                 {
-                  "content": [
+                "content": [
                     {
-                      "text": {{System.Text.Json.JsonSerializer.Serialize(nestedOutput)}}
+                    "text": {{System.Text.Json.JsonSerializer.Serialize(nestedOutput)}}
                     }
-                  ]
+                ]
                 }
-              ]
+            ]
             }
             """;
 
-            var handler = new FakeHttpMessageHandler((request, _) =>
+            var handler = new FakeHttpMessageHandler(async (request, _) =>
             {
                 capturedRequest = request;
+                capturedBody = await request.Content!.ReadAsStringAsync();
 
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(json)
-                });
+                };
             });
 
             var httpClient = new HttpClient(handler);
@@ -325,19 +327,19 @@ namespace InfrastructureApp_Tests.Services.ImageSeverity
             Assert.That(capturedRequest.Headers.Authorization!.Scheme, Is.EqualTo("Bearer"));
             Assert.That(capturedRequest.Headers.Authorization.Parameter, Is.EqualTo("test-api-key"));
 
-            var body = await capturedRequest.Content!.ReadAsStringAsync();
-            Assert.That(body, Does.Contain("\"model\":\"custom-severity-model\""));
-            Assert.That(body, Does.Contain("\"type\":\"input_text\""));
-            Assert.That(body, Does.Contain("\"type\":\"input_image\""));
-            Assert.That(body, Does.Contain("\"image_url\":\"data:image/png;base64,abc123\""));
-            Assert.That(body, Does.Contain("\"severityStatus\""));
-            Assert.That(body, Does.Contain("\"Critical\""));
+            Assert.That(capturedBody, Is.Not.Null);
+            Assert.That(capturedBody, Does.Contain("\"model\":\"custom-severity-model\""));
+            Assert.That(capturedBody, Does.Contain("\"type\":\"input_text\""));
+            Assert.That(capturedBody, Does.Contain("\"type\":\"input_image\""));
+            Assert.That(capturedBody, Does.Contain("\"image_url\":\"data:image/png;base64,abc123\""));
+            Assert.That(capturedBody, Does.Contain("\"severityStatus\""));
+            Assert.That(capturedBody, Does.Contain("\"Critical\""));
         }
 
         [Test]
         public async Task EstimateSeverityAsync_WhenModelMissing_UsesDefaultModel()
         {
-            HttpRequestMessage? capturedRequest = null;
+            string? capturedBody = null;
 
             var nestedOutput = """
             {"severityStatus":"Low","reason":"Minor cosmetic issue"}
@@ -345,26 +347,26 @@ namespace InfrastructureApp_Tests.Services.ImageSeverity
 
             var json = $$"""
             {
-              "output": [
+            "output": [
                 {
-                  "content": [
+                "content": [
                     {
-                      "text": {{System.Text.Json.JsonSerializer.Serialize(nestedOutput)}}
+                    "text": {{System.Text.Json.JsonSerializer.Serialize(nestedOutput)}}
                     }
-                  ]
+                ]
                 }
-              ]
+            ]
             }
             """;
 
-            var handler = new FakeHttpMessageHandler((request, _) =>
+            var handler = new FakeHttpMessageHandler(async (request, _) =>
             {
-                capturedRequest = request;
+                capturedBody = await request.Content!.ReadAsStringAsync();
 
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(json)
-                });
+                };
             });
 
             var httpClient = new HttpClient(handler);
@@ -373,8 +375,8 @@ namespace InfrastructureApp_Tests.Services.ImageSeverity
 
             await service.EstimateSeverityAsync("data:image/png;base64,abc123");
 
-            var body = await capturedRequest!.Content!.ReadAsStringAsync();
-            Assert.That(body, Does.Contain("\"model\":\"gpt-4.1-mini\""));
+            Assert.That(capturedBody, Is.Not.Null);
+            Assert.That(capturedBody, Does.Contain("\"model\":\"gpt-4.1-mini\""));
         }
 
         private static IConfiguration MakeConfig(string? apiKey, string? model)

@@ -189,25 +189,27 @@ namespace InfrastructureApp_Tests.Services.ImageSeverity
         public async Task ModerateImageAsync_SendsBearerToken_AndExpectedRequestBody()
         {
             HttpRequestMessage? capturedRequest = null;
+            string? capturedBody = null;
 
             var json = """
-                       {
-                         "results": [
-                           {
-                             "flagged": false
-                           }
-                         ]
-                       }
-                       """;
+                    {
+                        "results": [
+                        {
+                            "flagged": false
+                        }
+                        ]
+                    }
+                    """;
 
-            var handler = new FakeHttpMessageHandler((request, _) =>
+            var handler = new FakeHttpMessageHandler(async (request, _) =>
             {
                 capturedRequest = request;
+                capturedBody = await request.Content!.ReadAsStringAsync();
 
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(json)
-                });
+                };
             });
 
             var httpClient = new HttpClient(handler);
@@ -227,36 +229,35 @@ namespace InfrastructureApp_Tests.Services.ImageSeverity
             Assert.That(capturedRequest.Headers.Authorization!.Scheme, Is.EqualTo("Bearer"));
             Assert.That(capturedRequest.Headers.Authorization.Parameter, Is.EqualTo("test-api-key"));
 
-            var body = await capturedRequest.Content!.ReadAsStringAsync();
-
-            Assert.That(body, Does.Contain("\"model\":\"custom-model\""));
-            Assert.That(body, Does.Contain("\"type\":\"image_url\""));
-            Assert.That(body, Does.Contain("\"url\":\"data:image/png;base64,abc123\""));
+            Assert.That(capturedBody, Is.Not.Null);
+            Assert.That(capturedBody, Does.Contain("\"model\":\"custom-model\""));
+            Assert.That(capturedBody, Does.Contain("\"type\":\"image_url\""));
+            Assert.That(capturedBody, Does.Contain("\"url\":\"data:image/png;base64,abc123\""));
         }
 
         [Test]
         public async Task ModerateImageAsync_WhenModelMissing_UsesDefaultModel()
         {
-            HttpRequestMessage? capturedRequest = null;
+            string? capturedBody = null;
 
             var json = """
-                       {
-                         "results": [
-                           {
-                             "flagged": false
-                           }
-                         ]
-                       }
-                       """;
+                    {
+                        "results": [
+                        {
+                            "flagged": false
+                        }
+                        ]
+                    }
+                    """;
 
-            var handler = new FakeHttpMessageHandler((request, _) =>
+            var handler = new FakeHttpMessageHandler(async (request, _) =>
             {
-                capturedRequest = request;
+                capturedBody = await request.Content!.ReadAsStringAsync();
 
-                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
+                return new HttpResponseMessage(HttpStatusCode.OK)
                 {
                     Content = new StringContent(json)
-                });
+                };
             });
 
             var httpClient = new HttpClient(handler);
@@ -268,8 +269,8 @@ namespace InfrastructureApp_Tests.Services.ImageSeverity
 
             await service.ModerateImageAsync("data:image/png;base64,abc123");
 
-            var body = await capturedRequest!.Content!.ReadAsStringAsync();
-            Assert.That(body, Does.Contain("\"model\":\"omni-moderation-latest\""));
+            Assert.That(capturedBody, Is.Not.Null);
+            Assert.That(capturedBody, Does.Contain("\"model\":\"omni-moderation-latest\""));
         }
 
         private static IConfiguration MakeConfig(string? apiKey, string? model)
