@@ -9,7 +9,7 @@ Feature: FAQ Page
     And the page should contain "Frequently Asked Questions"
 
   Scenario: FAQ page is linked from the footer
-    Given I am on the Home page
+    Given I navigate to the Home page
     Then the footer should contain a link to the FAQ page
 
   Scenario: FAQ page explains the purpose of creating an account
