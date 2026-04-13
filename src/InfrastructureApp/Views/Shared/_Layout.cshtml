@@ -53,13 +53,18 @@
                 <a class="navbar-brand" href="#">
                     <i class="fa-solid fa-city"></i> PatchNotes
                 </a>
-               @{
-                    string avatarUrl = AvatarCatalog.ToUrl(null);
+                
+                @{
+                    string avatarUrl = AvatarCatalog.ToUrl(null); // default fallback
 
                     if (User?.Identity?.IsAuthenticated == true)
                     {
                         var currentUser = await UserManager.GetUserAsync(User);
-                        avatarUrl = AvatarCatalog.ToUrl(currentUser?.AvatarKey);
+
+                        if (!string.IsNullOrWhiteSpace(currentUser?.AvatarUrl))
+                            avatarUrl = currentUser.AvatarUrl;          // uploaded photo wins
+                        else
+                            avatarUrl = AvatarCatalog.ToUrl(currentUser?.AvatarKey); // preset fallback
                     }
                 }
                 @if (User.Identity.IsAuthenticated)
@@ -92,9 +97,9 @@
                                     <i class="fa fa-car"></i> Report Issue
                                 </a>
                             </li>
-                            <li class="nav-item">
+                         @* <li class="nav-item">
                                 <a class="nav-link" href="/Achievements"><i class="fa-solid fa-medal"></i> Badges</a>
-                            </li>
+                            </li> *@
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="RoadCamera" asp-action="Index"><i class="fa-solid fa-video"></i> Road Cameras </a>
                             </li>
@@ -137,12 +142,17 @@
 
 
         <footer class="border-top border-secondary text-muted mt-5">
-            <div class="container py-3 d-flex justify-content-between align-items-center">
+            <div class="container py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <span>&copy; @DateTime.Now.Year - PatchNotes</span>
-                <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted">
-                    Privacy Policy
-                </a>
-                 <a asp-controller="Home" asp-action="About" class="text-decoration-none text-muted">About</a>
+                <div class="d-flex gap-3">
+                    <a asp-controller="Home" asp-action="FAQ" class="text-decoration-none text-muted">
+                        <i class="fa-solid fa-circle-question me-1"></i>FAQ
+                    </a>
+                    <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted">
+                        Privacy Policy
+                    </a>
+                    <a asp-controller="Home" asp-action="About" class="text-decoration-none text-muted">About</a>
+                </div>
             </div>
         </footer>
 
