@@ -142,12 +142,17 @@
 
 
         <footer class="border-top border-secondary text-muted mt-5">
-            <div class="container py-3 d-flex justify-content-between align-items-center">
+            <div class="container py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <span>&copy; @DateTime.Now.Year - PatchNotes</span>
-                <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted">
-                    Privacy Policy
-                </a>
-                 <a asp-controller="Home" asp-action="About" class="text-decoration-none text-muted">About</a>
+                <div class="d-flex gap-3">
+                    <a asp-controller="Home" asp-action="FAQ" class="text-decoration-none text-muted">
+                        <i class="fa-solid fa-circle-question me-1"></i>FAQ
+                    </a>
+                    <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted">
+                        Privacy Policy
+                    </a>
+                    <a asp-controller="Home" asp-action="About" class="text-decoration-none text-muted">About</a>
+                </div>
             </div>
         </footer>
 
