@@ -49,8 +49,8 @@ namespace InfrastructureApp_Tests.StepDefinitions
             _html = await _response.Content.ReadAsStringAsync();
         }
 
-        [Given("I am on the Home page")]
-        public async Task GivenIAmOnTheHomePage()
+        [Given("I navigate to the Home page")]
+        public async Task GivenINavigateToTheHomePage()
         {
             _response = await _client.GetAsync("/");
             _html = await _response.Content.ReadAsStringAsync();
