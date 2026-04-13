@@ -22,8 +22,11 @@ Feature: Leaderboard Page
     Then the leaderboard page should contain "alice"
     And the leaderboard page should contain "bob"
 
-  Scenario: Leaderboard displays ranking table columns
-    Given I navigate to the Leaderboard page
+  Scenario: Leaderboard displays ranking table columns when entries exist
+    Given the following leaderboard entries exist
+      | UserId   | UserPoints |
+      | testuser | 100        |
+    When I navigate to the Leaderboard page
     Then the leaderboard page should contain "Rank"
     And the leaderboard page should contain "User"
     And the leaderboard page should contain "Points"

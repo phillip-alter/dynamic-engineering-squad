@@ -50,18 +50,20 @@ namespace InfrastructureApp_Tests.SeleniumTests
         }
 
         [Test]
-        public void Leaderboard_NavLink_NavigatesToLeaderboard()
+        public void Leaderboard_HomePageViewLeaderboardButton_NavigatesToLeaderboard()
         {
             Login();
             Driver.Navigate().GoToUrl($"{BaseUrl}/");
 
             var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
-            var navLink = wait.Until(d =>
-                d.FindElements(By.CssSelector(".nav-link"))
-                 .FirstOrDefault(l => l.Text.Contains("Leaderboard") || l.GetAttribute("href")?.Contains("Leaderboard") == true));
+            var button = wait.Until(d =>
+                d.FindElements(By.CssSelector("a[href*='Leaderboard']"))
+                 .FirstOrDefault(a => a.Displayed));
 
-            Assert.That(navLink, Is.Not.Null);
-            navLink!.Click();
+            Assert.That(button, Is.Not.Null);
+            ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView(true);", button);
+            Thread.Sleep(300);
+            button!.Click();
 
             wait.Until(d => d.Url.Contains("/Leaderboard"));
             Assert.That(Driver.Url, Does.Contain("/Leaderboard"));
