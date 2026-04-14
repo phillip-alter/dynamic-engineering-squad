@@ -1,4 +1,4 @@
-﻿.account-container {
+.account-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -7,10 +7,43 @@
 }
 
 .account-box {
-    background: #ffffff;
+    background: var(--pn-surface, #2A2D3E);
+    color: var(--pn-text, #E0E0E0);
     padding: 40px;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1); 
+    box-shadow: var(--pn-shadow, 0 4px 12px rgba(0,0,0,0.3));
+    border: 1px solid var(--pn-divider, #3A3D5C);
     width: 100%;
-    max-width: 450px; 
+    max-width: 450px;
+}
+
+.account-box h2,
+.account-box h3,
+.account-box label {
+    color: var(--pn-text, #E0E0E0);
+}
+
+.account-box .form-control {
+    background: var(--pn-surface-2, #32364A);
+    border-color: var(--pn-divider, #3A3D5C);
+    color: var(--pn-text, #E0E0E0);
+}
+
+.account-box .form-control:focus {
+    background: var(--pn-surface-2, #32364A);
+    border-color: var(--pn-orange, #FF6B35);
+    color: var(--pn-text, #E0E0E0);
+    box-shadow: 0 0 0 0.2rem rgba(255, 107, 53, 0.25);
+}
+
+.account-box .form-control::placeholder {
+    color: var(--pn-text-muted, #A0A3BD);
+}
+
+.account-box a {
+    color: var(--pn-orange-soft, #FF8C42);
+}
+
+.account-box a:hover {
+    color: var(--pn-orange-glow, #FFA94D);
 }

@@ -15,7 +15,7 @@ public class LeaderboardRepositoryEf : ILeaderboardRepository
 
     public async Task<IReadOnlyCollection<LeaderboardEntry>> GetAllAsync()
     {
-        var results = await _db.Users
+        var rows = await _db.Users
             .Where(u => u.UserName != null)
             .GroupJoin(
                 _db.UserPoints,
@@ -23,13 +23,25 @@ public class LeaderboardRepositoryEf : ILeaderboardRepository
                 p => p.UserId,
                 (u, pts) => new { u, pts }
             )
-            .Select(x => new LeaderboardEntry
+            .Select(x => new
             {
-                UserId = x.u.UserName!,
+                x.u.UserName,
+                x.u.AvatarUrl,
+                x.u.AvatarKey,
                 UserPoints = x.pts.Select(p => p.CurrentPoints).FirstOrDefault(),
                 UpdatedAtUtc = x.pts.Select(p => p.LastUpdated).FirstOrDefault()
             })
             .ToListAsync();
+
+        var results = rows.Select(x => new LeaderboardEntry
+        {
+            UserId = x.UserName!,
+            UserPoints = x.UserPoints,
+            UpdatedAtUtc = x.UpdatedAtUtc,
+            AvatarUrl = !string.IsNullOrWhiteSpace(x.AvatarUrl)
+                ? x.AvatarUrl
+                : AvatarCatalog.ToUrl(x.AvatarKey)
+        }).ToList();
 
         return results.AsReadOnly();
     }

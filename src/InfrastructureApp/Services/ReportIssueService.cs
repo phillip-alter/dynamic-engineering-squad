@@ -15,14 +15,16 @@ namespace InfrastructureApp.Services
         private readonly IWebHostEnvironment _env; //gives access to wwwroot so you can save uploaded files
         private readonly IContentModerationService _moderation; //for openAI moderation of user description
         private readonly IImageHashService _imageHashService; // computes SHA-256 + pHash for duplicate image detection
+        private readonly IHttpClientFactory _httpClientFactory; // for downloading camera images
 
-        public ReportIssueService(ApplicationDbContext db, IReportIssueRepository reports, IWebHostEnvironment env, IContentModerationService moderation, IImageHashService imageHashService)
+        public ReportIssueService(ApplicationDbContext db, IReportIssueRepository reports, IWebHostEnvironment env, IContentModerationService moderation, IImageHashService imageHashService, IHttpClientFactory httpClientFactory)
         {
             _db = db;
             _reports = reports;
             _env = env;
             _moderation = moderation;
             _imageHashService = imageHashService;
+            _httpClientFactory = httpClientFactory;
         }
 
         //service gets delegated to the repo
@@ -150,6 +152,34 @@ namespace InfrastructureApp.Services
                 // Save the hashes onto the report row so we can compare future uploads.
                 report.ImageSha256 = hashes.Sha256;
                 report.ImagePHash = hashes.PHash;
+            }
+
+            // ---------------------------------------------------------
+            // 3) If the report came from a road camera, download the
+            //    snapshot and save it locally so it is always accessible
+            //    from the same origin (avoids mixed-content / auth issues).
+            // ---------------------------------------------------------
+            if (savedImagePath == null && !string.IsNullOrWhiteSpace(report.CameraImageUrl))
+            {
+                try
+                {
+                    var httpClient = _httpClientFactory.CreateClient();
+                    var imageBytes = await httpClient.GetByteArrayAsync(report.CameraImageUrl);
+
+                    var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "issues");
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    var fileName = $"{Guid.NewGuid()}.jpg";
+                    var fullPath = Path.Combine(uploadsFolder, fileName);
+                    await File.WriteAllBytesAsync(fullPath, imageBytes);
+
+                    savedImagePath = $"/uploads/issues/{fileName}";
+                }
+                catch (Exception ex)
+                {
+                    // If the download fails, fall back to storing the external URL
+                    Console.WriteLine($"[ReportIssue] Camera image download failed: {ex.Message}");
+                }
             }
 
             //starts database transaction, saves it if everything completes otherwise gives an error
