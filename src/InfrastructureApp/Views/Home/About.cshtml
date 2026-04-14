@@ -1,68 +1,203 @@
 @{
     ViewData["Title"] = "About";
-
 }
 
-<div class="container py-4">
-    <h1>About Patch Notes</h1>
+<div class="container py-5">
 
-    <section class="mt-4">
-        <h2>Purpose</h2>
-
-        <p>
-            Patch Notes helps community members report everyday infrastructure issues so the right people can
-            see them and take action. The goal is to make it easier to share concerns like potholes, damaged signs,
-            unsafe sidewalks, or other public-space problems while enjoying a new game.
+    <!-- Hero -->
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">
+            <i class="fa-solid fa-city me-2" style="color:var(--pn-orange);"></i>About PatchNotes
+        </h1>
+        <p class="lead" style="color:var(--pn-text-muted);">
+            A community-powered platform for reporting and tracking city infrastructure issues.
         </p>
-    </section>
+        <hr class="w-50 mx-auto" style="border-color:var(--pn-divider);" />
+    </div>
 
-    <section class="mt-4">
-        <h2>The problem we're solving</h2>
-        <p>
-            Many people notice issues in their neighborhood but don’t know where to report them, or the process feels
-            confusing and time-consuming. This app provides a simple place to submit reports and view helpful, high-level
-            information about what has been reported.
-        </p>
-    </section>
+    <!-- What is PatchNotes -->
+    <div class="pn-card-primary card mb-4">
+        <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-3">
+                <i class="fa-solid fa-bullseye me-2" style="color:var(--pn-orange-soft);"></i>What is PatchNotes?
+            </h2>
+            <p>
+                PatchNotes is a gamified infrastructure reporting platform built for residents, visitors, and city staff.
+                It makes it fast and rewarding to flag real-world problems — potholes, broken streetlights, damaged
+                sidewalks, unsafe road conditions — so they can be tracked, reviewed, and fixed.
+            </p>
+            <p class="mb-0">
+                Think of it as a live patch feed for your city. Every report is a bug ticket filed against the
+                urban environment, and every verified fix closes that ticket. The community earns XP along the way.
+            </p>
+        </div>
+    </div>
 
-    <section class="mt-4">
-        <h2>Who it's for</h2>
-        <ul>
-            <li><strong>Residents and visitors</strong> who want to report infrastrucutre problems</li>
-            <li><strong>City staff (or admins)</strong> who review reports and update public-facing information</li>
-        </ul>
-    </section>
+    <!-- The Problem -->
+    <div class="pn-card-primary card mb-4">
+        <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-3">
+                <i class="fa-solid fa-triangle-exclamation me-2" style="color:var(--pn-red);"></i>The Problem We're Solving
+            </h2>
+            <p>
+                Most people notice infrastructure issues every day but never report them — either because the
+                reporting process is unclear, too time-consuming, or simply not visible. Problems go unfixed for
+                months because there is no easy channel for residents to raise them.
+            </p>
+            <p class="mb-0">
+                PatchNotes removes that friction. One description, one photo, one map pin — and the issue is on record.
+            </p>
+        </div>
+    </div>
 
-    <section class="mt-4">
-        <h2>How it works (high-level)</h2>
-        <ul>
-            <li>Users can submit infrastructure issue reports.</li>
-            <li>Reports are reviewed and used to help track common issues.</li>
-            <li>The app may show summary information and community contributions.</li>
-        </ul>
-        <p class="text-muted">
-            Note: This page is intentionally high-level and does not describe sensitive technical implementation details.
-        </p>
-    </section>
+    <!-- Features -->
+    <div class="pn-card-primary card mb-4">
+        <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-4">
+                <i class="fa-solid fa-list-check me-2" style="color:var(--pn-green);"></i>What You Can Do
+            </h2>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="d-flex gap-3 align-items-start">
+                        <i class="fa-solid fa-camera fa-lg mt-1" style="color:var(--pn-blue);"></i>
+                        <div>
+                            <strong>Report Issues</strong>
+                            <p class="mb-0 small" style="color:var(--pn-text-muted);">
+                                Submit a description, photo, and map location for any infrastructure problem you spot.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-3 align-items-start">
+                        <i class="fa-solid fa-check-double fa-lg mt-1" style="color:var(--pn-green);"></i>
+                        <div>
+                            <strong>Verify Fixes</strong>
+                            <p class="mb-0 small" style="color:var(--pn-text-muted);">
+                                Confirm when the city has completed a repair and earn Reputation Points for doing so.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-3 align-items-start">
+                        <i class="fa-solid fa-map-pin fa-lg mt-1" style="color:var(--pn-orange);"></i>
+                        <div>
+                            <strong>Browse Nearby Issues</strong>
+                            <p class="mb-0 small" style="color:var(--pn-text-muted);">
+                                Use GPS or a manual location to see all reported issues within a radius of your choice on an interactive map.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-3 align-items-start">
+                        <i class="fa-solid fa-video fa-lg mt-1" style="color:var(--pn-purple);"></i>
+                        <div>
+                            <strong>Live Road Cameras</strong>
+                            <p class="mb-0 small" style="color:var(--pn-text-muted);">
+                                Browse live traffic camera snapshots from ODOT's TripCheck network and report issues directly from what you see.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-3 align-items-start">
+                        <i class="fa-solid fa-trophy fa-lg mt-1" style="color:var(--pn-orange-glow);"></i>
+                        <div>
+                            <strong>Leaderboard &amp; XP</strong>
+                            <p class="mb-0 small" style="color:var(--pn-text-muted);">
+                                Earn points for every report and verification. Climb the community leaderboard and see where you rank among fellow Pathfinders.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex gap-3 align-items-start">
+                        <i class="fa-solid fa-user fa-lg mt-1" style="color:var(--pn-blue);"></i>
+                        <div>
+                            <strong>Custom Avatar</strong>
+                            <p class="mb-0 small" style="color:var(--pn-text-muted);">
+                                Choose from a set of preset avatars or upload your own photo to personalise your profile.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <section class="mt-4">
-        <h2>Project info</h2>
-        <ul>
-            <li><strong>Project:</strong> InfrastructureApp</li>
-            <li><strong>Created by:</strong> (Dynamic Engineering Squad)</li>
-            <li><strong>Team Members:</strong>Erin Anderson, Julian Aguilar, Sunair Iqbal, Phillip Alter</li>
-            <li><strong>Course/Organization:</strong>Software Engineering/WOU</li>
-        </ul>
-    </section>
+    <!-- Tech -->
+    <div class="pn-card-primary card mb-4">
+        <div class="card-body p-4">
+            <h2 class="h4 fw-bold mb-3">
+                <i class="fa-solid fa-code me-2" style="color:var(--pn-blue);"></i>Built With
+            </h2>
+            <div class="d-flex flex-wrap gap-2">
+                <span class="badge fs-6 px-3 py-2" style="background:var(--pn-surface-2);color:var(--pn-text);">ASP.NET Core MVC</span>
+                <span class="badge fs-6 px-3 py-2" style="background:var(--pn-surface-2);color:var(--pn-text);">C#</span>
+                <span class="badge fs-6 px-3 py-2" style="background:var(--pn-surface-2);color:var(--pn-text);">Entity Framework Core</span>
+                <span class="badge fs-6 px-3 py-2" style="background:var(--pn-surface-2);color:var(--pn-text);">SQLite</span>
+                <span class="badge fs-6 px-3 py-2" style="background:var(--pn-surface-2);color:var(--pn-text);">Bootstrap 5</span>
+                <span class="badge fs-6 px-3 py-2" style="background:var(--pn-surface-2);color:var(--pn-text);">Google Maps API</span>
+                <span class="badge fs-6 px-3 py-2" style="background:var(--pn-surface-2);color:var(--pn-text);">TripCheck / ODOT API</span>
+                <span class="badge fs-6 px-3 py-2" style="background:var(--pn-surface-2);color:var(--pn-text);">ASP.NET Core Identity</span>
+                <span class="badge fs-6 px-3 py-2" style="background:var(--pn-surface-2);color:var(--pn-text);">OpenAI Moderation</span>
+                <span class="badge fs-6 px-3 py-2" style="background:var(--pn-surface-2);color:var(--pn-text);">Google Translate</span>
+            </div>
+        </div>
+    </div>
 
-    <!-- <section class="mt-4">
-        <h2>Support</h2>
-        <p>
-            Need help or have feedback? Contact us at:
-            <a href="mailto:support@example.com">support@example.com</a>
-        </p>
-        <p>
-            You can also check the <a asp-controller="Home" asp-action="FAQ">FAQ</a> if it’s available in the app.
-        </p>
-    </section> -->
+    <!-- Team -->
+    <div class="pn-card-primary card mb-4">
+        <div class="card-body p-4 text-center">
+            <h2 class="h4 fw-bold mb-1" style="color:var(--pn-orange-soft);">
+                <i class="fa-solid fa-users me-2"></i>The Team
+            </h2>
+            <p class="mb-4" style="color:var(--pn-text-muted);">
+                PatchNotes is a project by the <strong>Dynamic Engineering Squad</strong>,
+                a team of four Software Engineering students at Western Oregon University.
+            </p>
+            <div class="row g-3 justify-content-center">
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded" style="background:var(--pn-surface-2);">
+                        <i class="fa-solid fa-code fa-2x mb-2" style="color:var(--pn-orange);"></i>
+                        <div class="fw-bold">Erin Anderson</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded" style="background:var(--pn-surface-2);">
+                        <i class="fa-solid fa-code fa-2x mb-2" style="color:var(--pn-blue);"></i>
+                        <div class="fw-bold">Julian Aguilar</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded" style="background:var(--pn-surface-2);">
+                        <i class="fa-solid fa-code fa-2x mb-2" style="color:var(--pn-green);"></i>
+                        <div class="fw-bold">Sunair Iqbal</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="p-3 rounded" style="background:var(--pn-surface-2);">
+                        <i class="fa-solid fa-code fa-2x mb-2" style="color:var(--pn-purple);"></i>
+                        <div class="fw-bold">Phillip Alter</div>
+                    </div>
+                </div>
+            </div>
+            <p class="mt-3 small mb-0" style="color:var(--pn-text-muted);">
+                Software Engineering &mdash; Western Oregon University
+            </p>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center mt-5">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-pn-orange btn-lg me-2">
+            <i class="fa-solid fa-map me-1"></i> Go to Mission Control
+        </a>
+        <a asp-controller="Home" asp-action="FAQ" class="btn btn-outline-secondary btn-lg">
+            <i class="fa-solid fa-circle-question me-1"></i> Read the FAQ
+        </a>
+    </div>
+
 </div>
