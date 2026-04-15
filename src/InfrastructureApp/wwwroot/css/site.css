@@ -1,4 +1,20 @@
 /* =========================
+   Dark Theme Color Palette
+   ========================= */
+:root {
+  --dark-bg:          #2B2B2B;   /* charcoal page background */
+  --dark-surface:     #363636;   /* card / panel surface */
+  --dark-border:      #484848;   /* subtle borders */
+  --text-primary:     #E8E8E8;   /* main body text (soft off-white) */
+  --text-muted:       #A0A0A0;   /* secondary / muted text */
+
+  /* Safety-object highlights */
+  --safety-orange:    #FF6600;   /* traffic cone / safety vest */
+  --safety-yellow:    #FFD600;   /* caution tape */
+  --safety-blue:      #1B7FD4;   /* hard-hat / safety equipment */
+}
+
+/* =========================
    Existing base site styles
    ========================= */
 html {
@@ -12,7 +28,7 @@ html {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: 0 0 0 0.1rem var(--dark-surface), 0 0 0 0.25rem var(--safety-blue);
 }
 
 html {
@@ -22,8 +38,175 @@ html {
 
 body {
   margin-bottom: 60px;
-   top: 0px !important; /* Added to prevents Google Translate banner from shifting page down */
+  top: 0px !important; /* Added to prevents Google Translate banner from shifting page down */
+  background-color: var(--dark-bg);
+  color: var(--text-primary);
 }
+
+/* =========================
+   Global Bootstrap overrides
+   ========================= */
+
+/* Cards */
+.card {
+  background-color: var(--dark-surface);
+  border-color: var(--dark-border);
+  color: var(--text-primary);
+}
+
+.card-header {
+  background-color: var(--dark-border);
+  border-color: var(--dark-border);
+  color: var(--text-primary);
+}
+
+/* Tables */
+.table {
+  color: var(--text-primary);
+  border-color: var(--dark-border);
+}
+
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+}
+
+.table-hover > tbody > tr:hover > * {
+  background-color: rgba(255, 102, 0, 0.1);
+  color: var(--text-primary);
+}
+
+/* Form controls */
+.form-control, .form-select {
+  background-color: var(--dark-surface);
+  border-color: var(--dark-border);
+  color: var(--text-primary);
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: var(--dark-surface);
+  border-color: var(--safety-blue);
+  color: var(--text-primary);
+}
+
+.form-control::placeholder {
+  color: var(--text-muted);
+}
+
+/* Badges */
+.badge.bg-primary   { background-color: var(--safety-blue)   !important; }
+.badge.bg-warning   { background-color: var(--safety-yellow) !important; color: #1a1a1a !important; }
+.badge.bg-danger    { background-color: var(--safety-orange) !important; }
+
+/* Buttons */
+.btn-primary {
+  background-color: var(--safety-blue);
+  border-color: var(--safety-blue);
+}
+.btn-primary:hover {
+  background-color: #1568b3;
+  border-color: #1568b3;
+}
+
+.btn-warning {
+  background-color: var(--safety-yellow);
+  border-color: var(--safety-yellow);
+  color: #1a1a1a;
+}
+.btn-warning:hover {
+  background-color: #e6c100;
+  border-color: #e6c100;
+  color: #1a1a1a;
+}
+
+.btn-danger, .btn-orange {
+  background-color: var(--safety-orange);
+  border-color: var(--safety-orange);
+  color: #fff;
+}
+.btn-danger:hover, .btn-orange:hover {
+  background-color: #e05a00;
+  border-color: #e05a00;
+}
+
+/* Alerts */
+.alert {
+  background-color: var(--dark-surface);
+  border-color: var(--dark-border);
+  color: var(--text-primary);
+}
+
+/* Modals */
+.modal-content {
+  background-color: var(--dark-surface);
+  color: var(--text-primary);
+  border-color: var(--dark-border);
+}
+
+.modal-header, .modal-footer {
+  border-color: var(--dark-border);
+}
+
+/* Dropdowns */
+.dropdown-menu {
+  background-color: var(--dark-surface);
+  border-color: var(--dark-border);
+}
+
+.dropdown-item {
+  color: var(--text-primary);
+}
+
+.dropdown-item:hover {
+  background-color: var(--dark-border);
+  color: var(--text-primary);
+}
+
+/* Links */
+a:not(.btn):not(.nav-link):not(.navbar-brand):not(.dropdown-item) {
+  color: var(--safety-blue);
+}
+
+a:not(.btn):not(.nav-link):not(.navbar-brand):not(.dropdown-item):hover {
+  color: var(--safety-orange);
+}
+
+/* Muted text */
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Borders */
+.border, .border-top, .border-bottom, .border-secondary {
+  border-color: var(--dark-border) !important;
+}
+
+/* Input groups */
+.input-group-text {
+  background-color: var(--dark-border);
+  border-color: var(--dark-border);
+  color: var(--text-primary);
+}
+
+/* List groups */
+.list-group-item {
+  background-color: var(--dark-surface);
+  border-color: var(--dark-border);
+  color: var(--text-primary);
+}
+
+/* Page headings accent */
+h1, h2, h3 {
+  color: var(--text-primary);
+}
+
+/* Safety-color utility classes */
+.text-safety-orange { color: var(--safety-orange) !important; }
+.text-safety-yellow { color: var(--safety-yellow) !important; }
+.text-safety-blue   { color: var(--safety-blue)   !important; }
+.bg-safety-orange   { background-color: var(--safety-orange) !important; }
+.bg-safety-yellow   { background-color: var(--safety-yellow) !important; color: #1a1a1a !important; }
+.bg-safety-blue     { background-color: var(--safety-blue)   !important; }
 
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
