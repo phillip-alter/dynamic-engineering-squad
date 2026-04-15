@@ -47,11 +47,42 @@ body {
    Global Bootstrap overrides
    ========================= */
 
-/* Cards */
+/* Cards — lifted off the charcoal page */
 .card {
   background-color: var(--dark-surface);
   border-color: var(--dark-border);
   color: var(--text-primary);
+  /* Two-layer shadow: deep black base + faint orange warmth so it reads on dark bg */
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.65),
+    0 1px 4px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 102, 0, 0.08);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+/* Clickable cards — visible resting glow, stronger on hover */
+.card[role="button"],
+a .card,
+.card.clickable {
+  cursor: pointer;
+  /* Subtle orange glow at rest so the card reads as interactive */
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.65),
+    0 1px 4px rgba(0, 0, 0, 0.5),
+    0 0 12px rgba(255, 102, 0, 0.18),
+    0 0 0 1px rgba(255, 102, 0, 0.25);
+  border-color: rgba(255, 102, 0, 0.3);
+}
+
+.card[role="button"]:hover,
+a:hover .card,
+.card.clickable:hover {
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.7),
+    0 0 22px rgba(255, 102, 0, 0.45),
+    0 0 0 1px rgba(255, 102, 0, 0.6);
+  border-color: var(--safety-orange);
+  transform: translateY(-4px);
 }
 
 .card-header {
@@ -71,9 +102,20 @@ body {
   color: var(--text-primary);
 }
 
+/* All table body rows are hoverable — orange highlight */
+.table tbody tr {
+  transition: background-color 0.15s ease, color 0.15s ease;
+  cursor: default;
+}
+
+.table tbody tr:hover > * {
+  background-color: rgba(255, 102, 0, 0.12);
+  color: var(--safety-orange);
+}
+
 .table-hover > tbody > tr:hover > * {
-  background-color: rgba(255, 102, 0, 0.1);
-  color: var(--text-primary);
+  background-color: rgba(255, 102, 0, 0.12);
+  color: var(--safety-orange);
 }
 
 /* Form controls */
@@ -129,10 +171,34 @@ body {
   border-color: #e05a00;
 }
 
-/* Alerts */
+/* Alerts — all variants darkened */
 .alert {
   background-color: var(--dark-surface);
   border-color: var(--dark-border);
+  color: var(--text-primary);
+}
+
+.alert-info {
+  background-color: rgba(27, 127, 212, 0.15);
+  border-color: var(--safety-blue);
+  color: var(--text-primary);
+}
+
+.alert-warning {
+  background-color: rgba(255, 214, 0, 0.12);
+  border-color: var(--safety-yellow);
+  color: var(--text-primary);
+}
+
+.alert-danger {
+  background-color: rgba(255, 102, 0, 0.15);
+  border-color: var(--safety-orange);
+  color: var(--text-primary);
+}
+
+.alert-success {
+  background-color: rgba(27, 127, 212, 0.15);
+  border-color: var(--safety-blue);
   color: var(--text-primary);
 }
 
@@ -141,10 +207,42 @@ body {
   background-color: var(--dark-surface);
   color: var(--text-primary);
   border-color: var(--dark-border);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.7);
 }
 
 .modal-header, .modal-footer {
   border-color: var(--dark-border);
+}
+
+/* Modal header accent strip */
+.modal-header {
+  border-top: 3px solid var(--safety-orange);
+}
+
+/* Close button — invert so it's visible on dark backgrounds */
+.btn-close {
+  filter: invert(1) grayscale(100%) brightness(1.5);
+}
+
+/* Modal image border */
+.modal-body img.img-fluid {
+  border-color: var(--dark-border) !important;
+}
+
+/* Modal map container */
+#modalReportMap {
+  border-color: var(--dark-border) !important;
+  border-radius: 6px;
+}
+
+/* Outline buttons — orange on hover */
+.btn-outline-primary:hover,
+.btn-outline-secondary:hover,
+.btn-outline-info:hover,
+.btn-outline-light:hover {
+  background-color: var(--safety-orange) !important;
+  border-color: var(--safety-orange) !important;
+  color: #fff !important;
 }
 
 /* Dropdowns */
@@ -155,11 +253,12 @@ body {
 
 .dropdown-item {
   color: var(--text-primary);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .dropdown-item:hover {
-  background-color: var(--dark-border);
-  color: var(--text-primary);
+  background-color: rgba(255, 102, 0, 0.15);
+  color: var(--safety-orange);
 }
 
 /* Links */
@@ -193,6 +292,22 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):not(.dropdown-item):hover {
   background-color: var(--dark-surface);
   border-color: var(--dark-border);
   color: var(--text-primary);
+  transition: background-color 0.15s ease, border-left-color 0.15s ease, color 0.15s ease;
+}
+
+/* Clickable list items (Latest Reports, Home recent activity) */
+.list-group-item-action:hover,
+.home-report-item:hover {
+  background-color: rgba(255, 102, 0, 0.12);
+  border-left: 3px solid var(--safety-orange);
+  color: var(--text-primary);
+  cursor: pointer;
+}
+
+.list-group-item-action:hover .fw-bold,
+.home-report-item:hover h6,
+.home-report-item:hover .home-report-link-text {
+  color: var(--safety-orange);
 }
 
 /* Page headings accent */
@@ -298,14 +413,24 @@ h1, h2, h3 {
 /*================
   Road Camera Styling
   ===================*/
-  .camera-card {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+.camera-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     cursor: pointer;
+    /* Resting glow — same treatment as other clickable cards */
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.65),
+        0 0 12px rgba(255, 102, 0, 0.18),
+        0 0 0 1px rgba(255, 102, 0, 0.25);
+    border-color: rgba(255, 102, 0, 0.3);
 }
 
 .camera-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 10px 18px rgba(0,0,0,0.18);
+    box-shadow:
+        0 10px 32px rgba(0, 0, 0, 0.7),
+        0 0 22px rgba(255, 102, 0, 0.45),
+        0 0 0 1px rgba(255, 102, 0, 0.6);
+    border-color: var(--safety-orange);
 }
 
 /* =========================
