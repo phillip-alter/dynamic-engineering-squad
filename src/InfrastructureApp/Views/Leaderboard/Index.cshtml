@@ -36,7 +36,8 @@ else
 }
 @foreach (var entry in Model.Entries)
 {
-    <tr style="background-color: var(--dark-surface); color: var(--text-primary); border-color: var(--dark-border);">
+    <tr style="background-color: var(--dark-surface); color: var(--text-primary); border-color: var(--dark-border); cursor: pointer;"
+        onclick="window.location='/Dashboard?username=@entry.UserId'">
         <td style="vertical-align: middle;">
             @if (rank == 1)
             {
