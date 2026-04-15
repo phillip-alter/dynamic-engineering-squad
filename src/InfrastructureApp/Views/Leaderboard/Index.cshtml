@@ -20,10 +20,11 @@ else
 {
     <div class="card">
         <div class="card-body p-0">
-            <table class="table table-striped mb-0">
+            <table class="table mb-0" style="--bs-table-bg: var(--dark-surface); --bs-table-striped-bg: var(--dark-surface); --bs-table-hover-bg: rgba(255,102,0,0.1);">
                 <thead>
-                    <tr style="border-bottom: 2px solid var(--safety-orange);">
+                    <tr style="border-bottom: 2px solid var(--safety-orange); background-color: var(--dark-surface);">
                         <th style="color: var(--safety-yellow);">Rank</th>
+                        <th style="color: var(--safety-yellow);">Avatar</th>
                         <th style="color: var(--safety-yellow);">User</th>
                         <th style="color: var(--safety-yellow);">Points</th>
                         <th style="color: var(--safety-yellow);">Updated</th>
@@ -35,8 +36,8 @@ else
 }
 @foreach (var entry in Model.Entries)
 {
-    <tr>
-        <td>
+    <tr style="background-color: var(--dark-surface); color: var(--text-primary); border-color: var(--dark-border);">
+        <td style="vertical-align: middle;">
             @if (rank == 1)
             {
                 <span class="badge" style="background-color: #FFD600; color: #1a1a1a; font-size: 0.85rem;">🥇 1</span>
@@ -54,9 +55,13 @@ else
                 <span class="text-muted">@rank</span>
             }
         </td>
-        <td class="fw-semibold">@entry.UserId</td>
-        <td><span class="text-safety-blue fw-bold">@entry.UserPoints</span></td>
-        <td class="text-muted small">@entry.UpdatedAtUtc.ToLocalTime().ToString("g")</td>
+        <td style="vertical-align: middle;">
+            <img src="@entry.AvatarUrl" alt="avatar"
+                 style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--dark-border);" />
+        </td>
+        <td class="fw-semibold text-muted" style="vertical-align: middle;">@entry.UserId</td>
+        <td style="vertical-align: middle;"><span class="text-safety-blue fw-bold">@entry.UserPoints</span></td>
+        <td class="text-muted small" style="vertical-align: middle;">@entry.UpdatedAtUtc.ToLocalTime().ToString("g")</td>
     </tr>
 
     rank++;
