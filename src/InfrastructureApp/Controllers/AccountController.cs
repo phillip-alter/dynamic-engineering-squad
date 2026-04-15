@@ -1,9 +1,11 @@
-﻿using InfrastructureApp.ViewModels.Account;
+﻿using System.Security.Claims;
+using InfrastructureApp.ViewModels.Account;
 using InfrastructureApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using InfrastructureApp.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace InfrastructureApp.Controllers
 {
@@ -11,15 +13,19 @@ namespace InfrastructureApp.Controllers
     {
         private readonly UserManager<Users> _userManager;
         private readonly SignInManager<Users> _signInManager;
-
+        private readonly IUserService _userService;
         private readonly IAvatarService _avatarService;
+        private readonly IEmailService _emailService;
+        private readonly ILogger<AccountController> _logger;
 
-        public AccountController(UserManager<Users> userManager,  SignInManager<Users> signInManager, IAvatarService avatarService)
+        public AccountController(UserManager<Users> userManager, SignInManager<Users> signInManager, IAvatarService avatarService, IUserService userService, IEmailService emailService, ILogger<AccountController> logger)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _avatarService = avatarService;
-            
+            _userService = userService;
+            _emailService = emailService;
+            _logger = logger;
         }
 
         public IActionResult Login()
@@ -41,6 +47,19 @@ namespace InfrastructureApp.Controllers
             {
                 return RedirectToAction("Index", "Home");
             }
+
+            if (result.IsNotAllowed)
+            {
+                var user = await _userManager.FindByNameAsync(model.UserName);
+                if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
+                {
+                    ModelState.AddModelError(string.Empty, "You must confirm your email before logging in.");
+                    ViewBag.ShowResendButton = true;
+                    ViewBag.UserId = user.Id;
+                    return View(model);
+                }
+            }
+
             ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return View(model);
         }
@@ -70,7 +89,16 @@ namespace InfrastructureApp.Controllers
 
             if (result.Succeeded)
             {
-                return RedirectToAction("Index","Home");
+                await _userManager.AddToRoleAsync(user, "User");
+                
+                var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var callbackUrl = Url.Action("ConfirmEmail", "Account", 
+                    new { userId = user.Id, token = token }, protocol: HttpContext.Request.Scheme);
+
+                await _emailService.SendEmailAsync(model.Email, "Confirm your email",
+                    $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.");
+
+                return RedirectToAction("RegisterConfirmation", new { email = model.Email });
             }
 
             foreach (var error in result.Errors)
@@ -78,6 +106,96 @@ namespace InfrastructureApp.Controllers
                 ModelState.AddModelError(string.Empty, error.Description);
             }
 
+            return View(model);
+        }
+
+        [HttpGet]
+        public IActionResult RegisterConfirmation(string email)
+        {
+            ViewBag.Email = email;
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (userId == null || token == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{userId}'.");
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (!result.Succeeded)
+            {
+                return View("ErrorConfirmingEmail");
+            }
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResendEmailConfirmation(string userId)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                return BadRequest();
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl = Url.Action("ConfirmEmail", "Account", 
+                new { userId = user.Id, token = token }, protocol: HttpContext.Request.Scheme);
+
+            await _emailService.SendEmailAsync(user.Email!, "Confirm your email",
+                $"Please confirm your account by <a href='{callbackUrl}'>clicking here</a>.");
+
+            ViewBag.Message = "Verification email sent. Please check your inbox.";
+            return View("RegisterConfirmation", new { email = user.Email });
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Admin(int page = 1)
+        {
+            var pageSize = 10;
+            var model = await _userService.GetUsersWithRolesAsync(page, pageSize);
+            return View(model);
+        }
+        
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EditRoles(string userId)
+        {
+            var model = await _userService.GetManageRolesViewModelAsync(userId);
+            return model == null ? NotFound() : View(model);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> EditRoles(ManageUserRolesViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            string currentAdminId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var result = await _userService.UpdateUserRolesAsync(model, currentAdminId);
+        
+            if (result.Succeeded) return RedirectToAction("Admin");
+
+            foreach (var error in result.Errors) ModelState.AddModelError("", error.Description);
             return View(model);
         }
         
@@ -99,7 +217,6 @@ namespace InfrastructureApp.Controllers
             var vm = _avatarService.BuildChooseAvatarViewModel(user);
             return View(vm);
         }
-
         [Authorize]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -108,11 +225,23 @@ namespace InfrastructureApp.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Login");
 
-            var (success, error) = await _avatarService.SaveAvatarAsync(user, vm.SelectedAvatarKey);
-            if (!success)
-                return View(_avatarService.BuildChooseAvatarViewModel(user, vm.SelectedAvatarKey, error));
+            (bool Success, string? ErrorMessage) result;
 
-            await _signInManager.RefreshSignInAsync(user); 
+            if (vm.UseUploadedImage)
+            {
+                result = await _avatarService.SaveUploadedAvatarAsync(user, vm.UploadedImage);
+            }
+            else
+            {
+                result = await _avatarService.SaveAvatarAsync(user, vm.SelectedAvatarKey);
+            }
+
+            if (!result.Success)
+            {
+                return View(_avatarService.BuildChooseAvatarViewModel(user, vm.SelectedAvatarKey, result.ErrorMessage));
+            }
+
+            await _signInManager.RefreshSignInAsync(user);
             return RedirectToAction("Index", "Home");
         }
     }
