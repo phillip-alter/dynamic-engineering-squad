@@ -46,6 +46,11 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
+                builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+                {
+                    options.ValidationInterval = TimeSpan.Zero;
+                });
+
                 builder.Services.AddControllersWithViews().AddApplicationPart(typeof(Program).Assembly);
                 
                 builder.Services.Configure<InfrastructureApp.Services.TripCheckOptions>(options => {
