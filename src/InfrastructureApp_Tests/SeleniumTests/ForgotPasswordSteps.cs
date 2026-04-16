@@ -60,6 +60,9 @@ namespace InfrastructureApp_Tests.StepDefinitions
         public void ThenIShouldSeeAMessage(string expectedMessage)
         {
             var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(5));
+
+            wait.IgnoreExceptionTypes(typeof(StaleElementReferenceException), typeof(NoSuchElementException));
+
             try
             {
                 wait.Until(d => d.FindElement(By.TagName("body")).Text.Contains(expectedMessage));
