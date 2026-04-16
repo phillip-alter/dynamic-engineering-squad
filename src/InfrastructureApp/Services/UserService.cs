@@ -91,26 +91,17 @@ public class UserService : IUserService
         return await _userManager.AddToRolesAsync(user, selectedRoles);
     }
 
-    public async Task<IdentityResult> DeleteUserAsync(string userId, string adminId)
+    public async Task<IdentityResult> DeleteAccountAsync(string userId, string currentPassword)
     {
         var user = await _userManager.FindByIdAsync(userId);
         if (user == null) return IdentityResult.Failed(new IdentityError { Description = "User not found" });
 
-        if (user.Id == adminId)
+        var passwordValid = await _userManager.CheckPasswordAsync(user, currentPassword);
+        if (!passwordValid)
         {
-            return IdentityResult.Failed(new IdentityError
-            {
-                Description = "You cannot delete your own account."
-            });
+            return IdentityResult.Failed(new IdentityError { Description = "Incorrect password." });
         }
 
-        // Before deleting the user, we should probably handle related data if any.
-        // Identity handles some things, but custom data like UserPoints might need manual cleanup if not cascading.
-        // However, the prompt says "immediately terminated, and their credentials are invalidated".
-        // Identity's DeleteAsync handles removing the user and their claims/roles.
-        // To invalidate sessions, we can update the security stamp before deleting, 
-        // though deleting the user usually makes the next check fail.
-        
         await _userManager.UpdateSecurityStampAsync(user);
         return await _userManager.DeleteAsync(user);
     }
