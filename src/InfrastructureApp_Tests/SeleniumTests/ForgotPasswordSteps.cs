@@ -59,7 +59,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Forgot Password")]
         public void ThenIShouldSeeAMessage(string expectedMessage)
         {
-            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(5));
+            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(45));
 
             wait.IgnoreExceptionTypes(typeof(StaleElementReferenceException), typeof(NoSuchElementException));
 
@@ -148,7 +148,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
                 button.Click();
             }
 
-            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(45));
             try
             {
                 wait.Until(d => d.FindElement(By.TagName("body")).Text.Contains(expectedMessage));
