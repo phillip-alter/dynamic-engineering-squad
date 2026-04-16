@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using InfrastructureApp.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace InfrastructureApp.Controllers
 {
@@ -259,9 +260,7 @@ namespace InfrastructureApp.Controllers
             var user = await _userManager.FindByEmailAsync(model.Email);
             if (user == null)
             {
-                // Don't reveal that the user does not exist
-                TempData["ResetPasswordMessage"] = "Your password has been reset successfully.";
-                return View();
+                return BadRequest("Invalid or expired token.");
             }
 
             var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
@@ -271,18 +270,18 @@ namespace InfrastructureApp.Controllers
                 return View();
             }
 
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-            
-            // Re-check for token error to give a better message for BDD
             if (result.Errors.Any(e => e.Code == "InvalidToken"))
             {
-                ModelState.AddModelError(string.Empty, "Invalid or expired token.");
+                return BadRequest("Invalid or expired token.");
             }
 
-            return View();
+            foreach (var errorItem in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, errorItem.Description);
+            }
+            TempData["ResetPasswordErrorMessage"] = string.Join(" ", result.Errors.Select(e => e.Description));
+
+            return View(model);
         }
 
         [HttpGet]
