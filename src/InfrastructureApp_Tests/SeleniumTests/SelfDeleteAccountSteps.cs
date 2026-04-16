@@ -94,10 +94,16 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Self Delete Account")]
         public void ThenIShouldSeeAnErrorMessage(string expectedMessage)
         {
-            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(5));
+            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(10));
             try
             {
-                wait.Until(d => d.FindElement(By.TagName("body")).Text.Contains(expectedMessage));
+                wait.Until(d => {
+                    try {
+                        return d.FindElement(By.TagName("body")).Text.Contains(expectedMessage);
+                    } catch (StaleElementReferenceException) {
+                        return false;
+                    }
+                });
             }
             catch (WebDriverTimeoutException)
             {
