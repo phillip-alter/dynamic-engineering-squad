@@ -200,6 +200,92 @@ namespace InfrastructureApp.Controllers
         }
         
         [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ForgotPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                // Don't reveal that the user does not exist or is not confirmed
+                TempData["ForgotPasswordMessage"] = "If your email is in our system, you will receive a reset link shortly.";
+                return View();
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var callbackUrl = Url.Action("ResetPassword", "Account", new { token, email = model.Email }, Request.Scheme);
+            
+            await _emailService.SendEmailAsync(model.Email, "Reset Password",
+                $"Please reset your password by <a href='{callbackUrl}'>clicking here</a>.");
+
+            TempData["ForgotPasswordMessage"] = "If your email is in our system, you will receive a reset link shortly.";
+            return View();
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult ResetPassword(string? token = null, string? email = null)
+        {
+            if (token == null || email == null)
+            {
+                return BadRequest("A token and email must be supplied for password reset.");
+            }
+            var model = new ResetPasswordViewModel { Token = token, Email = email };
+            return View(model);
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                // Don't reveal that the user does not exist
+                TempData["ResetPasswordMessage"] = "Your password has been reset successfully.";
+                return View();
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, model.Token, model.Password);
+            if (result.Succeeded)
+            {
+                TempData["ResetPasswordMessage"] = "Your password has been reset successfully.";
+                return View();
+            }
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            
+            // Re-check for token error to give a better message for BDD
+            if (result.Errors.Any(e => e.Code == "InvalidToken"))
+            {
+                ModelState.AddModelError(string.Empty, "Invalid or expired token.");
+            }
+
+            return View();
+        }
+
+        [HttpGet]
         public IActionResult AccessDenied()
         {
             return View();
