@@ -12,20 +12,13 @@ using NUnit.Framework;
 namespace InfrastructureApp_Tests.StepDefinitions
 {
     [Binding]
-    public class RemoveUserSteps : SeleniumTestBase, IDisposable
+    public class RemoveUserSteps : SeleniumTestBase
     {
         private readonly ScenarioContext _scenarioContext;
 
         public RemoveUserSteps(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
-        }
-
-        [BeforeScenario]
-        public async Task BeforeScenario()
-        {
-            await OneTimeSetUp();
-            await SetUpDriver();
         }
 
         [Given(@"the user ""(.*)"" has the ""(.*)"" role")]
@@ -213,7 +206,6 @@ namespace InfrastructureApp_Tests.StepDefinitions
 
         public void Dispose()
         {
-            TearDownDriver();
         }
     }
 }
