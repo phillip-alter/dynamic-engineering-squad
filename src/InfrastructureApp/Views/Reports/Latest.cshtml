@@ -9,15 +9,15 @@
     ViewData["Title"] = "Latest Reports";
 }
 
-<h1 class="mb-3">Latest Reports</h1>
+<h1 class="mb-3"><i class="fa-solid fa-scroll me-2 text-safety-orange"></i>Latest Reports</h1>
 
 <div class="mb-3 d-flex gap-2">
     <input id="latestSearchInput" class="form-control" type="text" placeholder="Search reports..." />
-    <button id="latestSearchButton" class="btn btn-primary" type="button">Search</button>
+    <button id="latestSearchButton" class="btn btn-primary" type="button"><i class="fa-solid fa-magnifying-glass me-1"></i>Search</button>
     <button id="latestClearButton" class="btn btn-outline-secondary" type="button">Clear</button>
 </div>
 
-<div id="latestSearchMessage" class="mb-2"></div>
+<div id="latestSearchMessage" class="mb-2 text-safety-orange fw-semibold"></div>
 
 <!-- SCRUM-86 ADDED: Sort dropdown allows user to select newest or oldest -->
 <select id="latestSortSelect" class="form-select" style="max-width: 200px;">
