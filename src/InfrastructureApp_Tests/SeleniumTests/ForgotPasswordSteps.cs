@@ -149,9 +149,14 @@ namespace InfrastructureApp_Tests.StepDefinitions
             }
 
             var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(45));
+
+            wait.IgnoreExceptionTypes(typeof(StaleElementReferenceException), typeof(NoSuchElementException));
+
             try
             {
-                wait.Until(d => d.FindElement(By.TagName("body")).Text.Contains(expectedMessage));
+                // wait.Until returns true when it succeeds. Capture it directly.
+                bool messageFound = wait.Until(d => d.FindElement(By.TagName("body")).Text.Contains(expectedMessage));
+                Assert.That(messageFound, Is.True, $"Error message '{expectedMessage}' was not found.");
             }
             catch (WebDriverTimeoutException)
             {
@@ -160,8 +165,6 @@ namespace InfrastructureApp_Tests.StepDefinitions
                 Console.WriteLine(Driver.PageSource);
                 throw;
             }
-            var bodyText = Driver.FindElement(By.TagName("body")).Text;
-            Assert.That(bodyText, Does.Contain(expectedMessage));
         }
     }
 }
