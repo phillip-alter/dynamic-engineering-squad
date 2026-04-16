@@ -91,6 +91,23 @@ public class UserService : IUserService
         return await _userManager.AddToRolesAsync(user, selectedRoles);
     }
 
+    public async Task<IdentityResult> DeleteUserAsync(string userId, string adminId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+        if (user.Id == adminId)
+        {
+            return IdentityResult.Failed(new IdentityError
+            {
+                Description = "You cannot delete your own account."
+            });
+        }
+
+        await _userManager.UpdateSecurityStampAsync(user);
+        return await _userManager.DeleteAsync(user);
+    }
+
     public async Task<IdentityResult> DeleteAccountAsync(string userId, string currentPassword)
     {
         var user = await _userManager.FindByIdAsync(userId);
