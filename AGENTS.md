@@ -1,4 +1,4 @@
-# Project Overview: Dynamic Engineering Squad (DES)
+# Project Overview: Dynamic Engineering Squad (DES) Agents
 
 This document serves as a comprehensive guide for agents and developers working on the **Dynamic Engineering Squad** senior capstone project. It outlines the architecture, coding standards, core features, and the team's specific "way of working."
 
