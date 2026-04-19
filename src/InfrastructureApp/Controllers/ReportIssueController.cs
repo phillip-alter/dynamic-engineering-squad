@@ -104,9 +104,9 @@ namespace InfrastructureApp.Controllers
                 ModelState.AddModelError(nameof(report.Photo), ex.Message);
                 return View(report);
             }
-            catch (ContentModerationRejectedException)
+            catch (ContentModerationRejectedException ex)
             {
-                ModelState.AddModelError(nameof(report.Description), "Your description contains unsafe content and cannot be submitted.");
+                ModelState.AddModelError(string.Empty, ex.Message);
                 return View(report);
             }
             catch (InvalidOperationException ex)
