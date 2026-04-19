@@ -22,7 +22,7 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
 {
     public abstract class SeleniumTestBase
     {
-        protected IWebDriver Driver = null!;
+        protected static IWebDriver Driver = null!;
 
         protected static readonly string BaseUrl =
             "http://127.0.0.1:5044";
@@ -48,6 +48,11 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+                builder.Services.Configure<SecurityStampValidatorOptions>(options =>
+                {
+                    options.ValidationInterval = TimeSpan.Zero;
+                });
 
                 builder.Services.AddControllersWithViews().AddApplicationPart(typeof(Program).Assembly);
                 

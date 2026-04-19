@@ -40,6 +40,31 @@ namespace InfrastructureApp.Services
             return await BuildDashboardForUserAsync(freshUser);
         }
 
+        // Returns public profile data for a user looked up by username
+        public async Task<DashboardViewModel?> GetPublicProfileAsync(string username)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+            if (user == null) return null;
+
+            var reportsSubmitted = await _db.ReportIssue
+                .AsNoTracking()
+                .CountAsync(r => r.UserId == user.Id);
+
+            var pointsRow = await _db.UserPoints
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.UserId == user.Id);
+
+            return new DashboardViewModel
+            {
+                Username         = user.UserName ?? username,
+                Email            = "",   // not exposed on public profile
+                ReportsSubmitted = reportsSubmitted,
+                Points           = pointsRow?.CurrentPoints ?? 0,
+                AvatarKey        = user.AvatarKey,
+                AvatarUrl        = user.AvatarUrl
+            };
+        }
+
         // Returns default dashboard values when no user is found
         private static DashboardViewModel BuildPlaceholderDashboard()
         {
