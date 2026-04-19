@@ -22,6 +22,37 @@
 
     <div class="report-card">
         <p><strong>Status:</strong> @Model.Status</p>
+        @{
+            var severityClass = Model.SeverityStatus switch
+            {
+                "Low" => "bg-success",
+                "Medium" => "bg-warning text-dark",
+                "High" => "bg-danger",
+                "Critical" => "bg-dark",
+                _ => "bg-secondary"
+            };
+        }
+
+        <p>
+            <strong>Severity:</strong>
+            <span class="badge @severityClass px-3 py-2" data-testid="severity-status">
+                @Model.SeverityStatus
+            </span>
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.SeverityReason))
+        {
+            <p>
+                <strong>Reason:</strong><br />
+                <span data-testid="severity-reason">@Model.SeverityReason</span>
+            </p>
+        }
+        else
+        {
+            <p class="text-muted">
+                <strong>Reason:</strong> <span data-testid="severity-reason">Not available.</span>
+            </p>
+        }
         <p><strong>Created:</strong> @Model.CreatedAt</p>
         <p><strong>Description:</strong><br />@Model.Description</p>
         <p><strong>Location:</strong> (@Model.Latitude, @Model.Longitude)</p>
