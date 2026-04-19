@@ -35,7 +35,7 @@
 
         <p>
             <strong>Severity:</strong>
-            <span class="badge @severityClass px-3 py-2">
+            <span class="badge @severityClass px-3 py-2" data-testid="severity-status">
                 @Model.SeverityStatus
             </span>
         </p>
@@ -44,13 +44,13 @@
         {
             <p>
                 <strong>Reason:</strong><br />
-                @Model.SeverityReason
+                <span data-testid="severity-reason">@Model.SeverityReason</span>
             </p>
         }
         else
         {
             <p class="text-muted">
-                <strong>Reason:</strong> Not available.
+                <strong>Reason:</strong> <span data-testid="severity-reason">Not available.</span>
             </p>
         }
         <p><strong>Created:</strong> @Model.CreatedAt</p>

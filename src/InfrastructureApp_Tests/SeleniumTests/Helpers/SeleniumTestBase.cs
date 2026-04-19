@@ -14,6 +14,9 @@ using InfrastructureApp.Services;
 using InfrastructureApp.Services.ContentModeration;
 using InfrastructureApp.Services.ImageHashing;
 using InfrastructureApp.Services.ReportAssist;
+using InfrastructureApp.Services.ImageSeverity;
+using InfrastructureApp_Tests.TestDoubles;
+
 
 namespace InfrastructureApp_Tests.SeleniumTests.Helpers
 {
@@ -68,6 +71,8 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
                 builder.Services.AddScoped<IImageHashService, ImageHashService>();
                 builder.Services.AddScoped<IReportDescriptionSuggestionService, ReportDescriptionSuggestionService>();
                 builder.Services.AddScoped<LeaderboardService>();
+                builder.Services.AddScoped<IImageModerationService, FakeImageModerationService>();
+                builder.Services.AddScoped<IImageSeverityEstimationService, FakeImageSeverityEstimationService>();
                 builder.Services.AddHttpContextAccessor();
 
                 builder.Services.Configure<InfrastructureApp.Configuration.GoogleMapsOptions>(options => {
