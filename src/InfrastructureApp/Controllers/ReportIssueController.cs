@@ -15,11 +15,13 @@ namespace InfrastructureApp.Controllers
         //dependency injection (business logic + identity for users)
         private readonly IReportIssueService _service;
         private readonly UserManager<Users> _userManager;
+        private readonly IVoteService _voteService;
 
-        public ReportIssueController(IReportIssueService service, UserManager<Users> userManager)
+        public ReportIssueController(IReportIssueService service, UserManager<Users> userManager, IVoteService voteService)
         {
             _service = service;
             _userManager = userManager;
+            _voteService = voteService;
         }
 
         //landing page
@@ -130,6 +132,11 @@ namespace InfrastructureApp.Controllers
             // Load report through the service layer; return 404 if it doesn't exist.
             var report = await _service.GetByIdAsync(id);
             if (report == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            var (voteCount, userHasVoted) = await _voteService.GetVoteStatusAsync(id, userId);
+            ViewBag.VoteCount = voteCount;
+            ViewBag.UserHasVoted = userHasVoted;
 
             return View(report);
         }

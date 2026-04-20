@@ -22,6 +22,8 @@ namespace InfrastructureApp.Data
         //this maps the reportIssue to the reports table, used for CRUD operations in EF
         public DbSet<ReportIssue> ReportIssue { get; set; } = null!;
 
+        public DbSet<ReportVote> ReportVotes { get; set; } = null!;
+
         //This is the place for constraints, defaults, indexes, and relationships
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -109,6 +111,11 @@ namespace InfrastructureApp.Data
                 // "Has this same user already uploaded this same exact image?"
                 entity.HasIndex(r => new { r.UserId, r.ImageSha256 });
             });
+
+            // One vote per user per report
+            builder.Entity<ReportVote>()
+                .HasIndex(v => new { v.ReportIssueId, v.UserId })
+                .IsUnique();
 
         }
     }

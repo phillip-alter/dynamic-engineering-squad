@@ -20,12 +20,16 @@ namespace InfrastructureApp_Tests
         //creates a fake service/fake substitute for users
         private IReportIssueService _service = null!;
         private UserManager<Users> _userManager = null!;
+        private IVoteService _voteService = null!;
 
         [SetUp]
         public void SetUp()
         {
             _service = Substitute.For<IReportIssueService>();
             _userManager = MakeUserManager();
+            _voteService = Substitute.For<IVoteService>();
+            _voteService.GetVoteStatusAsync(Arg.Any<int>(), Arg.Any<string?>())
+                .Returns((0, false));
         }
 
         [TearDown]
@@ -49,7 +53,7 @@ namespace InfrastructureApp_Tests
 
         private ReportIssueController MakeController(ClaimsPrincipal? user = null)
         {
-            var controller = new ReportIssueController(_service, _userManager);
+            var controller = new ReportIssueController(_service, _userManager, _voteService);
 
             // Set up HttpContext + User
             controller.ControllerContext = new ControllerContext
