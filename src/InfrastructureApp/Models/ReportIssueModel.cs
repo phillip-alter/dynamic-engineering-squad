@@ -162,5 +162,23 @@ namespace InfrastructureApp.Models
             return query.OrderByDescending(r => r.CreatedAt);
         }
 
+        // Builds a short Home page preview while preserving the full description for details pages.
+        public static string BuildDescriptionPreview(string? description, int previewLength = 80)
+        {
+            if (string.IsNullOrWhiteSpace(description))
+            {
+                return string.Empty;
+            }
+
+            var trimmedDescription = description.Trim();
+
+            if (trimmedDescription.Length <= previewLength)
+            {
+                return trimmedDescription;
+            }
+
+            return trimmedDescription.Substring(0, previewLength).TrimEnd() + "...";
+        }
+
     }
 }
