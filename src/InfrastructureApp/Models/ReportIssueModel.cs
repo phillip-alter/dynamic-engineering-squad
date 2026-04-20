@@ -162,21 +162,25 @@ namespace InfrastructureApp.Models
             return query.OrderByDescending(r => r.CreatedAt);
         }
 
-        // Builds a short Home page preview while preserving the full description for details pages.
+        // SCRUM-126: Shortens report descriptions for Home page preview 
         public static string BuildDescriptionPreview(string? description, int previewLength = 60)
         {
+            // Return empty if null or whitespace
             if (string.IsNullOrWhiteSpace(description))
             {
                 return string.Empty;
             }
 
+             // Remove extra spaces from start/end
             var trimmedDescription = description.Trim();
 
+            // If short enough, return as-is
             if (trimmedDescription.Length <= previewLength)
             {
                 return trimmedDescription;
             }
 
+            // Otherwise, cut and add "..."
             return trimmedDescription.Substring(0, previewLength).TrimEnd() + "...";
         }
     }
