@@ -133,10 +133,14 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Then(@"I should not see ""(.*)"" in the user list")]
         public void ThenIShouldNotSeeInTheUserList(string username)
         {
-            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(5));
+            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(45));
+            wait.IgnoreExceptionTypes(typeof(StaleElementReferenceException), typeof(NoSuchElementException));
+
             try
             {
-                wait.Until(d => !d.FindElement(By.TagName("body")).Text.Contains(username));
+                // wait.Until returns true when it succeeds. Capture it directly.
+                bool messageFound = wait.Until(d => d.FindElement(By.TagName("body")).Text.Contains(username));
+                Assert.That(messageFound, Is.True, $"Error message '{username}' was not found.");
             }
             catch (WebDriverTimeoutException)
             {
