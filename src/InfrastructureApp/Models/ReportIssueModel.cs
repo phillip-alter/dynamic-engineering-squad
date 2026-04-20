@@ -163,7 +163,7 @@ namespace InfrastructureApp.Models
         }
 
         // Builds a short Home page preview while preserving the full description for details pages.
-        public static string BuildDescriptionPreview(string? description, int previewLength = 80)
+        public static string BuildDescriptionPreview(string? description, int previewLength = 60)
         {
             if (string.IsNullOrWhiteSpace(description))
             {
@@ -179,6 +179,5 @@ namespace InfrastructureApp.Models
 
             return trimmedDescription.Substring(0, previewLength).TrimEnd() + "...";
         }
-
     }
 }
