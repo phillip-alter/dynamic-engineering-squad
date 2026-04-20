@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using InfrastructureApp.Services.ImageHashing;
 using Azure.Communication.Email;
 using InfrastructureApp.Services.ReportAssist;
+using InfrastructureApp.Services.ImageSeverity;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -109,6 +110,11 @@ builder.Services.AddScoped<IImageHashService, ImageHashService>();
 
 //ReportAssist
 builder.Services.AddScoped<IReportDescriptionSuggestionService, ReportDescriptionSuggestionService>();
+
+//Image Severity Service
+builder.Services.AddHttpClient<IImageModerationService, OpenAiImageModerationService>();
+builder.Services.AddHttpClient<IImageSeverityEstimationService, OpenAiImageSeverityEstimationService>();
+
 
 builder.Services.AddScoped<IAvatarService, AvatarService>();
 
