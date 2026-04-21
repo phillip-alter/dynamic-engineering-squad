@@ -31,10 +31,14 @@
                 voteCount.textContent = data.voteCount;
                 updateVoteButton(voteBtn, data.userHasVoted);
 
-                // Update the plural label next to the count
+                // Update the plural text node without replacing the #voteCount span
                 const label = voteBtn.closest(".d-flex")?.querySelector(".text-muted");
                 if (label) {
-                    label.textContent = `${data.voteCount} community vote${data.voteCount === 1 ? "" : "s"}`;
+                    const textNode = Array.from(label.childNodes)
+                        .find(n => n.nodeType === Node.TEXT_NODE);
+                    if (textNode) {
+                        textNode.textContent = ` community vote${data.voteCount === 1 ? "" : "s"}`;
+                    }
                 }
 
             } catch (err) {

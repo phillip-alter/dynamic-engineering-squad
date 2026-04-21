@@ -38,7 +38,12 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
                 SqliteConnection = new SqliteConnection("DataSource=:memory:");
                 SqliteConnection.Open();
 
-                var builder = WebApplication.CreateBuilder(new string[] { "--environment", "Testing" });
+                var contentRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "InfrastructureApp"));
+                var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+                {
+                    Args = new string[] { "--environment", "Testing" },
+                    ContentRootPath = contentRoot
+                });
                 
                 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlite(SqliteConnection));
                 
@@ -71,6 +76,7 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
                 builder.Services.AddScoped<INearbyIssueService, NearbyIssueService>();
                 builder.Services.AddScoped<ILeaderboardRepository, LeaderboardRepositoryEf>();
                 builder.Services.AddScoped<IUserService, UserService>();
+                builder.Services.AddScoped<IVoteService, VoteService>();
                 builder.Services.AddScoped<ITripCheckService, TripCheckService>();
                 builder.Services.AddScoped<IContentModerationService, ContentModerationService>();
                 builder.Services.AddScoped<IImageHashService, ImageHashService>();
@@ -175,6 +181,11 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
             }
             SqliteConnection?.Dispose();
             SqliteConnection = null;
+        }
+
+        protected void ScrollAndClick(IWebElement element)
+        {
+            ((OpenQA.Selenium.IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView({block:'center'}); arguments[0].click();", element);
         }
 
         protected void Login(string username = "ErinBleu", string password = "Password1234!")
