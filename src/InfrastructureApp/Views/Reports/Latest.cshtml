@@ -91,23 +91,43 @@ else
             </div>
 
             <div class="modal-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
-                <!-- Community upvote -->
-                <div class="d-flex align-items-center gap-2">
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        <button id="modalVoteBtn" class="btn btn-outline-primary btn-sm fw-bold" data-report-id="">
-                            <i class="fa-solid fa-thumbs-up me-1"></i>
-                            I've seen this too
-                        </button>
-                    }
-                    else
-                    {
-                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-sm fw-bold">
-                            <i class="fa-solid fa-thumbs-up me-1"></i>
-                            I've seen this too
-                        </a>
-                    }
-                    <span class="text-muted small"><span id="modalVoteCount">0</span> vote<span id="modalVotePlural">s</span></span>
+                <div class="d-flex flex-column gap-2">
+                    <!-- Community upvote -->
+                    <div class="d-flex align-items-center gap-2">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <button id="modalVoteBtn" class="btn btn-outline-primary btn-sm fw-bold" data-report-id="">
+                                <i class="fa-solid fa-thumbs-up me-1"></i>
+                                I've seen this too
+                            </button>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-sm fw-bold">
+                                <i class="fa-solid fa-thumbs-up me-1"></i>
+                                I've seen this too
+                            </a>
+                        }
+                        <span class="text-muted small"><span id="modalVoteCount">0</span> vote<span id="modalVotePlural">s</span></span>
+                    </div>
+                    <!-- Community fix verification (only shown for Approved reports) -->
+                    <div id="modalVerifySection" class="d-flex align-items-center gap-2 d-none">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <button id="modalVerifyBtn" class="btn btn-outline-success btn-sm fw-bold" data-report-id="">
+                                <i class="fa-solid fa-circle-check me-1"></i>
+                                I've verified this is fixed
+                            </button>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-success btn-sm fw-bold">
+                                <i class="fa-solid fa-circle-check me-1"></i>
+                                I've verified this is fixed
+                            </a>
+                        }
+                        <span class="text-muted small"><span id="modalVerifyCount">0</span> verification<span id="modalVerifyPlural">s</span></span>
+                    </div>
                 </div>
                 <div class="d-flex gap-2">
                     <!-- SCRUM-101 ADDED: unique URL link to existing ReportIssue details page -->

@@ -781,6 +781,14 @@ namespace InfrastructureApp_Tests
 
                 return await query.ToListAsync();
             }
+
+            public async Task<List<ReportIssue>> GetResolvedReportsAsync()
+            {
+                return await _db.ReportIssue
+                    .Where(r => r.Status == "Resolved")
+                    .OrderByDescending(r => r.CreatedAt)
+                    .ToListAsync();
+            }
         }
     }
 }

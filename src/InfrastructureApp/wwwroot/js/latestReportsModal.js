@@ -12,6 +12,57 @@ document.addEventListener("DOMContentLoaded", function () {
     const modalCreatedElement = document.getElementById("modalCreated");
     const modalStatusElement = document.getElementById("modalStatus");
 
+    // Verify section elements
+    const modalVerifySection = document.getElementById("modalVerifySection");
+    const modalVerifyBtn = document.getElementById("modalVerifyBtn");
+    const modalVerifyCount = document.getElementById("modalVerifyCount");
+    const modalVerifyPlural = document.getElementById("modalVerifyPlural");
+
+    function getAntiForgeryToken() {
+        const field = document.querySelector('input[name="__RequestVerificationToken"]');
+        return field ? field.value : "";
+    }
+
+    async function loadVerifyStatus(reportId) {
+        if (!modalVerifySection) return;
+        try {
+            const res = await fetch(`/VerifyFix/Status/${reportId}`);
+            if (!res.ok) return;
+            const data = await res.json();
+            updateVerifyUI(data);
+        } catch { }
+    }
+
+    function updateVerifyUI(data) {
+        if (!modalVerifySection || !modalVerifyCount) return;
+        modalVerifyCount.textContent = data.verifyCount;
+        if (modalVerifyPlural) modalVerifyPlural.textContent = data.verifyCount === 1 ? "" : "s";
+        if (modalVerifyBtn) {
+            modalVerifyBtn.classList.toggle("btn-outline-success", !data.userHasVerified);
+            modalVerifyBtn.classList.toggle("btn-success", data.userHasVerified);
+        }
+    }
+
+    if (modalVerifyBtn) {
+        modalVerifyBtn.addEventListener("click", async function () {
+            const reportId = modalVerifyBtn.dataset.reportId;
+            try {
+                const res = await fetch(`/VerifyFix/Toggle/${reportId}`, {
+                    method: "POST",
+                    headers: { "RequestVerificationToken": getAntiForgeryToken() }
+                });
+                if (!res.ok) {
+                    if (res.status === 401) window.location.href = "/Account/Login";
+                    return;
+                }
+                const data = await res.json();
+                updateVerifyUI(data);
+            } catch (err) {
+                console.error("Verify request failed:", err);
+            }
+        });
+    }
+
     // Modal image elements
     const modalImageElement = document.getElementById("modalImage");
     const modalImageFallbackElement = document.getElementById("modalImageFallback");
@@ -102,6 +153,18 @@ document.addEventListener("DOMContentLoaded", function () {
             // -------------------------------------------------------
             if (openFullReportLink && reportId) {
                 openFullReportLink.href = `/ReportIssue/Details/${reportId}`;
+            }
+
+            // Show verify section only for Approved reports
+            if (modalVerifySection && modalVerifyBtn) {
+                if (status === "Approved") {
+                    modalVerifyBtn.dataset.reportId = reportId;
+                    modalVerifySection.classList.remove("d-none");
+                    if (modalVerifyCount) modalVerifyCount.textContent = "0";
+                    loadVerifyStatus(reportId);
+                } else {
+                    modalVerifySection.classList.add("d-none");
+                }
             }
 
             // -------------------------------------------------------
