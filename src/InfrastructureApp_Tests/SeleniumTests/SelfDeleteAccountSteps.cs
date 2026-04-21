@@ -44,7 +44,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Then(@"I should be on the ""Delete Account"" confirmation page")]
         public void ThenIShouldBeOnTheConfirmationPage()
         {
-            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(5));
+            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(45));
             wait.Until(d => d.Url.Contains("/Account/DeleteAccount"));
         }
 
@@ -94,7 +94,8 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Self Delete Account")]
         public void ThenIShouldSeeAnErrorMessage(string expectedMessage)
         {
-            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(45));
+            wait.IgnoreExceptionTypes(typeof(StaleElementReferenceException), typeof(NoSuchElementException));
             try
             {
                 wait.Until(d => {

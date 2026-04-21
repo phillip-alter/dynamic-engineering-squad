@@ -78,13 +78,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Then(@"a password reset email should be sent to ""(.*)""")]
         public async Task ThenAPasswordResetEmailShouldBeSentTo(string email)
         {
-            // In Selenium tests, we can't easily check the mock service directly unless we use a backchannel.
-            // However, the Acceptance Criteria says "triggers a password recovery email".
-            // Since we are doing end-to-end, maybe we should check if the message appeared on the UI first.
-            // To verify the actual email was "sent" (triggered in backend), 
-            // we'd need to inspect the database or a shared state if we were using a fake email service.
-            // For now, let's assume if the success message is shown, the email was triggered.
-            // Or we can add a way to check sent emails if we use a specific test email service.
+
         }
 
         [Given(@"a valid password reset token for user ""(.*)""")]
