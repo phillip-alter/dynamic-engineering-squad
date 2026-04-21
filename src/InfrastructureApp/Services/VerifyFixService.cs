@@ -65,13 +65,13 @@ namespace InfrastructureApp.Services
 
                 int verifyCount = await _db.ReportVerifications.CountAsync(v => v.ReportIssueId == reportId);
 
-                // Auto-transition report to "Verified Fixed" when threshold is reached
+                // Auto-transition to "Resolved" when threshold is reached so it appears on the verify queue
                 if (userHasVerified && verifyCount >= VerificationThreshold)
                 {
                     var report = await _db.ReportIssue.FirstOrDefaultAsync(r => r.Id == reportId);
-                    if (report != null && report.Status == "Resolved")
+                    if (report != null && report.Status == "Approved")
                     {
-                        report.Status = "Verified Fixed";
+                        report.Status = "Resolved";
                         await _db.SaveChangesAsync();
                     }
                 }

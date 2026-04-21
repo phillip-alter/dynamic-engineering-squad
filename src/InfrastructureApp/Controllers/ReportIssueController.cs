@@ -139,6 +139,18 @@ namespace InfrastructureApp.Controllers
             return RedirectToAction("Details", new { id });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> MarkVerifiedFixed(int id)
+        {
+            var found = await _service.UpdateStatusAsync(id, "Verified Fixed");
+            if (!found) return NotFound();
+
+            TempData["Success"] = "Report marked as Verified Fixed.";
+            return RedirectToAction("Details", new { id });
+        }
+
         //Shows the details page for a specific report id.
         [HttpGet]
         public async Task<IActionResult> Details(int id)
