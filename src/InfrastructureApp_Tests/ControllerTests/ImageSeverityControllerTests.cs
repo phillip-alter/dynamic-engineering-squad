@@ -124,7 +124,11 @@ namespace InfrastructureApp_Tests.ControllerTests
             IReportIssueService service,
             UserManager<Users> userManager)
         {
-            return new ReportIssueController(service, userManager)
+            var voteService = Substitute.For<IVoteService>();
+            voteService.GetVoteStatusAsync(Arg.Any<int>(), Arg.Any<string?>())
+                .Returns((0, false));
+
+            return new ReportIssueController(service, userManager, voteService)
             {
                 ControllerContext = new ControllerContext
                 {
