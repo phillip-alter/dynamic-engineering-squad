@@ -24,6 +24,8 @@ namespace InfrastructureApp.Data
 
         public DbSet<ReportVote> ReportVotes { get; set; } = null!;
 
+        public DbSet<ReportVerification> ReportVerifications { get; set; } = null!;
+
         //This is the place for constraints, defaults, indexes, and relationships
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -114,6 +116,11 @@ namespace InfrastructureApp.Data
 
             // One vote per user per report
             builder.Entity<ReportVote>()
+                .HasIndex(v => new { v.ReportIssueId, v.UserId })
+                .IsUnique();
+
+            // One verification per user per report
+            builder.Entity<ReportVerification>()
                 .HasIndex(v => new { v.ReportIssueId, v.UserId })
                 .IsUnique();
 

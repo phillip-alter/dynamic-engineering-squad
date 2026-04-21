@@ -16,12 +16,14 @@ namespace InfrastructureApp.Controllers
         private readonly IReportIssueService _service;
         private readonly UserManager<Users> _userManager;
         private readonly IVoteService _voteService;
+        private readonly IVerifyFixService _verifyFixService;
 
-        public ReportIssueController(IReportIssueService service, UserManager<Users> userManager, IVoteService voteService)
+        public ReportIssueController(IReportIssueService service, UserManager<Users> userManager, IVoteService voteService, IVerifyFixService verifyFixService)
         {
             _service = service;
             _userManager = userManager;
             _voteService = voteService;
+            _verifyFixService = verifyFixService;
         }
 
         //landing page
@@ -137,6 +139,11 @@ namespace InfrastructureApp.Controllers
             var (voteCount, userHasVoted) = await _voteService.GetVoteStatusAsync(id, userId);
             ViewBag.VoteCount = voteCount;
             ViewBag.UserHasVoted = userHasVoted;
+
+            var (verifyCount, userHasVerified) = await _verifyFixService.GetVerifyStatusAsync(id, userId);
+            ViewBag.VerifyCount = verifyCount;
+            ViewBag.UserHasVerified = userHasVerified;
+            ViewBag.VerifyThreshold = VerifyFixService.VerificationThreshold;
 
             return View(report);
         }
