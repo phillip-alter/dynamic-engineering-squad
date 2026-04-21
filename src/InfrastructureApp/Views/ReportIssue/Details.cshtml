@@ -85,6 +85,20 @@
         }
     </div>
 
+    <!-- Admin: mark report as resolved -->
+    @if (User.IsInRole("Admin") && Model.Status == "Approved")
+    {
+        <div class="mt-3">
+            <form asp-action="MarkResolved" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn btn-warning fw-bold">
+                    <i class="fa-solid fa-wrench me-1"></i>
+                    Mark as Resolved
+                </button>
+            </form>
+        </div>
+    }
+
     <!-- Community upvote -->
     <div class="mt-4 d-flex align-items-center gap-3">
         @if (User.Identity?.IsAuthenticated == true)
