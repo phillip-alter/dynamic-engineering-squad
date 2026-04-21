@@ -136,6 +136,7 @@ else
 builder.Services.AddScoped<InfrastructureApp.Services.IAvatarService, InfrastructureApp.Services.AvatarService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVoteService, VoteService>();
+builder.Services.AddScoped<IVerifyFixService, VerifyFixService>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
