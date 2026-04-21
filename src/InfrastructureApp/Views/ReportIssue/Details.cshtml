@@ -88,7 +88,7 @@
     <!-- Admin: mark report as resolved -->
     @if (User.IsInRole("Admin") && Model.Status == "Approved")
     {
-        <div class="mt-3">
+        <div class="mt-3 d-flex align-items-center gap-3">
             <form asp-action="MarkResolved" asp-route-id="@Model.Id" method="post">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="btn btn-warning fw-bold">
@@ -96,6 +96,13 @@
                     Mark as Resolved
                 </button>
             </form>
+            @if (ViewBag.VerifyCount > 0)
+            {
+                <span class="text-muted">
+                    <i class="fa-solid fa-circle-check text-success me-1"></i>
+                    @ViewBag.VerifyCount community member@(ViewBag.VerifyCount == 1 ? "" : "s") verified this is fixed
+                </span>
+            }
         </div>
     }
 
@@ -124,39 +131,38 @@
         </span>
     </div>
 
-    <!-- Community fix verification (only shown on Resolved reports) -->
-    @if (Model.Status == "Resolved" || Model.Status == "Verified Fixed")
+    <!-- Community fix verification -->
+    @if (Model.Status == "Approved")
     {
         <div class="mt-3 d-flex align-items-center gap-3">
-            @if (Model.Status == "Verified Fixed")
-            {
-                <span class="badge bg-success fs-6 px-3 py-2">
-                    <i class="fa-solid fa-circle-check me-1"></i> Verified Fixed
-                </span>
-            }
-            else if (User.Identity?.IsAuthenticated == true)
+            @if (User.Identity?.IsAuthenticated == true)
             {
                 <button id="verifyBtn"
                         class="btn @(ViewBag.UserHasVerified ? "btn-success" : "btn-outline-success") fw-bold"
                         data-report-id="@Model.Id">
                     <i class="fa-solid fa-circle-check me-1"></i>
-                    This is fixed
+                    I've verified this is fixed
                 </button>
             }
             else
             {
                 <a asp-controller="Account" asp-action="Login" class="btn btn-outline-success fw-bold">
                     <i class="fa-solid fa-circle-check me-1"></i>
-                    This is fixed
+                    I've verified this is fixed
                 </a>
             }
-            @if (Model.Status == "Resolved")
-            {
-                <span class="text-muted">
-                    <span id="verifyCount">@ViewBag.VerifyCount</span>
-                    of @ViewBag.VerifyThreshold verification@(ViewBag.VerifyThreshold == 1 ? "" : "s")
-                </span>
-            }
+            <span class="text-muted">
+                <span id="verifyCount">@ViewBag.VerifyCount</span>
+                community verification@(ViewBag.VerifyCount == 1 ? "" : "s")
+            </span>
+        </div>
+    }
+    else if (Model.Status == "Resolved")
+    {
+        <div class="mt-3">
+            <span class="badge bg-success fs-6 px-3 py-2">
+                <i class="fa-solid fa-circle-check me-1"></i> Resolved
+            </span>
         </div>
     }
 
