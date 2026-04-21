@@ -9,9 +9,13 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     reportItems.forEach(function (item) {
+        // SCRUM-128:
+        // Find the inline expand/collapse button for this Home page report row
         const toggleButton = item.querySelector(".home-report-toggle");
 
         if (toggleButton) {
+            // SCRUM-128:
+            // Toggle inline details without triggering existing View Details navigation
             toggleButton.addEventListener("click", function (event) {
                 event.preventDefault();
                 event.stopPropagation();
