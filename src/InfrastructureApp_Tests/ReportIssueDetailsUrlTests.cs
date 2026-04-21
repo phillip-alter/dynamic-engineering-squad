@@ -32,9 +32,13 @@ namespace InfrastructureApp_Tests
             voteService.GetVoteStatusAsync(Arg.Any<int>(), Arg.Any<string?>())
                 .Returns((0, false));
 
+            var verifyFixService = Substitute.For<IVerifyFixService>();
+            verifyFixService.GetVerifyStatusAsync(Arg.Any<int>(), Arg.Any<string?>())
+                .Returns((0, false));
+
             // SCRUM-101
             // Initialize the controller used to test the Details URL behavior.
-            _controller = new ReportIssueController(_service, userManager, voteService)
+            _controller = new ReportIssueController(_service, userManager, voteService, verifyFixService)
             {
                 ControllerContext = new ControllerContext
                 {
