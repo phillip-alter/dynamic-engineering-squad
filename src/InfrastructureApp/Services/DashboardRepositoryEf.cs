@@ -3,6 +3,7 @@ using InfrastructureApp.Models;
 using InfrastructureApp.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace InfrastructureApp.Services
 {
@@ -37,7 +38,9 @@ namespace InfrastructureApp.Services
             if (freshUser == null)
                 return BuildPlaceholderDashboard();
 
-            return await BuildDashboardForUserAsync(freshUser);
+            var dashboard = await BuildDashboardForUserAsync(freshUser);
+            dashboard.IsOwnDashboard = true;
+            return dashboard;
         }
 
         // Returns public profile data for a user looked up by username
@@ -54,7 +57,7 @@ namespace InfrastructureApp.Services
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
-            var personalInfoBackgroundUrl = await GetPersonalInfoBackgroundUrlAsync(user.Id);
+            var selectedBackground = await GetSelectedDashboardBackgroundAsync(user.Id, user.SelectedDashboardBackgroundKey);
 
             return new DashboardViewModel
             {
@@ -64,7 +67,8 @@ namespace InfrastructureApp.Services
                 Points           = pointsRow?.CurrentPoints ?? 0,
                 AvatarKey        = user.AvatarKey,
                 AvatarUrl        = user.AvatarUrl,
-                PersonalInfoBackgroundUrl = personalInfoBackgroundUrl
+                SelectedDashboardBackgroundKey = selectedBackground?.Key,
+                PersonalInfoBackgroundUrl = selectedBackground?.ImageUrl
             };
         }
 
@@ -93,7 +97,8 @@ namespace InfrastructureApp.Services
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
-            var personalInfoBackgroundUrl = await GetPersonalInfoBackgroundUrlAsync(user.Id);
+            var unlockedBackgroundNames = await GetUnlockedDashboardBackgroundNamesAsync(user.Id);
+            var selectedBackground = ResolveSelectedBackground(unlockedBackgroundNames, user.SelectedDashboardBackgroundKey);
 
             return new DashboardViewModel
             {
@@ -103,13 +108,51 @@ namespace InfrastructureApp.Services
                 Points = pointsRow?.CurrentPoints ?? 0,
                 AvatarKey = user.AvatarKey,
                 AvatarUrl = user.AvatarUrl,
-                PersonalInfoBackgroundUrl = personalInfoBackgroundUrl
+                SelectedDashboardBackgroundKey = selectedBackground?.Key,
+                PersonalInfoBackgroundUrl = selectedBackground?.ImageUrl,
+                AvailableDashboardBackgrounds = PointsShopCatalog.BuildDashboardBackgroundOptions(unlockedBackgroundNames)
             };
         }
 
-        private async Task<string?> GetPersonalInfoBackgroundUrlAsync(string userId)
+        public async Task<bool> UpdateSelectedDashboardBackgroundAsync(string userId, string? selectedBackgroundKey)
         {
-            var hasDashboardBackground = await _db.UserShopItemPurchases
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(selectedBackgroundKey))
+            {
+                user.SelectedDashboardBackgroundKey = null;
+                var result = await _userManager.UpdateAsync(user);
+                return result.Succeeded;
+            }
+
+            var selectedBackground = PointsShopCatalog.GetDashboardBackgroundByKey(selectedBackgroundKey);
+            if (selectedBackground == null)
+            {
+                return false;
+            }
+
+            var unlockedBackgroundNames = await GetUnlockedDashboardBackgroundNamesAsync(userId);
+            if (!unlockedBackgroundNames.Contains(selectedBackground.Name))
+            {
+                return false;
+            }
+
+            user.SelectedDashboardBackgroundKey = selectedBackground.Key;
+            var updateResult = await _userManager.UpdateAsync(user);
+            return updateResult.Succeeded;
+        }
+
+        private async Task<List<string>> GetUnlockedDashboardBackgroundNamesAsync(string userId)
+        {
+            var validBackgroundNames = PointsShopCatalog.DashboardBackgrounds
+                .Select(background => background.Name)
+                .ToList();
+
+            return await _db.UserShopItemPurchases
                 .AsNoTracking()
                 .Where(p => p.UserId == userId)
                 .Join(
@@ -117,10 +160,27 @@ namespace InfrastructureApp.Services
                     purchase => purchase.ShopItemId,
                     item => item.Id,
                     (purchase, item) => item.Name)
-                .AnyAsync(name => name == PointsShopCatalog.DashboardBackgroundImageItemName);
+                .Where(name => validBackgroundNames.Contains(name))
+                .Distinct()
+                .ToListAsync();
+        }
 
-            return hasDashboardBackground
-                ? PointsShopCatalog.DashboardBackgroundImageUrl
+        private async Task<DashboardBackgroundDefinition?> GetSelectedDashboardBackgroundAsync(string userId, string? selectedBackgroundKey)
+        {
+            var unlockedBackgroundNames = await GetUnlockedDashboardBackgroundNamesAsync(userId);
+            return ResolveSelectedBackground(unlockedBackgroundNames, selectedBackgroundKey);
+        }
+
+        private static DashboardBackgroundDefinition? ResolveSelectedBackground(IEnumerable<string> unlockedBackgroundNames, string? selectedBackgroundKey)
+        {
+            var selectedBackground = PointsShopCatalog.GetDashboardBackgroundByKey(selectedBackgroundKey);
+            if (selectedBackground == null)
+            {
+                return null;
+            }
+
+            return unlockedBackgroundNames.Contains(selectedBackground.Name)
+                ? selectedBackground
                 : null;
         }
     }

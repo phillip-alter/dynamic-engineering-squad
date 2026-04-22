@@ -9,6 +9,7 @@ namespace InfrastructureApp.Models
         public string? AvatarKey { get; set; } // e.g. "avatar01", "avatar02"
 
         public string? AvatarUrl { get; set; }
+        public string? SelectedDashboardBackgroundKey { get; set; }
         public List<string>? Roles { get; set; }
 
         

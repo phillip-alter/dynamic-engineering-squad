@@ -2,6 +2,7 @@ using InfrastructureApp.Services;
 using InfrastructureApp.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace InfrastructureApp.Controllers
 {
@@ -37,6 +38,31 @@ namespace InfrastructureApp.Controllers
             }
 
             return View(vm);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateBackground(string? selectedBackgroundKey)
+        {
+            var userId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized();
+            }
+
+            var updated = await _dashboardRepo.UpdateSelectedDashboardBackgroundAsync(userId, selectedBackgroundKey);
+            if (updated)
+            {
+                TempData["Success"] = string.IsNullOrWhiteSpace(selectedBackgroundKey)
+                    ? "Dashboard background reset to default."
+                    : "Dashboard background updated.";
+            }
+            else
+            {
+                TempData["Error"] = "That dashboard background is unavailable.";
+            }
+
+            return RedirectToAction(nameof(Index));
         }
     }
 }

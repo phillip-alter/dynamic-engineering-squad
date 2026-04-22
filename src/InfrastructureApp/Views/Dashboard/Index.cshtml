@@ -6,6 +6,20 @@
 
 <h1>Dashboard</h1>
 
+@if (TempData["Success"] is string successMessage)
+{
+    <div class="alert alert-success">
+        @successMessage
+    </div>
+}
+
+@if (TempData["Error"] is string errorMessage)
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+
 <div class="row">
     <div class="col-md-6 mb-3">
         <div class="card dashboard-personal-card @(Model.HasPersonalInfoBackground ? "dashboard-personal-card--unlocked" : "")"
@@ -29,6 +43,43 @@
                    asp-action="ChooseAvatar">
                     Choose / Change Avatar
                 </a>
+
+                @if (Model.IsOwnDashboard)
+                {
+                    <hr />
+                    <form asp-action="UpdateBackground" asp-controller="Dashboard" method="post" class="dashboard-background-form">
+                        @Html.AntiForgeryToken()
+                        <label for="selectedBackgroundKey" class="form-label fw-semibold">Personal card background</label>
+                        <div class="d-flex flex-column flex-sm-row gap-2 align-items-sm-center">
+                            <select id="selectedBackgroundKey" name="selectedBackgroundKey" class="form-select">
+                                <option value="">Default gray</option>
+                                @foreach (var background in Model.AvailableDashboardBackgrounds)
+                                {
+                                    <option value="@background.Key" selected="@(Model.SelectedDashboardBackgroundKey == background.Key)">
+                                        @background.Name
+                                    </option>
+                                }
+                            </select>
+                            <button type="submit" class="btn btn-warning text-nowrap">Apply</button>
+                        </div>
+                    </form>
+
+                    @if (Model.AvailableDashboardBackgrounds.Count > 0)
+                    {
+                        <div class="dashboard-background-previews mt-3">
+                            <div class="small text-muted mb-2">Unlocked backgrounds</div>
+                            <div class="d-flex flex-wrap gap-2">
+                                @foreach (var background in Model.AvailableDashboardBackgrounds)
+                                {
+                                    <div class="dashboard-background-preview @(Model.SelectedDashboardBackgroundKey == background.Key ? "dashboard-background-preview--active" : "")"
+                                         title="@background.Name"
+                                         style="background-image: linear-gradient(rgba(18, 18, 18, 0.2), rgba(18, 18, 18, 0.45)), url('@background.PreviewUrl');">
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
             </div>
         </div>
     </div>

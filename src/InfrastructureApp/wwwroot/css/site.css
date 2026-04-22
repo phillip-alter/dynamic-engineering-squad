@@ -427,6 +427,33 @@ h1, h2, h3 {
   color: #fff !important;
 }
 
+.dashboard-background-form .form-select {
+  min-width: 240px;
+  max-width: 360px;
+}
+
+.dashboard-background-previews {
+  background: rgba(16, 17, 18, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 0.75rem;
+}
+
+.dashboard-background-preview {
+  width: 72px;
+  height: 44px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.22);
+}
+
+.dashboard-background-preview--active {
+  border-color: var(--safety-yellow);
+  box-shadow: 0 0 0 2px rgba(255, 214, 0, 0.18), 0 10px 20px rgba(0, 0, 0, 0.28);
+}
+
 /* Base action button — secondary style */
 .report-action-btn {
     background-color: var(--dark-border);

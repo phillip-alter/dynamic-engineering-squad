@@ -35,18 +35,20 @@ namespace InfrastructureApp_Tests.Dashboard
         [Test]
         public async Task GetPublicProfileAsync_WhenDashboardBackgroundPurchased_ReturnsBackgroundUrl()
         {
+            var selectedBackground = PointsShopCatalog.GetDashboardBackgroundByKey("city-grid")!;
             var user = new Users
             {
                 Id = Guid.NewGuid().ToString(),
                 UserName = "alice",
                 Email = "alice@test.com",
-                EmailConfirmed = true
+                EmailConfirmed = true,
+                SelectedDashboardBackgroundKey = selectedBackground.Key
             };
             _db.Users.Add(user);
 
             var backgroundItem = new ShopItem
             {
-                Name = PointsShopCatalog.DashboardBackgroundImageItemName,
+                Name = selectedBackground.Name,
                 Description = "Background unlock",
                 CostPoints = 10,
                 IsSinglePurchase = true,
@@ -69,7 +71,7 @@ namespace InfrastructureApp_Tests.Dashboard
             var result = await repo.GetPublicProfileAsync("alice");
 
             Assert.That(result, Is.Not.Null);
-            Assert.That(result!.PersonalInfoBackgroundUrl, Is.EqualTo(PointsShopCatalog.DashboardBackgroundImageUrl));
+            Assert.That(result!.PersonalInfoBackgroundUrl, Is.EqualTo(selectedBackground.ImageUrl));
             Assert.That(result.HasPersonalInfoBackground, Is.True);
         }
 
@@ -95,6 +97,68 @@ namespace InfrastructureApp_Tests.Dashboard
             Assert.That(result.HasPersonalInfoBackground, Is.False);
         }
 
+        [Test]
+        public async Task UpdateSelectedDashboardBackgroundAsync_WhenUnlocked_UpdatesUserPreference()
+        {
+            var background = PointsShopCatalog.GetDashboardBackgroundByKey("blueprint")!;
+            var user = new Users
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "charlie",
+                Email = "charlie@test.com",
+                EmailConfirmed = true
+            };
+            _db.Users.Add(user);
+
+            var item = new ShopItem
+            {
+                Name = background.Name,
+                Description = background.Description,
+                CostPoints = 10,
+                IsSinglePurchase = true,
+                IsActive = true
+            };
+            _db.ShopItems.Add(item);
+            await _db.SaveChangesAsync();
+
+            _db.UserShopItemPurchases.Add(new UserShopItemPurchase
+            {
+                UserId = user.Id,
+                ShopItemId = item.Id,
+                CostPoints = 10,
+                PurchasedAt = DateTime.UtcNow
+            });
+            await _db.SaveChangesAsync();
+
+            var repo = new DashboardRepositoryEf(_db, CreateUserManager(user), Mock.Of<IHttpContextAccessor>());
+
+            var updated = await repo.UpdateSelectedDashboardBackgroundAsync(user.Id, background.Key);
+
+            Assert.That(updated, Is.True);
+            Assert.That(user.SelectedDashboardBackgroundKey, Is.EqualTo(background.Key));
+        }
+
+        [Test]
+        public async Task UpdateSelectedDashboardBackgroundAsync_WhenLocked_ReturnsFalse()
+        {
+            var user = new Users
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "dana",
+                Email = "dana@test.com",
+                EmailConfirmed = true
+            };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            var repo = new DashboardRepositoryEf(_db, CreateUserManager(user), Mock.Of<IHttpContextAccessor>());
+
+            var updated = await repo.UpdateSelectedDashboardBackgroundAsync(user.Id, "signal-glow");
+
+            Assert.That(updated, Is.False);
+            Assert.That(user.SelectedDashboardBackgroundKey, Is.Null);
+        }
+
         private static UserManager<Users> CreateUserManager(Users user)
         {
             var store = new Mock<IUserStore<Users>>();
@@ -111,6 +175,10 @@ namespace InfrastructureApp_Tests.Dashboard
 
             userManager.Setup(m => m.FindByNameAsync(user.UserName!))
                 .ReturnsAsync(user);
+            userManager.Setup(m => m.FindByIdAsync(user.Id))
+                .ReturnsAsync(user);
+            userManager.Setup(m => m.UpdateAsync(user))
+                .ReturnsAsync(IdentityResult.Success);
 
             return userManager.Object;
         }
