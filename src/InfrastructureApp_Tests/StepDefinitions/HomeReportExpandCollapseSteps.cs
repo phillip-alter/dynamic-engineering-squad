@@ -88,18 +88,18 @@ namespace InfrastructureApp_Tests.StepDefinitions
         }
 
         // SCRUM-128:
-        // TEST 1 assertion: each recent report exposes an inline expand control
+        // TEST 1: Verify expand controls exist
         [Then("the Home recent reports should include expand controls")]
         public void ThenTheHomeRecentReportsShouldIncludeExpandControls()
         {
             Assert.That(_response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(CountOccurrences(_html, "home-report-toggle"), Is.EqualTo(2));
-            Assert.That(CountOccurrences(_html, "aria-expanded=\"false\""), Is.EqualTo(2));
             Assert.That(CountOccurrences(_html, "aria-controls=\"home-report-details-"), Is.EqualTo(2));
+            Assert.That(CountOccurrences(_html, ">Expand<"), Is.EqualTo(2));
         }
 
         // SCRUM-128:
-        // TEST 1 assertion: details exist inline but start hidden until expanded
+        // TEST 2: Verify hidden details panels exist
         [Then("the Home recent reports should include hidden inline details panels")]
         public void ThenTheHomeRecentReportsShouldIncludeHiddenInlineDetailsPanels()
         {
