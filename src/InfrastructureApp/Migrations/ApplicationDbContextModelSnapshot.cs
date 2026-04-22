@@ -55,6 +55,15 @@ namespace InfrastructureApp.Migrations
                     b.Property<decimal?>("Longitude")
                         .HasColumnType("decimal(9,6)");
 
+                    b.Property<string>("SeverityReason")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("SeverityStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -70,6 +79,58 @@ namespace InfrastructureApp.Migrations
                     b.HasIndex("UserId", "ImageSha256");
 
                     b.ToTable("Reports", (string)null);
+                });
+
+            modelBuilder.Entity("InfrastructureApp.Models.ReportVerification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ReportIssueId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportIssueId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("ReportVerifications");
+                });
+
+            modelBuilder.Entity("InfrastructureApp.Models.ReportVote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ReportIssueId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReportIssueId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("ReportVotes");
                 });
 
             modelBuilder.Entity("InfrastructureApp.Models.UserPoints", b =>

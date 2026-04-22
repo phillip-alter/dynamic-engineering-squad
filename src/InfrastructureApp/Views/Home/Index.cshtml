@@ -20,7 +20,7 @@
 </div>
 
 <div class="text-center mb-4">
-    <a asp-controller="Leaderboard" asp-action="Index" class="btn btn-success btn-lg fw-bold">
+    <a asp-controller="Leaderboard" asp-action="Index" class="btn btn-primary btn-lg fw-bold">
         <i class="fa-solid fa-trophy me-2"></i> View Leaderboard
     </a>
 </div>
@@ -28,14 +28,14 @@
 <div class="row text-center mb-5">
     <!-- Report Issue Card -->
     <div class="col-md-6 mb-3">
-        <div class="card bg-dark text-white border-info h-100 shadow-lg">
+        <div class="card clickable h-100" style="border-top: 3px solid var(--safety-orange);">
             <div class="card-body d-flex flex-column justify-content-center align-items-center p-5">
-                <i class="fa-solid fa-camera fa-4x mb-3 text-info"></i>
+                <i class="fa-solid fa-camera fa-4x mb-3 text-safety-orange"></i>
                 <h2 class="card-title">Report Issue</h2>
                 <p class="card-text">
                     Spot a pothole or broken light? Snap it, tag it, claim the bounty.
                 </p>
-                <a asp-controller="ReportIssue" asp-action="Create" class="btn btn-lg btn-info mt-auto fw-bold">
+                <a asp-controller="ReportIssue" asp-action="Create" class="btn btn-lg btn-danger mt-auto fw-bold">
                     Start Quest
                 </a>
             </div>
@@ -44,15 +44,15 @@
 
     <!-- Verify Fixes Card -->
     <div class="col-md-6 mb-3">
-        <div class="card bg-dark text-white border-warning h-100 shadow-lg">
+        <div class="card clickable h-100" style="border-top: 3px solid var(--safety-yellow);">
             <div class="card-body d-flex flex-column justify-content-center align-items-center p-5">
-                <i class="fa-solid fa-check-double fa-4x mb-3 text-warning"></i>
+                <i class="fa-solid fa-check-double fa-4x mb-3 text-safety-yellow"></i>
                 <h2 class="card-title">Verify Fixes</h2>
                 <p class="card-text">
                     Confirm repairs made by the city to earn Reputation Points.
                 </p>
                 <a asp-controller="Reports" asp-action="Verify"
-                       class="btn btn-lg btn-warning mt-auto fw-bold text-dark">
+                       class="btn btn-lg btn-warning mt-auto fw-bold">
                     Verify Now
                 </a>
             </div>
@@ -74,8 +74,10 @@
         <div id="recentReportsList" class="list-group">
             @foreach (var report in Model)
             {
-                <!-- SCRUM-103: display only (NOT clickable yet) -->
-                <div class="list-group-item d-flex gap-3 py-3">
+                <!-- SCRUM-113 ADDED:
+                 Each report row is now interactive and stores report Id for JS navigation -->
+                <div class="list-group-item d-flex gap-3 py-3 home-report-item" data-reportid="@report.Id" tabindex="0"
+                     role="button" aria-label="Open details for report @report.Id">
 
                     <!-- Icon -->
                     <div class="d-flex align-items-center justify-content-center bg-light rounded-circle"
@@ -84,17 +86,23 @@
                     </div>
 
                     <!-- Content -->
-                    <div class="d-flex gap-2 w-100 justify-content-between">
+                    <div class="d-flex gap-2 w-100 justify-content-between align-items-start">
                         <div>
-                            <h6 class="mb-0">@report.Description</h6>
+                            <!-- SCRUM-126: Use preview helper instead of full description -->
+                            <h6 class="mb-0">@InfrastructureApp.Models.ReportIssue.BuildDescriptionPreview(report.Description)</h6>
                             <p class="mb-0 opacity-75">
                                 <span class="badge bg-secondary">@report.Status</span>
                             </p>
                         </div>
 
-                        <small class="opacity-50 text-nowrap">
-                            @report.CreatedAt.ToLocalTime().ToString("g")
-                        </small>
+                        <!-- SCRUM-113 ADDED:
+                         Added View Details text so users know row is clickable -->
+                        <div class="text-end">
+                            <small class="opacity-50 text-nowrap d-block">
+                                @report.CreatedAt.ToLocalTime().ToString("g")
+                            </small>
+                            <small class="text-primary fw-semibold home-report-link-text">View Details</small>
+                        </div>
                     </div>
                 </div>
             }
@@ -107,3 +115,9 @@
             View All Latest Reports
         </a>
     </div>
+
+    @section Scripts {
+        <!-- SCRUM-113 ADDED:
+         Handles click and keyboard navigation for Home page recent reports -->
+        <script src="~/js/homeRecentReports.js" asp-append-version="true"></script>
+    }

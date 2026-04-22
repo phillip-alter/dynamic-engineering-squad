@@ -149,6 +149,35 @@ namespace InfrastructureApp_Tests
         }
 
         // -------------------------------------------------------
+        // ADDED TEST for SCRUM 113
+        // TEST 6: Check reports include ids for details navigation
+        // Recent reports need valid ids so the details page can open
+        // -------------------------------------------------------
+        [Test]
+        public async Task Index_ReturnsReportsWithIds_ForDetailsNavigation()
+        {
+            // Arrange: add reports with valid ids
+            _fakeRepo.LatestReports = new List<ReportIssue>
+            {
+                new ReportIssue { Id = 10, Description = "Report 1", Status = "Approved" },
+                new ReportIssue { Id = 11, Description = "Report 2", Status = "Approved" }
+            };
+
+            var controller = new HomeController(
+                NullLogger<HomeController>.Instance,
+                _fakeRepo
+            );
+
+            // Act: call Index and get model from View
+            var result = await controller.Index() as ViewResult;
+            var model = result?.Model as List<ReportIssue>;
+
+            // Assert: verify all returned reports have ids
+            Assert.That(model, Is.Not.Null);
+            Assert.That(model!.All(r => r.Id > 0), Is.True);
+        }
+
+        // -------------------------------------------------------
         // Fake Repository for testing (no real database)
         // -------------------------------------------------------
         private class FakeReportIssueRepository : IReportIssueRepository
@@ -178,6 +207,11 @@ namespace InfrastructureApp_Tests
             }
 
             public Task<List<ReportIssue>> SearchLatestReportsAsync(bool isAdmin, string? keyword, string? sort)
+            {
+                return Task.FromResult(new List<ReportIssue>());
+            }
+
+            public Task<List<ReportIssue>> GetResolvedReportsAsync()
             {
                 return Task.FromResult(new List<ReportIssue>());
             }

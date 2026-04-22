@@ -14,16 +14,49 @@
     <link rel="stylesheet" href="~/css/site.css" />
 
     <style>
-                /* Custom tweaks to make it feel less like a tax form and more like a game */
+                /* Navbar / brand */
                 .navbar-brand {
                     font-weight: bold;
                     letter-spacing: 1px;
-                    color: #00d4ff !important;
+                    color: var(--safety-orange) !important;
                 }
+
+                nav.navbar {
+                    background-color: #1E1E1E !important;
+                    border-bottom-color: var(--dark-border) !important;
+                }
+
+                .nav-link {
+                    color: var(--text-primary) !important;
+                }
+
+                .nav-link:hover {
+                    color: var(--safety-orange) !important;
+                }
+
+                /* Active nav link */
+                .nav-link.active {
+                    color: var(--safety-yellow) !important;
+                }
+
+                /* Footer */
+                footer {
+                    background-color: #1E1E1E;
+                    color: var(--text-muted) !important;
+                }
+
+                footer a {
+                    color: var(--text-muted) !important;
+                }
+
+                footer a:hover {
+                    color: var(--safety-orange) !important;
+                }
+
                 .xp-bar {
                     height: 4px;
                     width: 100px;
-                    background: #333;
+                    background: var(--dark-border);
                     display: inline-block;
                     vertical-align: middle;
                     margin-left: 10px;
@@ -31,13 +64,12 @@
 
                 .xp-fill {
                     height: 100%;
-                    background: #00ff00;
+                    background: var(--safety-orange);
                     width: 75%;
                 }
 
-                /* Hardcoded 75% for demo */
                 .user-level-badge {
-                    background: #ff0055;
+                    background: var(--safety-orange);
                     color: white;
                     border-radius: 50%;
                     padding: 5px 10px;
@@ -142,12 +174,17 @@
 
 
         <footer class="border-top border-secondary text-muted mt-5">
-            <div class="container py-3 d-flex justify-content-between align-items-center">
+            <div class="container py-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <span>&copy; @DateTime.Now.Year - PatchNotes</span>
-                <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted">
-                    Privacy Policy
-                </a>
-                 <a asp-controller="Home" asp-action="About" class="text-decoration-none text-muted">About</a>
+                <div class="d-flex gap-3">
+                    <a asp-controller="Home" asp-action="FAQ" class="text-decoration-none text-muted">
+                        <i class="fa-solid fa-circle-question me-1"></i>FAQ
+                    </a>
+                    <a asp-controller="Home" asp-action="Privacy" class="text-decoration-none text-muted">
+                        Privacy Policy
+                    </a>
+                    <a asp-controller="Home" asp-action="About" class="text-decoration-none text-muted">About</a>
+                </div>
             </div>
         </footer>
 
