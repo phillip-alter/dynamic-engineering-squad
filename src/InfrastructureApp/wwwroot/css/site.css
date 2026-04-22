@@ -310,6 +310,16 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):not(.dropdown-item):hover {
   color: var(--safety-orange);
 }
 
+/* SCRUM-128 ADDED: Inline details area for expanded Home page recent reports */
+.home-report-details {
+  color: var(--text-primary);
+  font-size: 0.95rem;
+}
+
+.home-report-details p {
+  overflow-wrap: anywhere;
+}
+
 /* Page headings accent */
 h1, h2, h3 {
   color: var(--text-primary);
