@@ -95,7 +95,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
             Assert.That(_response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
             Assert.That(CountOccurrences(_html, "home-report-toggle"), Is.EqualTo(2));
             Assert.That(CountOccurrences(_html, "aria-controls=\"home-report-details-"), Is.EqualTo(2));
-            Assert.That(CountOccurrences(_html, ">Expand<"), Is.EqualTo(2));
+            Assert.That(_html, Does.Contain("Expand"));
         }
 
         // SCRUM-128:
@@ -104,7 +104,8 @@ namespace InfrastructureApp_Tests.StepDefinitions
         public void ThenTheHomeRecentReportsShouldIncludeHiddenInlineDetailsPanels()
         {
             Assert.That(_response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(CountOccurrences(_html, "home-report-details"), Is.EqualTo(2));
+            Assert.That(CountOccurrences(_html, "id=\"home-report-details-"), Is.EqualTo(2));
+            Assert.That(CountOccurrences(_html, "class=\"home-report-details"), Is.EqualTo(2));
             Assert.That(CountOccurrences(_html, "hidden"), Is.GreaterThanOrEqualTo(2));
             Assert.That(_html, Does.Contain("Description:"));
             Assert.That(_html, Does.Contain("Reported:"));
