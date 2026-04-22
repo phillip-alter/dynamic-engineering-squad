@@ -64,5 +64,30 @@ namespace InfrastructureApp.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateBorder(string? selectedBorderKey)
+        {
+            var userId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized();
+            }
+
+            var updated = await _dashboardRepo.UpdateSelectedDashboardBorderAsync(userId, selectedBorderKey);
+            if (updated)
+            {
+                TempData["Success"] = string.IsNullOrWhiteSpace(selectedBorderKey)
+                    ? "Dashboard border reset to default."
+                    : "Dashboard border updated.";
+            }
+            else
+            {
+                TempData["Error"] = "That dashboard border is unavailable.";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

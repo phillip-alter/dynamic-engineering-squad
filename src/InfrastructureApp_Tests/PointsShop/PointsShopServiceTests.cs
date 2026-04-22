@@ -198,7 +198,8 @@ namespace InfrastructureApp_Tests.PointsShop
             var snapshot = await _service.GetShopAsync(userId);
 
             Assert.That(snapshot.Items.Any(i => i.Name == PointsShopCatalog.DashboardBackgroundImageItemName), Is.True);
-            Assert.That(snapshot.Items.Count(i => PointsShopCatalog.GetDashboardBackgroundByName(i.Name) != null), Is.EqualTo(6));
+            Assert.That(snapshot.Items.Count(i => PointsShopCatalog.GetDashboardBackgroundByName(i.Name) != null), Is.EqualTo(5));
+            Assert.That(snapshot.Items.Count(i => PointsShopCatalog.GetDashboardBorderByName(i.Name) != null), Is.EqualTo(5));
         }
     }
 }

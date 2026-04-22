@@ -19,6 +19,21 @@ namespace InfrastructureApp.Services
         public int CostPoints { get; init; } = 10;
     }
 
+    public sealed class DashboardBorderDefinition
+    {
+        public required string Key { get; init; }
+
+        public required string Name { get; init; }
+
+        public required string Description { get; init; }
+
+        public required string CssClass { get; init; }
+
+        public required string PreviewCssClass { get; init; }
+
+        public int CostPoints { get; init; } = 10;
+    }
+
     public static class PointsShopCatalog
     {
         public const string DashboardBackgroundImageItemName = "Dashboard Background Image";
@@ -60,13 +75,51 @@ namespace InfrastructureApp.Services
                     Name = "Aurora Night Background",
                     Description = "Unlock a glowing night-sky dashboard background.",
                     ImageUrl = "/Images/dashboard-aurora-night-bg.svg"
-                },
-                new DashboardBackgroundDefinition
+                }
+            };
+
+        public static readonly IReadOnlyList<DashboardBorderDefinition> DashboardBorders =
+            new[]
+            {
+                new DashboardBorderDefinition
                 {
-                    Key = "signal-glow",
-                    Name = "Signal Glow Background",
-                    Description = "Unlock a signal-inspired dashboard background with warm highlights.",
-                    ImageUrl = "/Images/dashboard-signal-glow-bg.svg"
+                    Key = "gold-ring",
+                    Name = "Golden Border",
+                    Description = "Unlock a bold golden border for your personal information card.",
+                    CssClass = "dashboard-personal-card--border-gold-ring",
+                    PreviewCssClass = "dashboard-border-preview--gold-ring"
+                },
+                new DashboardBorderDefinition
+                {
+                    Key = "blue-glow",
+                    Name = "Blue Glow Border",
+                    Description = "Unlock a blue glow border for your personal information card.",
+                    CssClass = "dashboard-personal-card--border-blue-glow",
+                    PreviewCssClass = "dashboard-border-preview--blue-glow"
+                },
+                new DashboardBorderDefinition
+                {
+                    Key = "safety-stripe",
+                    Name = "Safety Stripe Border",
+                    Description = "Unlock a safety stripe border for your personal information card.",
+                    CssClass = "dashboard-personal-card--border-safety-stripe",
+                    PreviewCssClass = "dashboard-border-preview--safety-stripe"
+                },
+                new DashboardBorderDefinition
+                {
+                    Key = "steel-frame",
+                    Name = "Steel Frame Border",
+                    Description = "Unlock a steel frame border for your personal information card.",
+                    CssClass = "dashboard-personal-card--border-steel-frame",
+                    PreviewCssClass = "dashboard-border-preview--steel-frame"
+                },
+                new DashboardBorderDefinition
+                {
+                    Key = "ember-outline",
+                    Name = "Ember Outline Border",
+                    Description = "Unlock an ember outline border for your personal information card.",
+                    CssClass = "dashboard-personal-card--border-ember-outline",
+                    PreviewCssClass = "dashboard-border-preview--ember-outline"
                 }
             };
 
@@ -78,6 +131,16 @@ namespace InfrastructureApp.Services
                     Name = background.Name,
                     Description = background.Description,
                     CostPoints = background.CostPoints,
+                    IsSinglePurchase = true,
+                    IsActive = true
+                });
+
+            var borderItems = DashboardBorders
+                .Select(border => new ShopItem
+                {
+                    Name = border.Name,
+                    Description = border.Description,
+                    CostPoints = border.CostPoints,
                     IsSinglePurchase = true,
                     IsActive = true
                 });
@@ -118,7 +181,7 @@ namespace InfrastructureApp.Services
                 }
             };
 
-            return backgroundItems.Concat(otherItems).ToList().AsReadOnly();
+            return backgroundItems.Concat(borderItems).Concat(otherItems).ToList().AsReadOnly();
         }
 
         public static DashboardBackgroundDefinition? GetDashboardBackgroundByKey(string? key)
@@ -141,6 +204,26 @@ namespace InfrastructureApp.Services
             return DashboardBackgrounds.FirstOrDefault(background => background.Name == name);
         }
 
+        public static DashboardBorderDefinition? GetDashboardBorderByKey(string? key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return null;
+            }
+
+            return DashboardBorders.FirstOrDefault(border => border.Key == key);
+        }
+
+        public static DashboardBorderDefinition? GetDashboardBorderByName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
+            return DashboardBorders.FirstOrDefault(border => border.Name == name);
+        }
+
         public static IReadOnlyList<DashboardBackgroundOptionViewModel> BuildDashboardBackgroundOptions(IEnumerable<string> unlockedItemNames)
         {
             var unlockedNameSet = unlockedItemNames.ToHashSet(StringComparer.Ordinal);
@@ -152,6 +235,22 @@ namespace InfrastructureApp.Services
                     Key = background.Key,
                     Name = background.Name,
                     PreviewUrl = background.ImageUrl
+                })
+                .ToList()
+                .AsReadOnly();
+        }
+
+        public static IReadOnlyList<DashboardBorderOptionViewModel> BuildDashboardBorderOptions(IEnumerable<string> unlockedItemNames)
+        {
+            var unlockedNameSet = unlockedItemNames.ToHashSet(StringComparer.Ordinal);
+
+            return DashboardBorders
+                .Where(border => unlockedNameSet.Contains(border.Name))
+                .Select(border => new DashboardBorderOptionViewModel
+                {
+                    Key = border.Key,
+                    Name = border.Name,
+                    PreviewCssClass = border.PreviewCssClass
                 })
                 .ToList()
                 .AsReadOnly();

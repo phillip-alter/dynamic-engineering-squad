@@ -12,5 +12,7 @@ namespace InfrastructureApp.Services
         Task<DashboardViewModel?> GetPublicProfileAsync(string username);
 
         Task<bool> UpdateSelectedDashboardBackgroundAsync(string userId, string? selectedBackgroundKey);
+
+        Task<bool> UpdateSelectedDashboardBorderAsync(string userId, string? selectedBorderKey);
     }
 }

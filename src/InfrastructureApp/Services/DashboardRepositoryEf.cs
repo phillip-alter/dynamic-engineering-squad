@@ -58,6 +58,7 @@ namespace InfrastructureApp.Services
                 .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
             var selectedBackground = await GetSelectedDashboardBackgroundAsync(user.Id, user.SelectedDashboardBackgroundKey);
+            var selectedBorder = await GetSelectedDashboardBorderAsync(user.Id, user.SelectedDashboardBorderKey);
 
             return new DashboardViewModel
             {
@@ -68,7 +69,9 @@ namespace InfrastructureApp.Services
                 AvatarKey        = user.AvatarKey,
                 AvatarUrl        = user.AvatarUrl,
                 SelectedDashboardBackgroundKey = selectedBackground?.Key,
-                PersonalInfoBackgroundUrl = selectedBackground?.ImageUrl
+                PersonalInfoBackgroundUrl = selectedBackground?.ImageUrl,
+                SelectedDashboardBorderKey = selectedBorder?.Key,
+                PersonalInfoBorderCssClass = selectedBorder?.CssClass
             };
         }
 
@@ -98,7 +101,9 @@ namespace InfrastructureApp.Services
                 .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
             var unlockedBackgroundNames = await GetUnlockedDashboardBackgroundNamesAsync(user.Id);
+            var unlockedBorderNames = await GetUnlockedDashboardBorderNamesAsync(user.Id);
             var selectedBackground = ResolveSelectedBackground(unlockedBackgroundNames, user.SelectedDashboardBackgroundKey);
+            var selectedBorder = ResolveSelectedBorder(unlockedBorderNames, user.SelectedDashboardBorderKey);
 
             return new DashboardViewModel
             {
@@ -110,7 +115,10 @@ namespace InfrastructureApp.Services
                 AvatarUrl = user.AvatarUrl,
                 SelectedDashboardBackgroundKey = selectedBackground?.Key,
                 PersonalInfoBackgroundUrl = selectedBackground?.ImageUrl,
-                AvailableDashboardBackgrounds = PointsShopCatalog.BuildDashboardBackgroundOptions(unlockedBackgroundNames)
+                SelectedDashboardBorderKey = selectedBorder?.Key,
+                PersonalInfoBorderCssClass = selectedBorder?.CssClass,
+                AvailableDashboardBackgrounds = PointsShopCatalog.BuildDashboardBackgroundOptions(unlockedBackgroundNames),
+                AvailableDashboardBorders = PointsShopCatalog.BuildDashboardBorderOptions(unlockedBorderNames)
             };
         }
 
@@ -146,6 +154,38 @@ namespace InfrastructureApp.Services
             return updateResult.Succeeded;
         }
 
+        public async Task<bool> UpdateSelectedDashboardBorderAsync(string userId, string? selectedBorderKey)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(selectedBorderKey))
+            {
+                user.SelectedDashboardBorderKey = null;
+                var result = await _userManager.UpdateAsync(user);
+                return result.Succeeded;
+            }
+
+            var selectedBorder = PointsShopCatalog.GetDashboardBorderByKey(selectedBorderKey);
+            if (selectedBorder == null)
+            {
+                return false;
+            }
+
+            var unlockedBorderNames = await GetUnlockedDashboardBorderNamesAsync(userId);
+            if (!unlockedBorderNames.Contains(selectedBorder.Name))
+            {
+                return false;
+            }
+
+            user.SelectedDashboardBorderKey = selectedBorder.Key;
+            var updateResult = await _userManager.UpdateAsync(user);
+            return updateResult.Succeeded;
+        }
+
         private async Task<List<string>> GetUnlockedDashboardBackgroundNamesAsync(string userId)
         {
             var validBackgroundNames = PointsShopCatalog.DashboardBackgrounds
@@ -165,10 +205,35 @@ namespace InfrastructureApp.Services
                 .ToListAsync();
         }
 
+        private async Task<List<string>> GetUnlockedDashboardBorderNamesAsync(string userId)
+        {
+            var validBorderNames = PointsShopCatalog.DashboardBorders
+                .Select(border => border.Name)
+                .ToList();
+
+            return await _db.UserShopItemPurchases
+                .AsNoTracking()
+                .Where(p => p.UserId == userId)
+                .Join(
+                    _db.ShopItems.AsNoTracking(),
+                    purchase => purchase.ShopItemId,
+                    item => item.Id,
+                    (purchase, item) => item.Name)
+                .Where(name => validBorderNames.Contains(name))
+                .Distinct()
+                .ToListAsync();
+        }
+
         private async Task<DashboardBackgroundDefinition?> GetSelectedDashboardBackgroundAsync(string userId, string? selectedBackgroundKey)
         {
             var unlockedBackgroundNames = await GetUnlockedDashboardBackgroundNamesAsync(userId);
             return ResolveSelectedBackground(unlockedBackgroundNames, selectedBackgroundKey);
+        }
+
+        private async Task<DashboardBorderDefinition?> GetSelectedDashboardBorderAsync(string userId, string? selectedBorderKey)
+        {
+            var unlockedBorderNames = await GetUnlockedDashboardBorderNamesAsync(userId);
+            return ResolveSelectedBorder(unlockedBorderNames, selectedBorderKey);
         }
 
         private static DashboardBackgroundDefinition? ResolveSelectedBackground(IEnumerable<string> unlockedBackgroundNames, string? selectedBackgroundKey)
@@ -181,6 +246,19 @@ namespace InfrastructureApp.Services
 
             return unlockedBackgroundNames.Contains(selectedBackground.Name)
                 ? selectedBackground
+                : null;
+        }
+
+        private static DashboardBorderDefinition? ResolveSelectedBorder(IEnumerable<string> unlockedBorderNames, string? selectedBorderKey)
+        {
+            var selectedBorder = PointsShopCatalog.GetDashboardBorderByKey(selectedBorderKey);
+            if (selectedBorder == null)
+            {
+                return null;
+            }
+
+            return unlockedBorderNames.Contains(selectedBorder.Name)
+                ? selectedBorder
                 : null;
         }
     }

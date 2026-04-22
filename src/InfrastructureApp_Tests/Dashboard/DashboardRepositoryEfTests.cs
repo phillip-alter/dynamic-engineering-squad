@@ -98,6 +98,49 @@ namespace InfrastructureApp_Tests.Dashboard
         }
 
         [Test]
+        public async Task GetPublicProfileAsync_WhenDashboardBorderPurchased_ReturnsBorderCssClass()
+        {
+            var selectedBorder = PointsShopCatalog.GetDashboardBorderByKey("gold-ring")!;
+            var user = new Users
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "erin",
+                Email = "erin@test.com",
+                EmailConfirmed = true,
+                SelectedDashboardBorderKey = selectedBorder.Key
+            };
+            _db.Users.Add(user);
+
+            var borderItem = new ShopItem
+            {
+                Name = selectedBorder.Name,
+                Description = selectedBorder.Description,
+                CostPoints = 10,
+                IsSinglePurchase = true,
+                IsActive = true
+            };
+            _db.ShopItems.Add(borderItem);
+            await _db.SaveChangesAsync();
+
+            _db.UserShopItemPurchases.Add(new UserShopItemPurchase
+            {
+                UserId = user.Id,
+                ShopItemId = borderItem.Id,
+                CostPoints = 10,
+                PurchasedAt = DateTime.UtcNow
+            });
+            await _db.SaveChangesAsync();
+
+            var repo = new DashboardRepositoryEf(_db, CreateUserManager(user), Mock.Of<IHttpContextAccessor>());
+
+            var result = await repo.GetPublicProfileAsync("erin");
+
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result!.SelectedDashboardBorderKey, Is.EqualTo(selectedBorder.Key));
+            Assert.That(result.PersonalInfoBorderCssClass, Is.EqualTo(selectedBorder.CssClass));
+        }
+
+        [Test]
         public async Task UpdateSelectedDashboardBackgroundAsync_WhenUnlocked_UpdatesUserPreference()
         {
             var background = PointsShopCatalog.GetDashboardBackgroundByKey("blueprint")!;
@@ -157,6 +200,68 @@ namespace InfrastructureApp_Tests.Dashboard
 
             Assert.That(updated, Is.False);
             Assert.That(user.SelectedDashboardBackgroundKey, Is.Null);
+        }
+
+        [Test]
+        public async Task UpdateSelectedDashboardBorderAsync_WhenUnlocked_UpdatesUserPreference()
+        {
+            var border = PointsShopCatalog.GetDashboardBorderByKey("steel-frame")!;
+            var user = new Users
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "frank",
+                Email = "frank@test.com",
+                EmailConfirmed = true
+            };
+            _db.Users.Add(user);
+
+            var item = new ShopItem
+            {
+                Name = border.Name,
+                Description = border.Description,
+                CostPoints = 10,
+                IsSinglePurchase = true,
+                IsActive = true
+            };
+            _db.ShopItems.Add(item);
+            await _db.SaveChangesAsync();
+
+            _db.UserShopItemPurchases.Add(new UserShopItemPurchase
+            {
+                UserId = user.Id,
+                ShopItemId = item.Id,
+                CostPoints = 10,
+                PurchasedAt = DateTime.UtcNow
+            });
+            await _db.SaveChangesAsync();
+
+            var repo = new DashboardRepositoryEf(_db, CreateUserManager(user), Mock.Of<IHttpContextAccessor>());
+
+            var updated = await repo.UpdateSelectedDashboardBorderAsync(user.Id, border.Key);
+
+            Assert.That(updated, Is.True);
+            Assert.That(user.SelectedDashboardBorderKey, Is.EqualTo(border.Key));
+        }
+
+        [Test]
+        public async Task UpdateSelectedDashboardBorderAsync_WhenLocked_ReturnsFalse()
+        {
+            var user = new Users
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserName = "gina",
+                Email = "gina@test.com",
+                EmailConfirmed = true
+            };
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+
+            var repo = new DashboardRepositoryEf(_db, CreateUserManager(user), Mock.Of<IHttpContextAccessor>());
+
+            var updated = await repo.UpdateSelectedDashboardBorderAsync(user.Id, "ember-outline");
+
+            Assert.That(updated, Is.False);
+            Assert.That(user.SelectedDashboardBorderKey, Is.Null);
         }
 
         private static UserManager<Users> CreateUserManager(Users user)
