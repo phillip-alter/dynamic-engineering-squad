@@ -8,7 +8,8 @@
 
 <div class="row">
     <div class="col-md-6 mb-3">
-        <div class="card">
+        <div class="card dashboard-personal-card @(Model.HasPersonalInfoBackground ? "dashboard-personal-card--unlocked" : "")"
+             style="@(Model.HasPersonalInfoBackground ? $"background-image: linear-gradient(rgba(19, 19, 19, 0.35), rgba(19, 19, 19, 0.78)), url('{Model.PersonalInfoBackgroundUrl}');" : null)">
             <div class="card-header">
                 Personal Information
             </div>

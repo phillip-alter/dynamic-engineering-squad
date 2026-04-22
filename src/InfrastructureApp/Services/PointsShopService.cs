@@ -161,52 +161,19 @@ namespace InfrastructureApp.Services
 
         private async Task EnsureSeedDataAsync()
         {
-            if (await _db.ShopItems.AnyAsync())
+            var existingNames = await _db.ShopItems
+                .Select(i => i.Name)
+                .ToListAsync();
+
+            var missingItems = PointsShopCatalog.GetStarterItems()
+                .Where(item => !existingNames.Contains(item.Name))
+                .ToList();
+
+            if (missingItems.Count > 0)
             {
-                return;
+                _db.ShopItems.AddRange(missingItems);
+                await _db.SaveChangesAsync();
             }
-
-            _db.ShopItems.AddRange(GetStarterItems());
-            await _db.SaveChangesAsync();
-        }
-
-        private static IEnumerable<ShopItem> GetStarterItems()
-        {
-            return new[]
-            {
-                new ShopItem
-                {
-                    Name = "Golden Reporter Title",
-                    Description = "Unlock a special title that highlights your contribution streak.",
-                    CostPoints = 25,
-                    IsSinglePurchase = true,
-                    IsActive = true
-                },
-                new ShopItem
-                {
-                    Name = "Map Pin Cosmetic",
-                    Description = "Claim a cosmetic map pin reward for your profile collection.",
-                    CostPoints = 40,
-                    IsSinglePurchase = true,
-                    IsActive = true
-                },
-                new ShopItem
-                {
-                    Name = "Premium Profile Frame",
-                    Description = "Add a premium-looking frame to your user profile presentation.",
-                    CostPoints = 60,
-                    IsSinglePurchase = true,
-                    IsActive = true
-                },
-                new ShopItem
-                {
-                    Name = "Dark Theme Badge",
-                    Description = "Unlock a cosmetic badge that shows off your shop progress.",
-                    CostPoints = 80,
-                    IsSinglePurchase = true,
-                    IsActive = true
-                }
-            };
         }
     }
 }

@@ -187,5 +187,17 @@ namespace InfrastructureApp_Tests.PointsShop
             Assert.That(affordableSummary.IsOwned, Is.False);
             Assert.That(affordableSummary.CanPurchase, Is.True);
         }
+
+        [Test]
+        public async Task GetShopAsync_WhenCatalogAlreadyExists_AddsMissingStarterBackgroundItem()
+        {
+            var userId = "user-7";
+            await AddShopItemAsync("Legacy Cosmetic", 99);
+            await SeedPointsAsync(userId, 50, 50);
+
+            var snapshot = await _service.GetShopAsync(userId);
+
+            Assert.That(snapshot.Items.Any(i => i.Name == PointsShopCatalog.DashboardBackgroundImageItemName), Is.True);
+        }
     }
 }

@@ -54,6 +54,8 @@ namespace InfrastructureApp.Services
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
+            var personalInfoBackgroundUrl = await GetPersonalInfoBackgroundUrlAsync(user.Id);
+
             return new DashboardViewModel
             {
                 Username         = user.UserName ?? username,
@@ -61,7 +63,8 @@ namespace InfrastructureApp.Services
                 ReportsSubmitted = reportsSubmitted,
                 Points           = pointsRow?.CurrentPoints ?? 0,
                 AvatarKey        = user.AvatarKey,
-                AvatarUrl        = user.AvatarUrl
+                AvatarUrl        = user.AvatarUrl,
+                PersonalInfoBackgroundUrl = personalInfoBackgroundUrl
             };
         }
 
@@ -90,6 +93,8 @@ namespace InfrastructureApp.Services
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.UserId == user.Id);
 
+            var personalInfoBackgroundUrl = await GetPersonalInfoBackgroundUrlAsync(user.Id);
+
             return new DashboardViewModel
             {
                 Username = user.UserName ?? "DemoUser",
@@ -97,8 +102,26 @@ namespace InfrastructureApp.Services
                 ReportsSubmitted = reportsSubmitted,
                 Points = pointsRow?.CurrentPoints ?? 0,
                 AvatarKey = user.AvatarKey,
-                AvatarUrl = user.AvatarUrl
+                AvatarUrl = user.AvatarUrl,
+                PersonalInfoBackgroundUrl = personalInfoBackgroundUrl
             };
+        }
+
+        private async Task<string?> GetPersonalInfoBackgroundUrlAsync(string userId)
+        {
+            var hasDashboardBackground = await _db.UserShopItemPurchases
+                .AsNoTracking()
+                .Where(p => p.UserId == userId)
+                .Join(
+                    _db.ShopItems.AsNoTracking(),
+                    purchase => purchase.ShopItemId,
+                    item => item.Id,
+                    (purchase, item) => item.Name)
+                .AnyAsync(name => name == PointsShopCatalog.DashboardBackgroundImageItemName);
+
+            return hasDashboardBackground
+                ? PointsShopCatalog.DashboardBackgroundImageUrl
+                : null;
         }
     }
 }

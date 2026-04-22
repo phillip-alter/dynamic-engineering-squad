@@ -399,6 +399,34 @@ h1, h2, h3 {
     color: var(--safety-orange);
 }
 
+.dashboard-personal-card {
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+
+.dashboard-personal-card--unlocked .card-header,
+.dashboard-personal-card--unlocked .card-body {
+  background-color: transparent;
+}
+
+.dashboard-personal-card--unlocked .card-header {
+  border-bottom-color: rgba(255, 214, 0, 0.4);
+  backdrop-filter: blur(1px);
+}
+
+.dashboard-personal-card--unlocked .btn-outline-primary {
+  background-color: rgba(33, 37, 41, 0.35);
+  border-color: rgba(255, 214, 0, 0.4);
+  color: var(--text-primary);
+}
+
+.dashboard-personal-card--unlocked .btn-outline-primary:hover {
+  background-color: var(--safety-orange) !important;
+  border-color: var(--safety-orange) !important;
+  color: #fff !important;
+}
+
 /* Base action button — secondary style */
 .report-action-btn {
     background-color: var(--dark-border);

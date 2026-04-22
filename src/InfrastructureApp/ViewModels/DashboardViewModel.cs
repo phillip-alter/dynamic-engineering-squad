@@ -21,10 +21,15 @@ namespace InfrastructureApp.ViewModels
         public string? AvatarKey { get; set; }
         public string? AvatarUrl { get; set; }
 
+        public string? PersonalInfoBackgroundUrl { get; set; }
+
         //Resolves which avatar URL to show - uploaded photo wins over preset
         public string ResolvedAvatarUrl =>
             !string.IsNullOrWhiteSpace(AvatarUrl)
                 ?AvatarUrl
                 : AvatarCatalog.ToUrl(AvatarKey);
+
+        public bool HasPersonalInfoBackground =>
+            !string.IsNullOrWhiteSpace(PersonalInfoBackgroundUrl);
     }
 }
