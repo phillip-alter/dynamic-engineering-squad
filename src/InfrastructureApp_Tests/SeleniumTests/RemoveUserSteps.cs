@@ -57,6 +57,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Then(@"I should see a ""Remove"" button for user ""(.*)""")]
         public void ThenIShouldSeeARemoveButtonForUser(string username)
         {
+            EnsureUserIsVisibleOnAdminPage(username);
             var removeButtons = Driver.FindElements(By.XPath($"//tr[td[contains(text(), '{username}')]]//button[contains(text(), 'Remove')] | //tr[td[contains(text(), '{username}')]]//a[contains(text(), 'Remove')]"));
             if (removeButtons.Count == 0)
             {
@@ -65,6 +66,24 @@ namespace InfrastructureApp_Tests.StepDefinitions
                 Console.WriteLine(Driver.PageSource);
             }
             Assert.That(removeButtons.Count, Is.GreaterThan(0), $"Remove button for user {username} not found.");
+        }
+
+        private void EnsureUserIsVisibleOnAdminPage(string username)
+        {
+            var wait = new OpenQA.Selenium.Support.UI.WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            while (true)
+            {
+                var userRows = Driver.FindElements(By.XPath($"//tr[td[contains(text(), '{username}')]]"));
+                if (userRows.Count > 0) return;
+
+                var nextButtons = Driver.FindElements(By.XPath("//li[contains(@class, 'page-item') and not(contains(@class, 'disabled'))]/a[contains(text(), 'Next')]"));
+                if (nextButtons.Count == 0)
+                {
+                    break;
+                }
+                ScrollAndClick(nextButtons[0]);
+                Thread.Sleep(500); // Wait for page load
+            }
         }
 
         [Then(@"I should see an error message ""(.*)"" or be redirected")]
@@ -89,6 +108,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         {
             try
             {
+                EnsureUserIsVisibleOnAdminPage(username);
                 var removeButton = Driver.FindElement(By.XPath($"//tr[td[contains(text(), '{username}')]]//*[contains(text(), 'Remove')]"));
                 removeButton.Click();
             }
