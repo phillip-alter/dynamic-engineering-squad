@@ -6,6 +6,7 @@ using InfrastructureApp.Models;
 using InfrastructureApp_Tests.SeleniumTests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using Microsoft.AspNetCore.Identity;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using Reqnroll;
@@ -18,6 +19,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         private int _reportId;
 
         [Given(@"a report exists with description ""(.*)""")]
+        [Scope(Feature = "Flag Post")]
         public async Task GivenAReportExistsWithDescription(string description)
         {
             using var scope = ServerHost!.Services.CreateScope();
@@ -37,19 +39,83 @@ namespace InfrastructureApp_Tests.StepDefinitions
         }
 
         [Given(@"I am logged in as ""(.*)""")]
+        [Scope(Feature = "Flag Post")]
         public async Task GivenIAmLoggedInAs(string username)
         {
             await CreateTestUser(username, "Password123!");
             Login(username, "Password123!");
         }
 
+        [Given(@"I navigate to that report's details page")]
         [When(@"I navigate to that report's details page")]
+        [Scope(Feature = "Flag Post")]
         public void WhenINavigateToThatReportsDetailsPage()
         {
             Driver.Navigate().GoToUrl($"{BaseUrl}/ReportIssue/Details/{_reportId}");
         }
 
+        [When(@"I navigate to the Latest Reports page")]
+        [Scope(Feature = "Flag Post")]
+        public void WhenINavigateToTheLatestReportsPage()
+        {
+            Driver.Navigate().GoToUrl($"{BaseUrl}/Reports/Latest");
+        }
+
+        [When(@"I click on the report with description ""(.*)""")]
+        [Scope(Feature = "Flag Post")]
+        public void WhenIClickOnTheReportWithDescription(string description)
+        {
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            // Find the report button that contains a div with the description text
+            var reportBtn = wait.Until(d => d.FindElement(By.XPath($"//button[contains(@class, 'report-item') and .//div[contains(text(), '{description}')]]")));
+            ScrollAndClick(reportBtn);
+        }
+
+        [Then(@"the report modal should be displayed")]
+        [Scope(Feature = "Flag Post")]
+        public void ThenTheReportModalShouldBeDisplayed()
+        {
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            var modal = wait.Until(d => {
+                var m = d.FindElement(By.Id("reportModal"));
+                return m.Displayed ? m : null;
+            });
+            Assert.That(modal, Is.Not.Null);
+        }
+
+        [Then(@"I should see a ""Flag"" button in the modal")]
+        [Scope(Feature = "Flag Post")]
+        public void ThenIShouldSeeAFlagButtonInTheModal()
+        {
+            var flagBtn = Driver.FindElement(By.Id("modalFlagBtn"));
+            Assert.That(flagBtn.Displayed, Is.True);
+        }
+
+        [When(@"I click the ""Flag"" button in the modal")]
+        [Scope(Feature = "Flag Post")]
+        public void WhenIClickTheFlagButtonInTheModal()
+        {
+            var flagBtn = Driver.FindElement(By.Id("modalFlagBtn"));
+            ScrollAndClick(flagBtn);
+            
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(5));
+            wait.Until(d => d.FindElement(By.Id("flagModal")).Displayed);
+        }
+
+        [Then(@"the ""Flag"" button in the modal should be disabled and show ""Already Flagged""")]
+        [Scope(Feature = "Flag Post")]
+        public void ThenTheFlagButtonInTheModalShouldBeDisabledAndShowAlreadyFlagged()
+        {
+            var flagBtn = Driver.FindElement(By.Id("modalFlagBtn"));
+            Assert.Multiple(() =>
+            {
+                Assert.That(flagBtn.Enabled, Is.False);
+                Assert.That(flagBtn.GetAttribute("innerText"), Does.Contain("Already Flagged"));
+            });
+        }
+
         [Then(@"I should see a ""Flag"" icon")]
+        [Scope(Feature = "Flag Post")]
         public void ThenIShouldSeeAFlagIcon()
         {
             var flagBtn = Driver.FindElement(By.Id("flagBtn"));
@@ -58,6 +124,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
 
         [When(@"I click the ""Flag"" icon")]
         [Given(@"I have clicked the ""Flag"" icon")]
+        [Scope(Feature = "Flag Post")]
         public void WhenIClickTheFlagIcon()
         {
             var flagBtn = Driver.FindElement(By.Id("flagBtn"));
@@ -68,6 +135,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         }
 
         [Then(@"I should be presented with categories ""(.*)"", ""(.*)"", ""(.*)""")]
+        [Scope(Feature = "Flag Post")]
         public void ThenIShouldBePresentedWithCategories(string cat1, string cat2, string cat3)
         {
             var body = Driver.FindElement(By.Id("flagModal")).Text;
@@ -80,6 +148,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         }
 
         [When(@"I select category ""(.*)""")]
+        [Scope(Feature = "Flag Post")]
         public void WhenISelectCategory(string category)
         {
             var radio = Driver.FindElement(By.XPath($"//label[contains(text(), '{category}')]/preceding-sibling::input"));
@@ -87,6 +156,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         }
 
         [When(@"I click ""Submit Report""")]
+        [Scope(Feature = "Flag Post")]
         public void WhenIClickSubmitReport()
         {
             var submitBtn = Driver.FindElement(By.Id("submitFlagBtn"));
@@ -94,6 +164,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         }
 
         [Then(@"I should see a confirmation message ""(.*)""")]
+        [Scope(Feature = "Flag Post")]
         public void ThenIShouldSeeAConfirmationMessage(string expectedMessage)
         {
             var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
@@ -105,6 +176,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         }
 
         [Then(@"the reporting interface should close")]
+        [Scope(Feature = "Flag Post")]
         public void ThenTheReportingInterfaceShouldClose()
         {
             var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
@@ -113,6 +185,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         }
 
         [Then(@"the ""Flag"" icon should be disabled and show ""Already Flagged""")]
+        [Scope(Feature = "Flag Post")]
         public void ThenTheFlagIconShouldBeDisabledAndShowAlreadyFlagged()
         {
             var flagBtn = Driver.FindElement(By.Id("flagBtn"));
@@ -124,10 +197,9 @@ namespace InfrastructureApp_Tests.StepDefinitions
         }
 
         [Given(@"I have already flagged that report with category ""(.*)""")]
+        [Scope(Feature = "Flag Post")]
         public async Task GivenIHaveAlreadyFlaggedThatReportWithCategory(string category)
         {
-            await GivenIAmLoggedInAs("testuser");
-            
             using var scope = ServerHost!.Services.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Users>>();
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -141,6 +213,9 @@ namespace InfrastructureApp_Tests.StepDefinitions
                 CreatedAt = DateTime.UtcNow
             });
             await db.SaveChangesAsync();
+
+            // Refresh the page to reflect the DB change
+            Driver.Navigate().Refresh();
         }
     }
 }

@@ -133,7 +133,8 @@ else
                     <!-- Community Flagging -->
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <button id="modalFlagBtn" class="btn btn-outline-danger btn-sm fw-bold" data-report-id="">
+                        <button id="modalFlagBtn" class="btn btn-outline-danger btn-sm fw-bold" 
+                                data-report-id="" data-bs-toggle="modal" data-bs-target="#flagModal">
                             <i class="fa-solid fa-flag me-1"></i>
                             Flag
                         </button>
@@ -163,6 +164,7 @@ else
     <!-- SCRUM-86 ADDED: enables newest/oldest sorting -->
     <script src="~/js/latestReportsMap.js" asp-append-version="true"></script> <!-- SCRUM-98 ADDED -->
     <script src="~/js/reportVote.js" asp-append-version="true"></script>
+    <script src="~/js/reportFlag.js" asp-append-version="true"></script>
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey">
     </script>

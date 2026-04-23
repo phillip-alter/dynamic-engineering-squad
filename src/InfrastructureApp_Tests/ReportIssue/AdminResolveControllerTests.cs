@@ -34,7 +34,9 @@ namespace InfrastructureApp_Tests
             verifyService.GetVerifyStatusAsync(Arg.Any<int>(), Arg.Any<string?>())
                 .Returns((0, false));
 
-            _controller = new ReportIssueController(_service, userManager, voteService, verifyService)
+            var flagService = Substitute.For<IFlagService>();
+
+            _controller = new ReportIssueController(_service, userManager, voteService, verifyService, flagService)
             {
                 ControllerContext = new ControllerContext
                 {
