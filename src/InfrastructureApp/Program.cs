@@ -138,6 +138,7 @@ builder.Services.AddScoped<InfrastructureApp.Services.IAvatarService, Infrastruc
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IVoteService, VoteService>();
 builder.Services.AddScoped<IVerifyFixService, VerifyFixService>();
+builder.Services.AddScoped<IFlagService, FlagService>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();

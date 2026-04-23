@@ -17,13 +17,15 @@ namespace InfrastructureApp.Controllers
         private readonly UserManager<Users> _userManager;
         private readonly IVoteService _voteService;
         private readonly IVerifyFixService _verifyFixService;
+        private readonly IFlagService _flagService;
 
-        public ReportIssueController(IReportIssueService service, UserManager<Users> userManager, IVoteService voteService, IVerifyFixService verifyFixService)
+        public ReportIssueController(IReportIssueService service, UserManager<Users> userManager, IVoteService voteService, IVerifyFixService verifyFixService, IFlagService flagService)
         {
             _service = service;
             _userManager = userManager;
             _voteService = voteService;
             _verifyFixService = verifyFixService;
+            _flagService = flagService;
         }
 
         //landing page
@@ -168,6 +170,8 @@ namespace InfrastructureApp.Controllers
             ViewBag.VerifyCount = verifyCount;
             ViewBag.UserHasVerified = userHasVerified;
             ViewBag.VerifyThreshold = VerifyFixService.VerificationThreshold;
+
+            ViewBag.UserHasFlagged = userId != null && await _flagService.HasUserFlaggedAsync(id, userId);
 
             return View(report);
         }

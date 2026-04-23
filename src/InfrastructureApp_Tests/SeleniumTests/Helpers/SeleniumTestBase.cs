@@ -78,6 +78,7 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
                 builder.Services.AddScoped<IUserService, UserService>();
                 builder.Services.AddScoped<IVoteService, VoteService>();
                 builder.Services.AddScoped<IVerifyFixService, VerifyFixService>();
+                builder.Services.AddScoped<IFlagService, FlagService>();
                 builder.Services.AddScoped<ITripCheckService, TripCheckService>();
                 builder.Services.AddScoped<IContentModerationService, ContentModerationService>();
                 builder.Services.AddScoped<IImageHashService, ImageHashService>();
@@ -186,10 +187,16 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
 
         protected void ScrollAndClick(IWebElement element)
         {
-            new OpenQA.Selenium.Interactions.Actions(Driver)
-                .MoveToElement(element)
-                .Click()
-                .Perform();
+            try
+            {
+                ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView({ block: 'center', inline: 'nearest' });", element);
+                Thread.Sleep(500); // Wait for scroll to finish
+                element.Click();
+            }
+            catch (ElementClickInterceptedException)
+            {
+                ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", element);
+            }
         }
 
         protected void Login(string username = "ErinBleu", string password = "Password1234!")

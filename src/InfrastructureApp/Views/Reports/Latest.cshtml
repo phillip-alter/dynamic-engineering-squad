@@ -40,6 +40,7 @@ else
 
             <button type="button"
                     class="list-group-item list-group-item-action d-flex justify-content-between align-items-start report-item"
+                    data-report-id="@r.Id"
                     data-bs-toggle="modal" data-bs-target="#reportModal" data-reportid="@r.Id" data-description="@r.Description"
                     data-created="@r.CreatedAt.ToLocalTime().ToString("f")" data-status="@r.Status" data-image="@r.ImageUrl">
 
@@ -130,6 +131,22 @@ else
                     </div>
                 </div>
                 <div class="d-flex gap-2">
+                    <!-- Community Flagging -->
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <button id="modalFlagBtn" class="btn btn-outline-danger btn-sm fw-bold" 
+                                data-report-id="" data-bs-toggle="modal" data-bs-target="#flagModal">
+                            <i class="fa-solid fa-flag me-1"></i>
+                            Flag
+                        </button>
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-danger btn-sm fw-bold">
+                            <i class="fa-solid fa-flag me-1"></i>
+                            Flag
+                        </a>
+                    }
                     <!-- SCRUM-101 ADDED: unique URL link to existing ReportIssue details page -->
                     <a id="openFullReportLink" class="btn btn-link" href="#" target="_blank"> View Details </a>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -148,6 +165,7 @@ else
     <!-- SCRUM-86 ADDED: enables newest/oldest sorting -->
     <script src="~/js/latestReportsMap.js" asp-append-version="true"></script> <!-- SCRUM-98 ADDED -->
     <script src="~/js/reportVote.js" asp-append-version="true"></script>
+    <script src="~/js/reportFlag.js" asp-append-version="true"></script>
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey">
     </script>
