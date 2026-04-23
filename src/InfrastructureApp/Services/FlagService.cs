@@ -15,14 +15,31 @@ namespace InfrastructureApp.Services
             _db = db;
         }
 
-        public Task<(bool Success, string Message)> FlagReportAsync(int reportId, string userId, string category)
+        public async Task<(bool Success, string Message)> FlagReportAsync(int reportId, string userId, string category)
         {
-            throw new NotImplementedException();
+            var alreadyFlagged = await HasUserFlaggedAsync(reportId, userId);
+            if (alreadyFlagged)
+            {
+                return (false, "You have already flagged this post.");
+            }
+
+            var flag = new ReportFlag
+            {
+                ReportIssueId = reportId,
+                UserId = userId,
+                Category = category,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            _db.ReportFlags.Add(flag);
+            await _db.SaveChangesAsync();
+
+            return (true, "Thank you for your report. Our moderation team will review it shortly.");
         }
 
-        public Task<bool> HasUserFlaggedAsync(int reportId, string userId)
+        public async Task<bool> HasUserFlaggedAsync(int reportId, string userId)
         {
-            throw new NotImplementedException();
+            return await _db.ReportFlags.AnyAsync(f => f.ReportIssueId == reportId && f.UserId == userId);
         }
     }
 }
