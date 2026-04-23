@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using InfrastructureApp.Data;
 using InfrastructureApp.Models;
@@ -20,6 +19,8 @@ namespace InfrastructureApp_Tests.PointsShop
         [SetUp]
         public void SetUp()
         {
+            // Each test gets a unique in-memory database name so records never leak
+            // across test methods. This keeps the database lifecycle isolated per test.
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase("PointsShopServiceTest_" + Guid.NewGuid())
                 .ConfigureWarnings(w => w.Ignore(InMemoryEventId.TransactionIgnoredWarning))
@@ -65,6 +66,28 @@ namespace InfrastructureApp_Tests.PointsShop
                 LifetimePoints = lifetimePoints == 0 ? currentPoints : lifetimePoints,
                 LastUpdated = DateTime.UtcNow
             });
+
+            await _db.SaveChangesAsync();
+        }
+
+        private async Task SeedStarterCatalogAsync(bool isActive)
+        {
+            // The production PointsShopService auto-seeds starter items when the shop is
+            // loaded. Some tests assert against an exact item count for only the items they
+            // intentionally create. Pre-seeding the starter catalog here keeps the service
+            // from adding extra rows during GetShopAsync while still preserving production behavior.
+            foreach (var starterItem in PointsShopCatalog.GetStarterItems())
+            {
+                _db.ShopItems.Add(new ShopItem
+                {
+                    Name = starterItem.Name,
+                    Description = starterItem.Description,
+                    CostPoints = starterItem.CostPoints,
+                    IsSinglePurchase = starterItem.IsSinglePurchase,
+                    IsActive = isActive,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
 
             await _db.SaveChangesAsync();
         }
@@ -160,6 +183,8 @@ namespace InfrastructureApp_Tests.PointsShop
         public async Task GetShopAsync_ReturnsBalanceOwnershipAndPurchaseStatus()
         {
             var userId = "user-6";
+            await SeedStarterCatalogAsync(isActive: false);
+
             var ownedItem = await AddShopItemAsync("Owned Cosmetic", 20);
             var affordableItem = await AddShopItemAsync("Affordable Cosmetic", 10);
             await AddShopItemAsync("Inactive Cosmetic", 5, isActive: false);
