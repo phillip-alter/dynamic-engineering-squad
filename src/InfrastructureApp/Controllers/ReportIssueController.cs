@@ -15,11 +15,15 @@ namespace InfrastructureApp.Controllers
         //dependency injection (business logic + identity for users)
         private readonly IReportIssueService _service;
         private readonly UserManager<Users> _userManager;
+        private readonly IVoteService _voteService;
+        private readonly IVerifyFixService _verifyFixService;
 
-        public ReportIssueController(IReportIssueService service, UserManager<Users> userManager)
+        public ReportIssueController(IReportIssueService service, UserManager<Users> userManager, IVoteService voteService, IVerifyFixService verifyFixService)
         {
             _service = service;
             _userManager = userManager;
+            _voteService = voteService;
+            _verifyFixService = verifyFixService;
         }
 
         //landing page
@@ -123,6 +127,30 @@ namespace InfrastructureApp.Controllers
 
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> MarkResolved(int id)
+        {
+            var found = await _service.UpdateStatusAsync(id, "Resolved");
+            if (!found) return NotFound();
+
+            TempData["Success"] = "Report marked as Resolved and added to the verify queue.";
+            return RedirectToAction("Details", new { id });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> MarkVerifiedFixed(int id)
+        {
+            var found = await _service.UpdateStatusAsync(id, "Verified Fixed");
+            if (!found) return NotFound();
+
+            TempData["Success"] = "Report marked as Verified Fixed.";
+            return RedirectToAction("Details", new { id });
+        }
+
         //Shows the details page for a specific report id.
         [HttpGet]
         public async Task<IActionResult> Details(int id)
@@ -130,6 +158,16 @@ namespace InfrastructureApp.Controllers
             // Load report through the service layer; return 404 if it doesn't exist.
             var report = await _service.GetByIdAsync(id);
             if (report == null) return NotFound();
+
+            var userId = _userManager.GetUserId(User);
+            var (voteCount, userHasVoted) = await _voteService.GetVoteStatusAsync(id, userId);
+            ViewBag.VoteCount = voteCount;
+            ViewBag.UserHasVoted = userHasVoted;
+
+            var (verifyCount, userHasVerified) = await _verifyFixService.GetVerifyStatusAsync(id, userId);
+            ViewBag.VerifyCount = verifyCount;
+            ViewBag.UserHasVerified = userHasVerified;
+            ViewBag.VerifyThreshold = VerifyFixService.VerificationThreshold;
 
             return View(report);
         }

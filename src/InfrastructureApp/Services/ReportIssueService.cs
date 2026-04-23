@@ -46,9 +46,18 @@ namespace InfrastructureApp.Services
 
         }
 
-        //service gets delegated to the repo
         public Task<ReportIssue?> GetByIdAsync(int id)
             => _reports.GetByIdAsync(id);
+
+        public async Task<bool> UpdateStatusAsync(int id, string newStatus)
+        {
+            var report = await _db.ReportIssue.FindAsync(id);
+            if (report == null) return false;
+
+            report.Status = newStatus;
+            await _db.SaveChangesAsync();
+            return true;
+        }
 
 
         //submit report workflow

@@ -90,21 +90,64 @@ else
                 </p>
             </div>
 
-            <div class="modal-footer">
-                <!-- SCRUM-101 ADDED: unique URL link to existing ReportIssue details page -->
-                <a id="openFullReportLink" class="btn btn-link" href="#" target="_blank"> View Details </a>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <div class="modal-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="d-flex flex-column gap-2">
+                    <!-- Community upvote -->
+                    <div class="d-flex align-items-center gap-2">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <button id="modalVoteBtn" class="btn btn-outline-primary btn-sm fw-bold" data-report-id="">
+                                <i class="fa-solid fa-thumbs-up me-1"></i>
+                                I've seen this too
+                            </button>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-sm fw-bold">
+                                <i class="fa-solid fa-thumbs-up me-1"></i>
+                                I've seen this too
+                            </a>
+                        }
+                        <span class="text-muted small"><span id="modalVoteCount">0</span> vote<span id="modalVotePlural">s</span></span>
+                    </div>
+                    <!-- Community fix verification (only shown for Approved reports) -->
+                    <div id="modalVerifySection" class="d-flex align-items-center gap-2 d-none">
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <button id="modalVerifyBtn" class="btn btn-outline-success btn-sm fw-bold" data-report-id="">
+                                <i class="fa-solid fa-circle-check me-1"></i>
+                                I've verified this is fixed
+                            </button>
+                        }
+                        else
+                        {
+                            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-success btn-sm fw-bold">
+                                <i class="fa-solid fa-circle-check me-1"></i>
+                                I've verified this is fixed
+                            </a>
+                        }
+                        <span class="text-muted small"><span id="modalVerifyCount">0</span> verification<span id="modalVerifyPlural">s</span></span>
+                    </div>
+                </div>
+                <div class="d-flex gap-2">
+                    <!-- SCRUM-101 ADDED: unique URL link to existing ReportIssue details page -->
+                    <a id="openFullReportLink" class="btn btn-link" href="#" target="_blank"> View Details </a>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
+    @Html.AntiForgeryToken()
+
     <script src="~/js/latestReportsSearch.js" asp-append-version="true"></script>
     <script src="~/js/latestReportsSort.js" asp-append-version="true"></script>
     <script src="~/js/latestReportsModal.js" asp-append-version="true"></script> <!-- Added the JS file for the LatestReportsModal seperately to site.js -->
     <!-- SCRUM-86 ADDED: enables newest/oldest sorting -->
     <script src="~/js/latestReportsMap.js" asp-append-version="true"></script> <!-- SCRUM-98 ADDED -->
+    <script src="~/js/reportVote.js" asp-append-version="true"></script>
 
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey">
     </script>

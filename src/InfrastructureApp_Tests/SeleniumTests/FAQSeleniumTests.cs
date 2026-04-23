@@ -163,9 +163,14 @@ namespace InfrastructureApp_Tests.SeleniumTests
             var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
             var button = wait.Until(d => d.FindElement(By.CssSelector("[data-bs-target='#faq-account-saved']")));
 
-            ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView(true);", button);
-            Thread.Sleep(300);
-            button.Click();
+            // Julian SCRUM-128 test cleanup:
+            // Center the FAQ accordion button and click through JS to avoid flaky Selenium click interception.
+            ((IJavaScriptExecutor)Driver).ExecuteScript(
+                "arguments[0].scrollIntoView({ block: 'center', inline: 'nearest' });",
+                button);
+
+            wait.Until(_ => button.Displayed && button.Enabled);
+            ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].click();", button);
 
             wait.Until(d => d.FindElement(By.Id("faq-account-saved")).GetAttribute("class").Contains("show"));
 
