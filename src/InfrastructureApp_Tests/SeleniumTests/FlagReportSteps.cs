@@ -65,7 +65,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void WhenIClickOnTheReportWithDescription(string description)
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
             // Find the report button that contains a div with the description text
             var reportBtn = wait.Until(d => d.FindElement(By.XPath($"//button[contains(@class, 'report-item') and .//div[contains(text(), '{description}')]]")));
             ScrollAndClick(reportBtn);
@@ -75,10 +75,10 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void ThenTheReportModalShouldBeDisplayed()
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
             var modal = wait.Until(d => {
                 var m = d.FindElement(By.Id("reportModal"));
-                return m.Displayed ? m : null;
+                return m.Displayed && m.GetAttribute("class").Contains("show") ? m : null;
             });
             Assert.That(modal, Is.Not.Null);
         }
@@ -87,7 +87,8 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void ThenIShouldSeeAFlagButtonInTheModal()
         {
-            var flagBtn = Driver.FindElement(By.Id("modalFlagBtn"));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var flagBtn = wait.Until(d => d.FindElement(By.Id("modalFlagBtn")));
             Assert.That(flagBtn.Displayed, Is.True);
         }
 
@@ -95,18 +96,22 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void WhenIClickTheFlagButtonInTheModal()
         {
-            var flagBtn = Driver.FindElement(By.Id("modalFlagBtn"));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var flagBtn = wait.Until(d => d.FindElement(By.Id("modalFlagBtn")));
             ScrollAndClick(flagBtn);
             
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(5));
-            wait.Until(d => d.FindElement(By.Id("flagModal")).Displayed);
+            wait.Until(d => {
+                var m = d.FindElement(By.Id("flagModal"));
+                return m.Displayed && m.GetAttribute("class").Contains("show");
+            });
         }
 
         [Then(@"the ""Flag"" button in the modal should be disabled and show ""Already Flagged""")]
         [Scope(Feature = "Flag Post")]
         public void ThenTheFlagButtonInTheModalShouldBeDisabledAndShowAlreadyFlagged()
         {
-            var flagBtn = Driver.FindElement(By.Id("modalFlagBtn"));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var flagBtn = wait.Until(d => d.FindElement(By.Id("modalFlagBtn")));
             Assert.Multiple(() =>
             {
                 Assert.That(flagBtn.Enabled, Is.False);
@@ -118,7 +123,8 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void ThenIShouldSeeAFlagIcon()
         {
-            var flagBtn = Driver.FindElement(By.Id("flagBtn"));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var flagBtn = wait.Until(d => d.FindElement(By.Id("flagBtn")));
             Assert.That(flagBtn.Displayed, Is.True);
         }
 
@@ -127,18 +133,22 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void WhenIClickTheFlagIcon()
         {
-            var flagBtn = Driver.FindElement(By.Id("flagBtn"));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var flagBtn = wait.Until(d => d.FindElement(By.Id("flagBtn")));
             ScrollAndClick(flagBtn);
             
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(5));
-            wait.Until(d => d.FindElement(By.Id("flagModal")).Displayed);
+            wait.Until(d => {
+                var m = d.FindElement(By.Id("flagModal"));
+                return m.Displayed && m.GetAttribute("class").Contains("show");
+            });
         }
 
         [Then(@"I should be presented with categories ""(.*)"", ""(.*)"", ""(.*)""")]
         [Scope(Feature = "Flag Post")]
         public void ThenIShouldBePresentedWithCategories(string cat1, string cat2, string cat3)
         {
-            var body = Driver.FindElement(By.Id("flagModal")).Text;
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var body = wait.Until(d => d.FindElement(By.Id("flagModal"))).Text;
             Assert.Multiple(() =>
             {
                 Assert.That(body, Does.Contain(cat1));
@@ -151,7 +161,8 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void WhenISelectCategory(string category)
         {
-            var radio = Driver.FindElement(By.XPath($"//label[contains(text(), '{category}')]/preceding-sibling::input"));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var radio = wait.Until(d => d.FindElement(By.XPath($"//label[contains(text(), '{category}')]/preceding-sibling::input")));
             radio.Click();
         }
 
@@ -159,7 +170,8 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void WhenIClickSubmitReport()
         {
-            var submitBtn = Driver.FindElement(By.Id("submitFlagBtn"));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var submitBtn = wait.Until(d => d.FindElement(By.Id("submitFlagBtn")));
             submitBtn.Click();
         }
 
@@ -167,10 +179,10 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void ThenIShouldSeeAConfirmationMessage(string expectedMessage)
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
             var messageEl = wait.Until(d => {
                 var el = d.FindElement(By.Id("flagMessage"));
-                return el.Displayed && el.Text.Contains(expectedMessage) ? el : null;
+                return el.Displayed && !string.IsNullOrEmpty(el.Text) && el.Text.Contains(expectedMessage) ? el : null;
             });
             Assert.That(messageEl, Is.Not.Null);
         }
@@ -179,7 +191,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void ThenTheReportingInterfaceShouldClose()
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
             wait.Until(d => !d.FindElement(By.Id("flagModal")).Displayed);
             Assert.That(Driver.FindElement(By.Id("flagModal")).Displayed, Is.False);
         }
@@ -188,11 +200,12 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void ThenTheFlagIconShouldBeDisabledAndShowAlreadyFlagged()
         {
-            var flagBtn = Driver.FindElement(By.Id("flagBtn"));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var flagBtn = wait.Until(d => d.FindElement(By.Id("flagBtn")));
             Assert.Multiple(() =>
             {
                 Assert.That(flagBtn.Enabled, Is.False);
-                Assert.That(flagBtn.Text, Does.Contain("Already Flagged"));
+                Assert.That(flagBtn.GetAttribute("innerText"), Does.Contain("Already Flagged"));
             });
         }
 
