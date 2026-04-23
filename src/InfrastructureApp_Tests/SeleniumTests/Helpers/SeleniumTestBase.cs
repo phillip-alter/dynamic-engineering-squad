@@ -78,6 +78,7 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
                 builder.Services.AddScoped<IUserService, UserService>();
                 builder.Services.AddScoped<IVoteService, VoteService>();
                 builder.Services.AddScoped<IVerifyFixService, VerifyFixService>();
+                builder.Services.AddScoped<IFlagService, FlagService>();
                 builder.Services.AddScoped<ITripCheckService, TripCheckService>();
                 builder.Services.AddScoped<IContentModerationService, ContentModerationService>();
                 builder.Services.AddScoped<IImageHashService, ImageHashService>();
