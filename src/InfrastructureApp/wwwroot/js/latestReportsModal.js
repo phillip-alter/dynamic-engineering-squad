@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const modalVerifyCount = document.getElementById("modalVerifyCount");
     const modalVerifyPlural = document.getElementById("modalVerifyPlural");
 
+    // Flag section elements
+    const modalFlagBtn = document.getElementById("modalFlagBtn");
+
     function getAntiForgeryToken() {
         const field = document.querySelector('input[name="__RequestVerificationToken"]');
         return field ? field.value : "";
@@ -31,6 +34,29 @@ document.addEventListener("DOMContentLoaded", function () {
             const data = await res.json();
             updateVerifyUI(data);
         } catch { }
+    }
+
+    async function loadFlagStatus(reportId) {
+        if (!modalFlagBtn) return;
+        try {
+            const res = await fetch(`/Flag/Status?reportId=${reportId}`);
+            if (!res.ok) return;
+            const data = await res.json();
+            updateFlagUI(data.hasUserFlagged);
+        } catch { }
+    }
+
+    function updateFlagUI(hasUserFlagged) {
+        if (!modalFlagBtn) return;
+        modalFlagBtn.disabled = hasUserFlagged;
+        modalFlagBtn.textContent = hasUserFlagged ? 'Already Flagged' : 'Flag';
+        if (hasUserFlagged) {
+            modalFlagBtn.classList.remove('btn-outline-danger');
+            modalFlagBtn.classList.add('btn-secondary');
+        } else {
+            modalFlagBtn.classList.remove('btn-secondary');
+            modalFlagBtn.classList.add('btn-outline-danger');
+        }
     }
 
     function updateVerifyUI(data) {
@@ -165,6 +191,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else {
                     modalVerifySection.classList.add("d-none");
                 }
+            }
+
+            if (modalFlagBtn) {
+                modalFlagBtn.dataset.reportId = reportId;
+                loadFlagStatus(reportId);
             }
 
             // -------------------------------------------------------
