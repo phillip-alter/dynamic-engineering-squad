@@ -186,7 +186,10 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
 
         protected void ScrollAndClick(IWebElement element)
         {
-            ((OpenQA.Selenium.IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView({block:'center'}); arguments[0].click();", element);
+            new OpenQA.Selenium.Interactions.Actions(Driver)
+                .MoveToElement(element)
+                .Click()
+                .Perform();
         }
 
         protected void Login(string username = "ErinBleu", string password = "Password1234!")
