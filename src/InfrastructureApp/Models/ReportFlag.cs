@@ -15,6 +15,8 @@ namespace InfrastructureApp.Models
         [MaxLength(50)]
         public string Category { get; set; } = string.Empty;
 
+        public bool IsDismissed { get; set; } = false;
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         // Navigation properties (optional, but good for EF)
