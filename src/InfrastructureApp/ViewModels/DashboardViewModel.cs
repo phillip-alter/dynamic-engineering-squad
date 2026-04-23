@@ -21,10 +21,23 @@ namespace InfrastructureApp.ViewModels
         public string? AvatarKey { get; set; }
         public string? AvatarUrl { get; set; }
 
+        public string? PersonalInfoBackgroundUrl { get; set; }
+        public string? SelectedDashboardBackgroundKey { get; set; }
+        public string? PersonalInfoBorderCssClass { get; set; }
+        public string? SelectedDashboardBorderKey { get; set; }
+        public bool IsOwnDashboard { get; set; }
+        public IReadOnlyList<DashboardBackgroundOptionViewModel> AvailableDashboardBackgrounds { get; set; }
+            = Array.Empty<DashboardBackgroundOptionViewModel>();
+        public IReadOnlyList<DashboardBorderOptionViewModel> AvailableDashboardBorders { get; set; }
+            = Array.Empty<DashboardBorderOptionViewModel>();
+
         //Resolves which avatar URL to show - uploaded photo wins over preset
         public string ResolvedAvatarUrl =>
             !string.IsNullOrWhiteSpace(AvatarUrl)
                 ?AvatarUrl
                 : AvatarCatalog.ToUrl(AvatarKey);
+
+        public bool HasPersonalInfoBackground =>
+            !string.IsNullOrWhiteSpace(PersonalInfoBackgroundUrl);
     }
 }
