@@ -30,6 +30,10 @@ namespace InfrastructureApp.Data
 
         public DbSet<ReportVerification> ReportVerifications { get; set; } = null!;
 
+        public DbSet<ReportFlag> ReportFlags { get; set; } = null!;
+
+        public DbSet<ModerationActionLog> ModerationActionLogs { get; set; } = null!;
+
         //This is the place for constraints, defaults, indexes, and relationships
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -172,6 +176,11 @@ namespace InfrastructureApp.Data
             // One verification per user per report
             builder.Entity<ReportVerification>()
                 .HasIndex(v => new { v.ReportIssueId, v.UserId })
+                .IsUnique();
+
+            // One flag per user per report
+            builder.Entity<ReportFlag>()
+                .HasIndex(f => new { f.ReportIssueId, f.UserId })
                 .IsUnique();
 
         }

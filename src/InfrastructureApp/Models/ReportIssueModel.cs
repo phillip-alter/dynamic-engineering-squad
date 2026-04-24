@@ -61,6 +61,8 @@ namespace InfrastructureApp.Models
         [MaxLength(1000)]
         public string? SeverityReason { get; set; }
 
+        public virtual ICollection<ReportFlag> ReportFlags { get; set; } = new List<ReportFlag>();
+
 
         // ----------------------------------------------------
         // UI-only properties for form submission
