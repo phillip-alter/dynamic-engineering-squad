@@ -36,6 +36,38 @@ namespace InfrastructureApp.Models
         public int CostPoints { get; init; } = 10;
     }
 
+    public sealed class ActivitySummaryBackgroundDefinition
+    {
+        public required string Key { get; init; }
+
+        public required string Name { get; init; }
+
+        public required string Description { get; init; }
+
+        public required string ImageUrl { get; init; }
+
+        public string CategoryLabel { get; init; } = "Activity Summary Background";
+
+        public int CostPoints { get; init; } = 10;
+    }
+
+    public sealed class ActivitySummaryBorderDefinition
+    {
+        public required string Key { get; init; }
+
+        public required string Name { get; init; }
+
+        public required string Description { get; init; }
+
+        public required string CssClass { get; init; }
+
+        public required string PreviewCssClass { get; init; }
+
+        public string CategoryLabel { get; init; } = "Activity Summary Border";
+
+        public int CostPoints { get; init; } = 10;
+    }
+
     public static class PointsShopCatalog
     {
         private static readonly IReadOnlyDictionary<string, string> LegacyItemNameMap =
@@ -96,6 +128,46 @@ namespace InfrastructureApp.Models
                 }
             };
 
+        public static readonly IReadOnlyList<ActivitySummaryBackgroundDefinition> ActivitySummaryBackgrounds =
+            new[]
+            {
+                new ActivitySummaryBackgroundDefinition
+                {
+                    Key = "signal-grid",
+                    Name = "Signal Grid Activity Background",
+                    Description = "Layer the activity card with a radar-style grid and signal sweep accents.",
+                    ImageUrl = "/Images/activity-summary-signal-grid-bg.svg"
+                },
+                new ActivitySummaryBackgroundDefinition
+                {
+                    Key = "amber-wave",
+                    Name = "Amber Wave Activity Background",
+                    Description = "Set the activity card behind warm amber contour waves and soft motion lines.",
+                    ImageUrl = "/Images/activity-summary-amber-wave-bg.svg"
+                },
+                new ActivitySummaryBackgroundDefinition
+                {
+                    Key = "blueprint-panel",
+                    Name = "Blueprint Panel Activity Background",
+                    Description = "Give the activity card a compact blueprint panel with technical drafting details.",
+                    ImageUrl = "/Images/activity-summary-blueprint-panel-bg.svg"
+                },
+                new ActivitySummaryBackgroundDefinition
+                {
+                    Key = "transit-lines",
+                    Name = "Transit Lines Activity Background",
+                    Description = "Add intersecting route lines and glowing waypoints behind the activity totals.",
+                    ImageUrl = "/Images/activity-summary-transit-lines-bg.svg"
+                },
+                new ActivitySummaryBackgroundDefinition
+                {
+                    Key = "night-pulse",
+                    Name = "Night Pulse Activity Background",
+                    Description = "Wrap the activity card in a dark pulse field with cool blue and gold highlights.",
+                    ImageUrl = "/Images/activity-summary-night-pulse-bg.svg"
+                }
+            };
+
         public static readonly IReadOnlyList<DashboardBorderDefinition> DashboardBorders =
             new[]
             {
@@ -141,6 +213,51 @@ namespace InfrastructureApp.Models
                 }
             };
 
+        public static readonly IReadOnlyList<ActivitySummaryBorderDefinition> ActivitySummaryBorders =
+            new[]
+            {
+                new ActivitySummaryBorderDefinition
+                {
+                    Key = "signal-ring",
+                    Name = "Signal Ring Activity Border",
+                    Description = "Wrap the activity card with a cool signal-blue frame and subtle radar glow.",
+                    CssClass = "dashboard-activity-card--border-signal-ring",
+                    PreviewCssClass = "dashboard-border-preview--signal-ring"
+                },
+                new ActivitySummaryBorderDefinition
+                {
+                    Key = "amber-rail",
+                    Name = "Amber Rail Activity Border",
+                    Description = "Add a warm amber rail around the activity card with a clean industrial edge.",
+                    CssClass = "dashboard-activity-card--border-amber-rail",
+                    PreviewCssClass = "dashboard-border-preview--amber-rail"
+                },
+                new ActivitySummaryBorderDefinition
+                {
+                    Key = "route-stripe",
+                    Name = "Route Stripe Activity Border",
+                    Description = "Give the activity card a striped transit-style border with bold directional color.",
+                    CssClass = "dashboard-activity-card--border-route-stripe",
+                    PreviewCssClass = "dashboard-border-preview--route-stripe"
+                },
+                new ActivitySummaryBorderDefinition
+                {
+                    Key = "steel-panel",
+                    Name = "Steel Panel Activity Border",
+                    Description = "Frame the activity card with a rigid steel panel look and crisp metallic edge.",
+                    CssClass = "dashboard-activity-card--border-steel-panel",
+                    PreviewCssClass = "dashboard-border-preview--steel-panel"
+                },
+                new ActivitySummaryBorderDefinition
+                {
+                    Key = "night-pulse",
+                    Name = "Night Pulse Activity Border",
+                    Description = "Surround the activity card with a dark neon outline and faint pulse glow.",
+                    CssClass = "dashboard-activity-card--border-night-pulse",
+                    PreviewCssClass = "dashboard-border-preview--night-pulse"
+                }
+            };
+
         public static IReadOnlyList<ShopItem> GetStarterItems()
         {
             var backgroundItems = DashboardBackgrounds
@@ -163,7 +280,32 @@ namespace InfrastructureApp.Models
                     IsActive = true
                 });
 
-            return backgroundItems.Concat(borderItems).ToList().AsReadOnly();
+            var activitySummaryItems = ActivitySummaryBackgrounds
+                .Select(background => new ShopItem
+                {
+                    Name = background.Name,
+                    Description = background.Description,
+                    CostPoints = background.CostPoints,
+                    IsSinglePurchase = true,
+                    IsActive = true
+                });
+
+            var activitySummaryBorderItems = ActivitySummaryBorders
+                .Select(border => new ShopItem
+                {
+                    Name = border.Name,
+                    Description = border.Description,
+                    CostPoints = border.CostPoints,
+                    IsSinglePurchase = true,
+                    IsActive = true
+                });
+
+            return backgroundItems
+                .Concat(activitySummaryItems)
+                .Concat(borderItems)
+                .Concat(activitySummaryBorderItems)
+                .ToList()
+                .AsReadOnly();
         }
 
         public static DashboardBackgroundDefinition? GetDashboardBackgroundByKey(string? key)
@@ -206,6 +348,48 @@ namespace InfrastructureApp.Models
 
             var canonicalName = NormalizeItemName(name);
             return DashboardBorders.FirstOrDefault(border => border.Name == canonicalName);
+        }
+
+        public static ActivitySummaryBackgroundDefinition? GetActivitySummaryBackgroundByKey(string? key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return null;
+            }
+
+            return ActivitySummaryBackgrounds.FirstOrDefault(background => background.Key == key);
+        }
+
+        public static ActivitySummaryBackgroundDefinition? GetActivitySummaryBackgroundByName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
+            var canonicalName = NormalizeItemName(name);
+            return ActivitySummaryBackgrounds.FirstOrDefault(background => background.Name == canonicalName);
+        }
+
+        public static ActivitySummaryBorderDefinition? GetActivitySummaryBorderByKey(string? key)
+        {
+            if (string.IsNullOrWhiteSpace(key))
+            {
+                return null;
+            }
+
+            return ActivitySummaryBorders.FirstOrDefault(border => border.Key == key);
+        }
+
+        public static ActivitySummaryBorderDefinition? GetActivitySummaryBorderByName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return null;
+            }
+
+            var canonicalName = NormalizeItemName(name);
+            return ActivitySummaryBorders.FirstOrDefault(border => border.Name == canonicalName);
         }
 
         public static string NormalizeItemName(string name)

@@ -49,7 +49,9 @@ namespace InfrastructureApp.Services
                 {
                     var isOwned = i.IsSinglePurchase && ownedSet.Contains(i.Id);
                     var background = PointsShopCatalog.GetDashboardBackgroundByName(i.Name);
+                    var activitySummaryBackground = PointsShopCatalog.GetActivitySummaryBackgroundByName(i.Name);
                     var border = PointsShopCatalog.GetDashboardBorderByName(i.Name);
+                    var activitySummaryBorder = PointsShopCatalog.GetActivitySummaryBorderByName(i.Name);
 
                     return new PointsShopItemSummary
                     {
@@ -60,9 +62,9 @@ namespace InfrastructureApp.Services
                         IsSinglePurchase = i.IsSinglePurchase,
                         IsOwned = isOwned,
                         CanPurchase = !isOwned && currentPoints >= i.CostPoints,
-                        CategoryLabel = background?.CategoryLabel ?? border?.CategoryLabel ?? "Shop Item",
-                        PreviewImageUrl = background?.ImageUrl,
-                        PreviewCssClass = border?.PreviewCssClass
+                        CategoryLabel = background?.CategoryLabel ?? activitySummaryBackground?.CategoryLabel ?? border?.CategoryLabel ?? activitySummaryBorder?.CategoryLabel ?? "Shop Item",
+                        PreviewImageUrl = background?.ImageUrl ?? activitySummaryBackground?.ImageUrl,
+                        PreviewCssClass = border?.PreviewCssClass ?? activitySummaryBorder?.PreviewCssClass
                     };
                 })
                 .ToList();
