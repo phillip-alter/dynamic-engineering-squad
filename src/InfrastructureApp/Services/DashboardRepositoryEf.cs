@@ -4,6 +4,7 @@ using InfrastructureApp.ViewModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace InfrastructureApp.Services
 {
@@ -117,8 +118,8 @@ namespace InfrastructureApp.Services
                 PersonalInfoBackgroundUrl = selectedBackground?.ImageUrl,
                 SelectedDashboardBorderKey = selectedBorder?.Key,
                 PersonalInfoBorderCssClass = selectedBorder?.CssClass,
-                AvailableDashboardBackgrounds = PointsShopCatalog.BuildDashboardBackgroundOptions(unlockedBackgroundNames),
-                AvailableDashboardBorders = PointsShopCatalog.BuildDashboardBorderOptions(unlockedBorderNames)
+                AvailableDashboardBackgrounds = BuildDashboardBackgroundOptions(unlockedBackgroundNames),
+                AvailableDashboardBorders = BuildDashboardBorderOptions(unlockedBorderNames)
             };
         }
 
@@ -188,11 +189,7 @@ namespace InfrastructureApp.Services
 
         private async Task<List<string>> GetUnlockedDashboardBackgroundNamesAsync(string userId)
         {
-            var validBackgroundNames = PointsShopCatalog.DashboardBackgrounds
-                .Select(background => background.Name)
-                .ToList();
-
-            return await _db.UserShopItemPurchases
+            var rawNames = await _db.UserShopItemPurchases
                 .AsNoTracking()
                 .Where(p => p.UserId == userId)
                 .Join(
@@ -200,18 +197,18 @@ namespace InfrastructureApp.Services
                     purchase => purchase.ShopItemId,
                     item => item.Id,
                     (purchase, item) => item.Name)
-                .Where(name => validBackgroundNames.Contains(name))
-                .Distinct()
                 .ToListAsync();
+
+            return rawNames
+                .Select(PointsShopCatalog.NormalizeItemName)
+                .Where(name => PointsShopCatalog.GetDashboardBackgroundByName(name) != null)
+                .Distinct()
+                .ToList();
         }
 
         private async Task<List<string>> GetUnlockedDashboardBorderNamesAsync(string userId)
         {
-            var validBorderNames = PointsShopCatalog.DashboardBorders
-                .Select(border => border.Name)
-                .ToList();
-
-            return await _db.UserShopItemPurchases
+            var rawNames = await _db.UserShopItemPurchases
                 .AsNoTracking()
                 .Where(p => p.UserId == userId)
                 .Join(
@@ -219,9 +216,13 @@ namespace InfrastructureApp.Services
                     purchase => purchase.ShopItemId,
                     item => item.Id,
                     (purchase, item) => item.Name)
-                .Where(name => validBorderNames.Contains(name))
-                .Distinct()
                 .ToListAsync();
+
+            return rawNames
+                .Select(PointsShopCatalog.NormalizeItemName)
+                .Where(name => PointsShopCatalog.GetDashboardBorderByName(name) != null)
+                .Distinct()
+                .ToList();
         }
 
         private async Task<DashboardBackgroundDefinition?> GetSelectedDashboardBackgroundAsync(string userId, string? selectedBackgroundKey)
@@ -260,6 +261,38 @@ namespace InfrastructureApp.Services
             return unlockedBorderNames.Contains(selectedBorder.Name)
                 ? selectedBorder
                 : null;
+        }
+
+        private static IReadOnlyList<DashboardBackgroundOptionViewModel> BuildDashboardBackgroundOptions(IEnumerable<string> unlockedItemNames)
+        {
+            var unlockedNameSet = unlockedItemNames.ToHashSet();
+
+            return PointsShopCatalog.DashboardBackgrounds
+                .Where(background => unlockedNameSet.Contains(background.Name))
+                .Select(background => new DashboardBackgroundOptionViewModel
+                {
+                    Key = background.Key,
+                    Name = background.Name,
+                    PreviewUrl = background.ImageUrl
+                })
+                .ToList()
+                .AsReadOnly();
+        }
+
+        private static IReadOnlyList<DashboardBorderOptionViewModel> BuildDashboardBorderOptions(IEnumerable<string> unlockedItemNames)
+        {
+            var unlockedNameSet = unlockedItemNames.ToHashSet();
+
+            return PointsShopCatalog.DashboardBorders
+                .Where(border => unlockedNameSet.Contains(border.Name))
+                .Select(border => new DashboardBorderOptionViewModel
+                {
+                    Key = border.Key,
+                    Name = border.Name,
+                    PreviewCssClass = border.PreviewCssClass
+                })
+                .ToList()
+                .AsReadOnly();
         }
     }
 }

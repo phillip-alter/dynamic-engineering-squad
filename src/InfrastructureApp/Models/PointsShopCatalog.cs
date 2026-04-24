@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using InfrastructureApp.Models;
-using InfrastructureApp.ViewModels;
 
-namespace InfrastructureApp.Services
+namespace InfrastructureApp.Models
 {
     public sealed class DashboardBackgroundDefinition
     {
@@ -15,6 +13,8 @@ namespace InfrastructureApp.Services
         public required string Description { get; init; }
 
         public required string ImageUrl { get; init; }
+
+        public string CategoryLabel { get; init; } = "Dashboard Background";
 
         public int CostPoints { get; init; } = 10;
     }
@@ -31,12 +31,30 @@ namespace InfrastructureApp.Services
 
         public required string PreviewCssClass { get; init; }
 
+        public string CategoryLabel { get; init; } = "Dashboard Border";
+
         public int CostPoints { get; init; } = 10;
     }
 
     public static class PointsShopCatalog
     {
-        public const string DashboardBackgroundImageItemName = "Dashboard Background Image";
+        private static readonly IReadOnlyDictionary<string, string> LegacyItemNameMap =
+            new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["Dashboard Background Image"] = "Safety Wave Background"
+            };
+
+        private static readonly IReadOnlySet<string> RetiredItemNames =
+            new HashSet<string>(StringComparer.Ordinal)
+            {
+                "Golden Reporter Title",
+                "Map Pin Cosmetic",
+                "Premium Profile Frame",
+                "Dark Theme Badge",
+                "Signal Glow Background"
+            };
+
+        public const string DashboardBackgroundImageItemName = "Safety Wave Background";
 
         public static readonly IReadOnlyList<DashboardBackgroundDefinition> DashboardBackgrounds =
             new[]
@@ -44,36 +62,36 @@ namespace InfrastructureApp.Services
                 new DashboardBackgroundDefinition
                 {
                     Key = "safety-wave",
-                    Name = DashboardBackgroundImageItemName,
-                    Description = "Unlock a dashboard background image for the personal information card.",
+                    Name = "Safety Wave Background",
+                    Description = "Sweep your dashboard card with dark contour waves and safety orange-yellow highlights.",
                     ImageUrl = "/Images/dashboard-personal-info-bg.svg"
                 },
                 new DashboardBackgroundDefinition
                 {
                     Key = "city-grid",
                     Name = "City Grid Background",
-                    Description = "Unlock a city grid backdrop for your dashboard card.",
+                    Description = "Add a cool blue street-grid backdrop with a dim skyline silhouette.",
                     ImageUrl = "/Images/dashboard-city-grid-bg.svg"
                 },
                 new DashboardBackgroundDefinition
                 {
                     Key = "safety-stripe",
                     Name = "Safety Stripe Background",
-                    Description = "Unlock bold safety stripes behind your personal information card.",
+                    Description = "Cover the card in bold diagonal caution stripes with a construction-zone feel.",
                     ImageUrl = "/Images/dashboard-safety-stripe-bg.svg"
                 },
                 new DashboardBackgroundDefinition
                 {
                     Key = "blueprint",
                     Name = "Blueprint Background",
-                    Description = "Unlock a blueprint-inspired dashboard background.",
+                    Description = "Give the card a technical blueprint layout with crisp drafting lines.",
                     ImageUrl = "/Images/dashboard-blueprint-bg.svg"
                 },
                 new DashboardBackgroundDefinition
                 {
                     Key = "aurora-night",
                     Name = "Aurora Night Background",
-                    Description = "Unlock a glowing night-sky dashboard background.",
+                    Description = "Set the card against a dark night sky with a soft glowing aurora band.",
                     ImageUrl = "/Images/dashboard-aurora-night-bg.svg"
                 }
             };
@@ -85,7 +103,7 @@ namespace InfrastructureApp.Services
                 {
                     Key = "gold-ring",
                     Name = "Golden Border",
-                    Description = "Unlock a bold golden border for your personal information card.",
+                    Description = "Frame the card with a bright caution-gold edge and a soft metallic glow.",
                     CssClass = "dashboard-personal-card--border-gold-ring",
                     PreviewCssClass = "dashboard-border-preview--gold-ring"
                 },
@@ -93,7 +111,7 @@ namespace InfrastructureApp.Services
                 {
                     Key = "blue-glow",
                     Name = "Blue Glow Border",
-                    Description = "Unlock a blue glow border for your personal information card.",
+                    Description = "Outline the card with a cool blue edge and a subtle electric glow.",
                     CssClass = "dashboard-personal-card--border-blue-glow",
                     PreviewCssClass = "dashboard-border-preview--blue-glow"
                 },
@@ -101,7 +119,7 @@ namespace InfrastructureApp.Services
                 {
                     Key = "safety-stripe",
                     Name = "Safety Stripe Border",
-                    Description = "Unlock a safety stripe border for your personal information card.",
+                    Description = "Wrap the card in a hazard-striped border with orange and yellow warning bands.",
                     CssClass = "dashboard-personal-card--border-safety-stripe",
                     PreviewCssClass = "dashboard-border-preview--safety-stripe"
                 },
@@ -109,7 +127,7 @@ namespace InfrastructureApp.Services
                 {
                     Key = "steel-frame",
                     Name = "Steel Frame Border",
-                    Description = "Unlock a steel frame border for your personal information card.",
+                    Description = "Add a brushed steel frame with a clean industrial finish.",
                     CssClass = "dashboard-personal-card--border-steel-frame",
                     PreviewCssClass = "dashboard-border-preview--steel-frame"
                 },
@@ -117,7 +135,7 @@ namespace InfrastructureApp.Services
                 {
                     Key = "ember-outline",
                     Name = "Ember Outline Border",
-                    Description = "Unlock an ember outline border for your personal information card.",
+                    Description = "Surround the card with a warm ember-orange outline and faint heat glow.",
                     CssClass = "dashboard-personal-card--border-ember-outline",
                     PreviewCssClass = "dashboard-border-preview--ember-outline"
                 }
@@ -145,43 +163,7 @@ namespace InfrastructureApp.Services
                     IsActive = true
                 });
 
-            var otherItems = new[]
-            {
-                new ShopItem
-                {
-                    Name = "Golden Reporter Title",
-                    Description = "Unlock a special title that highlights your contribution streak.",
-                    CostPoints = 25,
-                    IsSinglePurchase = true,
-                    IsActive = true
-                },
-                new ShopItem
-                {
-                    Name = "Map Pin Cosmetic",
-                    Description = "Claim a cosmetic map pin reward for your profile collection.",
-                    CostPoints = 40,
-                    IsSinglePurchase = true,
-                    IsActive = true
-                },
-                new ShopItem
-                {
-                    Name = "Premium Profile Frame",
-                    Description = "Add a premium-looking frame to your user profile presentation.",
-                    CostPoints = 60,
-                    IsSinglePurchase = true,
-                    IsActive = true
-                },
-                new ShopItem
-                {
-                    Name = "Dark Theme Badge",
-                    Description = "Unlock a cosmetic badge that shows off your shop progress.",
-                    CostPoints = 80,
-                    IsSinglePurchase = true,
-                    IsActive = true
-                }
-            };
-
-            return backgroundItems.Concat(borderItems).Concat(otherItems).ToList().AsReadOnly();
+            return backgroundItems.Concat(borderItems).ToList().AsReadOnly();
         }
 
         public static DashboardBackgroundDefinition? GetDashboardBackgroundByKey(string? key)
@@ -201,7 +183,8 @@ namespace InfrastructureApp.Services
                 return null;
             }
 
-            return DashboardBackgrounds.FirstOrDefault(background => background.Name == name);
+            var canonicalName = NormalizeItemName(name);
+            return DashboardBackgrounds.FirstOrDefault(background => background.Name == canonicalName);
         }
 
         public static DashboardBorderDefinition? GetDashboardBorderByKey(string? key)
@@ -221,39 +204,26 @@ namespace InfrastructureApp.Services
                 return null;
             }
 
-            return DashboardBorders.FirstOrDefault(border => border.Name == name);
+            var canonicalName = NormalizeItemName(name);
+            return DashboardBorders.FirstOrDefault(border => border.Name == canonicalName);
         }
 
-        public static IReadOnlyList<DashboardBackgroundOptionViewModel> BuildDashboardBackgroundOptions(IEnumerable<string> unlockedItemNames)
+        public static string NormalizeItemName(string name)
         {
-            var unlockedNameSet = unlockedItemNames.ToHashSet(StringComparer.Ordinal);
-
-            return DashboardBackgrounds
-                .Where(background => unlockedNameSet.Contains(background.Name))
-                .Select(background => new DashboardBackgroundOptionViewModel
-                {
-                    Key = background.Key,
-                    Name = background.Name,
-                    PreviewUrl = background.ImageUrl
-                })
-                .ToList()
-                .AsReadOnly();
+            return LegacyItemNameMap.TryGetValue(name, out var canonicalName)
+                ? canonicalName
+                : name;
         }
 
-        public static IReadOnlyList<DashboardBorderOptionViewModel> BuildDashboardBorderOptions(IEnumerable<string> unlockedItemNames)
+        public static bool IsRetiredItemName(string name)
         {
-            var unlockedNameSet = unlockedItemNames.ToHashSet(StringComparer.Ordinal);
+            return RetiredItemNames.Contains(name);
+        }
 
-            return DashboardBorders
-                .Where(border => unlockedNameSet.Contains(border.Name))
-                .Select(border => new DashboardBorderOptionViewModel
-                {
-                    Key = border.Key,
-                    Name = border.Name,
-                    PreviewCssClass = border.PreviewCssClass
-                })
-                .ToList()
-                .AsReadOnly();
+        public static bool ShouldHideFromShop(string name)
+        {
+            return IsRetiredItemName(name)
+                || LegacyItemNameMap.ContainsKey(name);
         }
     }
 }

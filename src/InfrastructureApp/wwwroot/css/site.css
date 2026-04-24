@@ -587,6 +587,25 @@ h1, h2, h3 {
   border: 3px solid #ff7b39;
 }
 
+.points-shop-preview {
+  width: 100%;
+  height: 120px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3);
+}
+
+.points-shop-preview--background {
+  background-size: cover;
+  background-position: center;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.points-shop-preview--border {
+  height: 120px;
+  border-radius: 12px;
+}
+
 /* Base action button — secondary style */
 .report-action-btn {
     background-color: var(--dark-border);
