@@ -32,5 +32,19 @@ namespace InfrastructureApp_Tests
 
             Assert.That(result, Is.EqualTo("Just now"));
         }
+
+        // -------------------------------------------------------
+        // TEST 3: Reports created minutes ago show "X minutes ago"
+        // -------------------------------------------------------
+        [Test]
+        public void BuildRelativeTime_FiveMinutesAgo_ReturnsFiveMinutesAgo()
+        {
+            var currentTime = DateTime.UtcNow;
+            var createdAt = currentTime.AddMinutes(-5);
+
+            var result = ReportIssue.BuildRelativeTime(createdAt, currentTime);
+
+            Assert.That(result, Is.EqualTo("5 minutes ago"));
+        }
     }
 }
