@@ -18,5 +18,19 @@ namespace InfrastructureApp_Tests
 
             Assert.That(result, Is.EqualTo("Just now"));
         }
+
+        // -------------------------------------------------------
+        // TEST 2: Future report timestamps show "Just now"
+        // -------------------------------------------------------
+        [Test]
+        public void BuildRelativeTime_FutureTimestamp_ReturnsJustNow()
+        {
+            var currentTime = DateTime.UtcNow;
+            var createdAt = currentTime.AddMinutes(5);
+
+            var result = ReportIssue.BuildRelativeTime(createdAt, currentTime);
+
+            Assert.That(result, Is.EqualTo("Just now"));
+        }
     }
 }
