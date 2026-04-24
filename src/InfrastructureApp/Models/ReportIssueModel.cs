@@ -202,6 +202,11 @@ namespace InfrastructureApp.Models
                 return $"{(int)timeDifference.TotalMinutes} minutes ago";
             }
 
+            if (timeDifference.TotalHours < 24)
+            {
+                return $"{(int)timeDifference.TotalHours} hours ago";
+            }
+
             return "Just now";
         }
     }
