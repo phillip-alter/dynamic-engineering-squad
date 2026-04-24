@@ -197,6 +197,11 @@ namespace InfrastructureApp.Models
                 return "Just now";
             }
 
+            if (timeDifference.TotalMinutes < 60)
+            {
+                return $"{(int)timeDifference.TotalMinutes} minutes ago";
+            }
+
             return "Just now";
         }
     }
