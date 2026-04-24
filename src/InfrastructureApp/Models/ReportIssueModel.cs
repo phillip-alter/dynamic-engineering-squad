@@ -185,5 +185,19 @@ namespace InfrastructureApp.Models
             // Otherwise, cut and add "..."
             return trimmedDescription.Substring(0, previewLength).TrimEnd() + "...";
         }
+
+        // SCRUM-127:
+        // Builds relative time text for Home page recent reports
+        public static string BuildRelativeTime(DateTime createdAt, DateTime currentTime)
+        {
+            var timeDifference = currentTime - createdAt;
+
+            if (timeDifference.TotalMinutes < 1)
+            {
+                return "Just now";
+            }
+
+            return "Just now";
+        }
     }
 }
