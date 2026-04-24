@@ -207,7 +207,7 @@ namespace InfrastructureApp.Models
                 return $"{(int)timeDifference.TotalHours} hours ago";
             }
 
-            return "Just now";
+            return $"{(int)timeDifference.TotalDays} days ago";
         }
     }
 }
