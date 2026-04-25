@@ -99,8 +99,10 @@
                             <!-- SCRUM-113 ADDED:
                              Added View Details text so users know row is clickable -->
                             <div class="text-end">
+                                <!-- SCRUM-127 ADDED:
+                                 Show relative time in the collapsed Home page report row -->
                                 <small class="opacity-50 text-nowrap d-block">
-                                    @report.CreatedAt.ToLocalTime().ToString("g")
+                                    @InfrastructureApp.Models.ReportIssue.BuildRelativeTime(report.CreatedAt, DateTime.UtcNow)
                                 </small>
                                 <small class="text-primary fw-semibold home-report-link-text d-block">View Details</small>
                                 <!-- SCRUM-128 ADDED:
