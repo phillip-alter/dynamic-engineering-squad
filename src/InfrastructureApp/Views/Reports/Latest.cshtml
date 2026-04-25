@@ -41,6 +41,8 @@ else
             <button type="button"
                     class="list-group-item list-group-item-action d-flex justify-content-between align-items-start report-item"
                     data-testid="latest-report-item"
+                    aria-controls="reportModal"
+                    onclick="window.openLatestReportModal?.(this)"
                     data-report-id="@r.Id"
                     data-bs-toggle="modal" data-bs-target="#reportModal" data-reportid="@r.Id" data-description="@r.Description"
                     data-created="@r.CreatedAt.ToLocalTime().ToString("f")" data-status="@r.Status" data-image="@r.ImageUrl">
@@ -135,7 +137,8 @@ else
                     <!-- Community Flagging -->
                     @if (User.Identity?.IsAuthenticated == true)
                     {
-                        <button id="modalFlagBtn" data-testid="modal-flag-button" class="btn btn-outline-danger btn-sm fw-bold" 
+                        <button id="modalFlagBtn" data-testid="flag-button modal-flag-button" class="btn btn-outline-danger btn-sm fw-bold" 
+                                onclick="window.showFlagModalFromButton?.(this)"
                                 data-report-id="" data-bs-toggle="modal" data-bs-target="#flagModal">
                             <i class="fa-solid fa-flag me-1"></i>
                             Flag

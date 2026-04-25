@@ -72,8 +72,13 @@ document.addEventListener("DOMContentLoaded", () => {
     return `
       <button type="button"
           class="list-group-item list-group-item-action d-flex justify-content-between align-items-start report-item"
+          data-testid="latest-report-item"
+          aria-controls="reportModal"
+          onclick="window.openLatestReportModal?.(this)"
+          data-report-id="${escapeHtml(String(r.id ?? ""))}"
           data-bs-toggle="modal"
           data-bs-target="#reportModal"
+          data-reportid="${escapeHtml(String(r.id ?? ""))}"
           data-description="${escapeHtml(r.description ?? "")}"
           data-created="${escapeHtml(createdShort)}"
           data-status="${escapeHtml(r.status ?? "")}"

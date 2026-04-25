@@ -189,6 +189,8 @@
         @if (User.Identity?.IsAuthenticated == true)
         {
             <button id="flagBtn"
+                    data-testid="flag-button"
+                    onclick="window.showFlagModalFromButton?.(this)"
                     class="btn @(ViewBag.UserHasFlagged ? "btn-secondary" : "btn-outline-danger") fw-bold"
                     data-report-id="@Model.Id"
                     data-bs-toggle="@(ViewBag.UserHasFlagged ? "" : "modal")"
