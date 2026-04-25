@@ -409,6 +409,12 @@ h1, h2, h3 {
     color: var(--safety-orange);
 }
 
+.report-description-text {
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
 .dashboard-personal-card {
   background-size: cover;
   background-position: center;
