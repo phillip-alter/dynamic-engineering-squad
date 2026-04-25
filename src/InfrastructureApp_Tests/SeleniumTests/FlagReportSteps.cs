@@ -95,11 +95,22 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void WhenIClickTheFlagButtonInTheModal()
         {
+            // Test stability cleanup:
+            // Wait for the flag button to be ready before clicking,
+            // then wait for the Bootstrap flag modal to fully open.
             var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
-            var flagBtn = wait.Until(d => d.FindElement(By.CssSelector("[data-testid='modal-flag-button'], #modalFlagBtn")));
+            var flagBtn = wait.Until(d =>
+            {
+                var button = d.FindElement(By.Id("modalFlagBtn"));
+                return button.Displayed && button.Enabled ? button : null;
+            });
             ScrollAndClick(flagBtn);
-
-            WaitForVisibleModal(By.Id("flagModal"));
+            
+            wait.Until(d => {
+                var modal = d.FindElement(By.Id("flagModal"));
+                var modalClass = modal.GetAttribute("class") ?? string.Empty;
+                return modal.Displayed && modalClass.Contains("show");
+            });
         }
 
         [Then(@"the ""Flag"" button in the modal should be disabled and show ""Already Flagged""")]
@@ -129,11 +140,26 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Flag Post")]
         public void WhenIClickTheFlagIcon()
         {
+            // Test stability cleanup:
+            // Wait for the flag button to be ready before clicking,
+            // then wait for the Bootstrap flag modal to fully open.
             var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
             var flagBtn = wait.Until(d =>
             {
+<<<<<<< HEAD
                 var element = d.FindElements(By.Id("flagBtn")).FirstOrDefault();
                 return element is { Displayed: true, Enabled: true } ? element : null;
+=======
+                var button = d.FindElement(By.Id("flagBtn"));
+                return button.Displayed && button.Enabled ? button : null;
+            });
+            ScrollAndClick(flagBtn);
+            
+            wait.Until(d => {
+                var modal = d.FindElement(By.Id("flagModal"));
+                var modalClass = modal.GetAttribute("class") ?? string.Empty;
+                return modal.Displayed && modalClass.Contains("show");
+>>>>>>> 19da73fc24403cd6b411f4763ca5688ad4052f84
             });
 
             ScrollAndClick(flagBtn);
