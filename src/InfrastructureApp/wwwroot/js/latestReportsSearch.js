@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
           data-status="${escapeHtml(r.status ?? "")}"
           data-image="${escapeHtml(r.imageUrl ?? "")}">
         <div class="me-3">
-          <div class="fw-bold">${escapeHtml(r.description ?? "")}</div>
+          <div class="fw-bold report-text-wrap text-break">${escapeHtml(r.description ?? "")}</div>
         </div>
         <small class="text-muted">${escapeHtml(createdShort)}</small>
       </button>

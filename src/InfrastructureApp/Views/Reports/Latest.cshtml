@@ -46,7 +46,7 @@ else
                     data-created="@r.CreatedAt.ToLocalTime().ToString("f")" data-status="@r.Status" data-image="@r.ImageUrl">
 
                 <div class="me-3">
-                    <div class="fw-bold">@r.Description</div>
+                    <div class="fw-bold report-text-wrap text-break">@r.Description</div>
                 </div>
 
                 <small class="text-muted">
@@ -76,7 +76,7 @@ else
                 </div>
 
                 <p class="mb-1"><strong>Description</strong></p>
-                <p id="modalDescription" class="mb-3"></p>
+                <p id="modalDescription" class="mb-3 report-text-wrap text-break"></p>
 
                 <p class="mb-1"><strong>Created</strong></p>
                 <p id="modalCreated" class="mb-3"></p>
