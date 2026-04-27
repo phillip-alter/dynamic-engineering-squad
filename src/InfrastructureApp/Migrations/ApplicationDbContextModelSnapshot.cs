@@ -17,7 +17,7 @@ namespace InfrastructureApp.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.15")
+                .HasAnnotation("ProductVersion", "9.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -370,6 +370,12 @@ namespace InfrastructureApp.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("SelectedActivitySummaryBackgroundKey")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SelectedActivitySummaryBorderKey")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("SelectedDashboardBackgroundKey")
                         .HasColumnType("nvarchar(max)");
 
@@ -543,7 +549,7 @@ namespace InfrastructureApp.Migrations
             modelBuilder.Entity("InfrastructureApp.Models.ReportFlag", b =>
                 {
                     b.HasOne("InfrastructureApp.Models.ReportIssue", "ReportIssue")
-                        .WithMany()
+                        .WithMany("ReportFlags")
                         .HasForeignKey("ReportIssueId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -619,6 +625,11 @@ namespace InfrastructureApp.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("InfrastructureApp.Models.ReportIssue", b =>
+                {
+                    b.Navigation("ReportFlags");
                 });
 #pragma warning restore 612, 618
         }
