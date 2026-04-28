@@ -118,7 +118,19 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
                 }
 
                 ServerHost = app;
-                await ServerHost.StartAsync();
+
+                for (int attempt = 0; ; attempt++)
+                {
+                    try
+                    {
+                        await ServerHost.StartAsync();
+                        break;
+                    }
+                    catch (System.IO.IOException) when (attempt < 4)
+                    {
+                        await Task.Delay(2000);
+                    }
+                }
             }
         }
 
