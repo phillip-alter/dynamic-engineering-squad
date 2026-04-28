@@ -132,7 +132,9 @@ namespace InfrastructureApp_Tests.ControllerTests
             verifyFixService.GetVerifyStatusAsync(Arg.Any<int>(), Arg.Any<string?>())
                 .Returns((0, false));
 
-            return new ReportIssueController(service, userManager, voteService, verifyFixService)
+            var flagService = Substitute.For<IFlagService>();
+
+            return new ReportIssueController(service, userManager, voteService, verifyFixService, flagService)
             {
                 ControllerContext = new ControllerContext
                 {

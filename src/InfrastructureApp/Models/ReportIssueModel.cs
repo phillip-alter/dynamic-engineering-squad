@@ -61,6 +61,8 @@ namespace InfrastructureApp.Models
         [MaxLength(1000)]
         public string? SeverityReason { get; set; }
 
+        public virtual ICollection<ReportFlag> ReportFlags { get; set; } = new List<ReportFlag>();
+
 
         // ----------------------------------------------------
         // UI-only properties for form submission
@@ -182,6 +184,30 @@ namespace InfrastructureApp.Models
 
             // Otherwise, cut and add "..."
             return trimmedDescription.Substring(0, previewLength).TrimEnd() + "...";
+        }
+
+        // SCRUM-127:
+        // Builds relative time text for Home page recent reports
+        public static string BuildRelativeTime(DateTime createdAt, DateTime currentTime)
+        {
+            var timeDifference = currentTime - createdAt;
+
+            if (timeDifference.TotalMinutes < 1)
+            {
+                return "Just now";
+            }
+
+            if (timeDifference.TotalMinutes < 60)
+            {
+                return $"{(int)timeDifference.TotalMinutes} minutes ago";
+            }
+
+            if (timeDifference.TotalHours < 24)
+            {
+                return $"{(int)timeDifference.TotalHours} hours ago";
+            }
+
+            return $"{(int)timeDifference.TotalDays} days ago";
         }
     }
 }

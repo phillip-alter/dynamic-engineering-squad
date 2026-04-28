@@ -54,7 +54,10 @@
             </p>
         }
         <p><strong>Created:</strong> @Model.CreatedAt</p>
-        <p><strong>Description:</strong><br />@Model.Description</p>
+        <p>
+            <strong>Description:</strong><br />
+            <span class="report-text-wrap text-break">@Model.Description</span>
+        </p>
         <p><strong>Location:</strong> (@Model.Latitude, @Model.Longitude)</p>
 
         <div class="mt-3">
@@ -181,6 +184,29 @@
         </div>
     }
 
+    <!-- Flag report -->
+    <div class="mt-3">
+        @if (User.Identity?.IsAuthenticated == true)
+        {
+            <button id="flagBtn"
+                    data-testid="flag-button"
+                    onclick="window.showFlagModalFromButton?.(this)"
+                    class="btn @(ViewBag.UserHasFlagged ? "btn-secondary" : "btn-outline-danger") fw-bold"
+                    data-report-id="@Model.Id"
+                    @(ViewBag.UserHasFlagged ? "disabled" : "")>
+                <i class="fa-solid fa-flag me-1"></i>
+                @(ViewBag.UserHasFlagged ? "Already Flagged" : "Flag Inappropriate Content")
+            </button>
+        }
+        else
+        {
+            <a asp-controller="Account" asp-action="Login" class="btn btn-outline-danger fw-bold">
+                <i class="fa-solid fa-flag me-1"></i>
+                Flag Inappropriate Content
+            </a>
+        }
+    </div>
+
     <div class="mt-3 d-flex gap-2">
         <a class="btn report-action-btn"
         asp-action="Create"
@@ -213,6 +239,7 @@
     <script src="~/js/reportIssue.js"></script>
     <script src="~/js/reportVote.js" asp-append-version="true"></script>
     <script src="~/js/reportVerify.js" asp-append-version="true"></script>
+    <script src="~/js/reportFlag.js" asp-append-version="true"></script>
 
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=@GoogleMaps.Value.ApiKey&callback=initSubmittedMap">
