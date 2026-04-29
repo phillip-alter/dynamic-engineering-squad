@@ -17,5 +17,9 @@ namespace InfrastructureApp.ViewModels.Minigames
         public bool IsAvailable { get; init; }
 
         public string? PlayUrl { get; init; }
+
+        public string ImageUrl { get; init; } = string.Empty;
+
+        public string ImageAltText { get; init; } = string.Empty;
     }
 }
