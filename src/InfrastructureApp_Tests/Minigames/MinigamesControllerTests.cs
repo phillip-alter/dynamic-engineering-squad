@@ -49,6 +49,7 @@ namespace InfrastructureApp_Tests.Minigames
             Assert.That(model.Games.Single(game => game.GameKey == MinigameConstants.SlotsGameKey).DailyPointsEarned, Is.EqualTo(2));
             Assert.That(model.Games.Single(game => game.GameKey == MinigameConstants.MatchingGameKey).IsAvailable, Is.True);
             Assert.That(model.Games.Single(game => game.GameKey == MinigameConstants.TriviaGameKey).IsAvailable, Is.True);
+            Assert.That(model.Games.Single(game => game.GameKey == MinigameConstants.TapRepairGameKey).IsAvailable, Is.True);
         }
 
         [Test]
@@ -124,6 +125,40 @@ namespace InfrastructureApp_Tests.Minigames
             Assert.That(model.CorrectAnswers, Is.EqualTo(2));
             Assert.That(model.CurrentQuestion, Is.Not.Null);
             Assert.That(model.CurrentQuestion!.QuestionId, Is.EqualTo("q1"));
+        }
+
+        [Test]
+        public async Task TapRepair_ReturnsViewResult_WithTapRepairViewModel()
+        {
+            var serviceMock = new Mock<IMinigameService>();
+            serviceMock
+                .Setup(service => service.GetTodayStatusesAsync("user-1", null))
+                .ReturnsAsync(new[]
+                {
+                    new MinigameStatus
+                    {
+                        GameKey = MinigameConstants.TapRepairGameKey,
+                        DailyPointsEarned = 0,
+                        DailyPointsLimit = 5,
+                        HasReachedDailyLimit = false
+                    }
+                });
+            serviceMock
+                .Setup(service => service.GetCurrentPointsAsync("user-1"))
+                .ReturnsAsync(19);
+
+            var controller = new MinigamesController(serviceMock.Object, CreateUserManager())
+            {
+                ControllerContext = BuildControllerContext("user-1")
+            };
+
+            var result = await controller.TapRepair();
+
+            Assert.That(result, Is.TypeOf<ViewResult>());
+            var model = (TapRepairViewModel)((ViewResult)result).Model!;
+            Assert.That(model.CurrentPoints, Is.EqualTo(19));
+            Assert.That(model.HasReachedDailyLimit, Is.False);
+            Assert.That(model.PointsAvailable, Is.EqualTo(5));
         }
 
         [Test]
@@ -257,6 +292,40 @@ namespace InfrastructureApp_Tests.Minigames
 
             var payload = (GameCompletionResultViewModel)((JsonResult)result).Value!;
             Assert.That(payload.GameKey, Is.EqualTo(MinigameConstants.MatchingGameKey));
+            Assert.That(payload.AwardedPoints, Is.EqualTo(1));
+            Assert.That(payload.HasReachedDailyLimit, Is.False);
+        }
+
+        [Test]
+        public async Task CompleteGame_ForTapRepair_ReturnsCompletionPayload()
+        {
+            var serviceMock = new Mock<IMinigameService>();
+            serviceMock
+                .Setup(service => service.CompleteGameAsync("user-1", MinigameConstants.TapRepairGameKey, null))
+                .ReturnsAsync(new MinigameAwardResult
+                {
+                    GameKey = MinigameConstants.TapRepairGameKey,
+                    AwardedPoints = 1,
+                    CurrentPoints = 37,
+                    DailyPointsEarned = 3,
+                    DailyPointsLimit = 5,
+                    HasReachedDailyLimit = false
+                });
+
+            var controller = new MinigamesController(serviceMock.Object, CreateUserManager())
+            {
+                ControllerContext = BuildControllerContext("user-1")
+            };
+
+            var result = await controller.CompleteGame(new CompleteGameRequestViewModel
+            {
+                GameKey = MinigameConstants.TapRepairGameKey
+            });
+
+            Assert.That(result, Is.TypeOf<JsonResult>());
+
+            var payload = (GameCompletionResultViewModel)((JsonResult)result).Value!;
+            Assert.That(payload.GameKey, Is.EqualTo(MinigameConstants.TapRepairGameKey));
             Assert.That(payload.AwardedPoints, Is.EqualTo(1));
             Assert.That(payload.HasReachedDailyLimit, Is.False);
         }

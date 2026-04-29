@@ -233,7 +233,37 @@ namespace InfrastructureApp_Tests.Minigames
         }
 
         [Test]
-        public async Task CompleteGameAsync_DuplicateProtectionWhenCalledTwiceQuicklyCreatesOnePlayRecord()
+        public async Task CompleteGameAsync_TapRepairAwardsOnePointPerRound()
+        {
+            var result = await _service.CompleteGameAsync("user-1", MinigameConstants.TapRepairGameKey, new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc));
+
+            Assert.That(result.AwardedPoints, Is.EqualTo(1));
+            Assert.That(result.DailyPointsEarned, Is.EqualTo(1));
+            Assert.That(result.HasReachedDailyLimit, Is.False);
+        }
+
+        [Test]
+        public async Task CompleteGameAsync_TapRepairStopsAwardingAfterFiveRoundsInOneDay()
+        {
+            var date = new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc);
+
+            MinigameAwardResult result = null!;
+            for (var i = 0; i < 6; i++)
+            {
+                result = await _service.CompleteGameAsync("user-1", MinigameConstants.TapRepairGameKey, date.AddMinutes(i));
+            }
+
+            Assert.That(result.AwardedPoints, Is.EqualTo(0));
+            Assert.That(result.DailyPointsEarned, Is.EqualTo(5));
+            Assert.That(result.HasReachedDailyLimit, Is.True);
+
+            var points = await _db.UserPoints.SingleAsync(x => x.UserId == "user-1");
+            Assert.That(points.CurrentPoints, Is.EqualTo(5));
+            Assert.That(points.LifetimePoints, Is.EqualTo(5));
+        }
+
+        [Test]
+        public async Task CompleteGameAsync_TapRepairCalledTwiceQuicklyAwardsTwoPointsIntoOneDailyRecord()
         {
             var date = new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc);
 
@@ -241,7 +271,8 @@ namespace InfrastructureApp_Tests.Minigames
             await _service.CompleteGameAsync("user-1", MinigameConstants.TapRepairGameKey, date);
 
             Assert.That(await _db.MinigamePlays.CountAsync(), Is.EqualTo(1));
-            Assert.That(await _db.UserPoints.Select(x => x.CurrentPoints).SingleAsync(), Is.EqualTo(5));
+            Assert.That(await _db.UserPoints.Select(x => x.CurrentPoints).SingleAsync(), Is.EqualTo(2));
+            Assert.That(await _db.MinigamePlays.Select(x => x.PointsAwarded).SingleAsync(), Is.EqualTo(2));
         }
 
         [Test]

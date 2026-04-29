@@ -62,10 +62,10 @@ namespace InfrastructureApp.Controllers
                     BuildCard(
                         MinigameConstants.TapRepairGameKey,
                         "Tap Repair",
-                        "Repair potholes before the timer runs out. Coming soon.",
+                        "Repair as many potholes as you can before the timer runs out for a 5-point daily reward.",
                         statusMap,
-                        isAvailable: false,
-                        playUrl: null)
+                        isAvailable: true,
+                        playUrl: "/Minigames/TapRepair")
                 }
             };
 
@@ -153,6 +153,35 @@ namespace InfrastructureApp.Controllers
                 CurrentQuestion = triviaRound.CurrentQuestion == null
                     ? null
                     : MapTriviaQuestion(triviaRound.CurrentQuestion)
+            };
+
+            return View(model);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> TapRepair()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized();
+            }
+
+            var statuses = await _minigameService.GetTodayStatusesAsync(userId);
+            var tapRepairStatus = statuses
+                .FirstOrDefault(status => status.GameKey == MinigameConstants.TapRepairGameKey)
+                ?? new MinigameStatus
+                {
+                    GameKey = MinigameConstants.TapRepairGameKey,
+                    DailyPointsLimit = MinigameConstants.PointsPerGame
+                };
+
+            var model = new TapRepairViewModel
+            {
+                CurrentPoints = await _minigameService.GetCurrentPointsAsync(userId),
+                DailyPointsEarned = tapRepairStatus.DailyPointsEarned,
+                HasReachedDailyLimit = tapRepairStatus.HasReachedDailyLimit,
+                PointsAvailable = MinigameConstants.PointsPerGame
             };
 
             return View(model);

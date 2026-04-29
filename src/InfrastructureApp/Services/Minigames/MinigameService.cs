@@ -292,9 +292,10 @@ namespace InfrastructureApp.Services.Minigames
 
         public Task<MinigameAwardResult> CompleteGameAsync(string userId, string gameKey, DateTime? utcNow = null)
         {
-            if (string.Equals(gameKey, MinigameConstants.MatchingGameKey, StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(gameKey, MinigameConstants.MatchingGameKey, StringComparison.OrdinalIgnoreCase)
+                || string.Equals(gameKey, MinigameConstants.TapRepairGameKey, StringComparison.OrdinalIgnoreCase))
             {
-                return AwardRepeatableGamePointAsync(userId, MinigameConstants.MatchingGameKey, utcNow);
+                return AwardRepeatableGamePointAsync(userId, gameKey.Trim().ToLowerInvariant(), utcNow);
             }
 
             return CompleteGameInternalAsync(userId, gameKey, utcNow);
