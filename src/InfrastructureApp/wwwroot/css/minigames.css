@@ -1,0 +1,39 @@
+.minigame-balance-card {
+    min-width: 220px;
+}
+
+.minigame-card {
+    border: 1px solid rgba(255, 193, 7, 0.15);
+}
+
+.minigame-shell .card {
+    border: 1px solid rgba(255, 193, 7, 0.12);
+}
+
+.slots-reels {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.slots-reel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 130px;
+    border-radius: 1rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: center;
+    background: linear-gradient(160deg, #2f3640, #15191f);
+    border: 1px solid rgba(255, 193, 7, 0.25);
+    color: #f8f9fa;
+    padding: 1rem;
+}
+
+@media (max-width: 576px) {
+    .slots-reel {
+        min-height: 96px;
+        font-size: 1rem;
+    }
+}
