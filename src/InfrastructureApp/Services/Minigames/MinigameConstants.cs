@@ -17,6 +17,13 @@ namespace InfrastructureApp.Services.Minigames
             TapRepairGameKey
         };
 
+        public static readonly string[] GenericCompletionGameKeys =
+        {
+            MatchingGameKey,
+            TriviaGameKey,
+            TapRepairGameKey
+        };
+
         public static readonly string[] SlotSymbols =
         {
             "pothole",
@@ -29,5 +36,9 @@ namespace InfrastructureApp.Services.Minigames
         public static bool IsSupportedGameKey(string? gameKey)
             => !string.IsNullOrWhiteSpace(gameKey)
                && SupportedGameKeys.Contains(gameKey, System.StringComparer.OrdinalIgnoreCase);
+
+        public static bool IsGenericCompletionGameKey(string? gameKey)
+            => !string.IsNullOrWhiteSpace(gameKey)
+               && GenericCompletionGameKeys.Contains(gameKey, System.StringComparer.OrdinalIgnoreCase);
     }
 }

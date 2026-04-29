@@ -31,29 +31,31 @@ namespace InfrastructureApp_Tests.Minigames
         }
 
         [Test]
-        public async Task CompleteGameAsync_UserCanCompleteNonSlotsGameOncePerDay()
+        public async Task CompleteGameAsync_MatchingAwardsOnePointPerBoardClear()
         {
             var result = await _service.CompleteGameAsync("user-1", MinigameConstants.MatchingGameKey, new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc));
 
-            Assert.That(result.AwardedPoints, Is.EqualTo(MinigameConstants.PointsPerGame));
-            Assert.That(result.HasReachedDailyLimit, Is.True);
+            Assert.That(result.AwardedPoints, Is.EqualTo(1));
+            Assert.That(result.DailyPointsEarned, Is.EqualTo(1));
+            Assert.That(result.HasReachedDailyLimit, Is.False);
         }
 
         [Test]
-        public async Task CompleteGameAsync_CompletingSameNonSlotsGameTwiceOnSameDayDoesNotAwardTwice()
+        public async Task CompleteGameAsync_MatchingCanBeCompletedMultipleTimesUntilDailyCap()
         {
             var date = new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc);
 
             var first = await _service.CompleteGameAsync("user-1", MinigameConstants.MatchingGameKey, date);
             var second = await _service.CompleteGameAsync("user-1", MinigameConstants.MatchingGameKey, date.AddHours(2));
 
-            Assert.That(first.AwardedPoints, Is.EqualTo(5));
-            Assert.That(second.AwardedPoints, Is.EqualTo(0));
-            Assert.That(second.HasReachedDailyLimit, Is.True);
+            Assert.That(first.AwardedPoints, Is.EqualTo(1));
+            Assert.That(second.AwardedPoints, Is.EqualTo(1));
+            Assert.That(second.DailyPointsEarned, Is.EqualTo(2));
+            Assert.That(second.HasReachedDailyLimit, Is.False);
 
             var points = await _db.UserPoints.SingleAsync(x => x.UserId == "user-1");
-            Assert.That(points.CurrentPoints, Is.EqualTo(5));
-            Assert.That(points.LifetimePoints, Is.EqualTo(5));
+            Assert.That(points.CurrentPoints, Is.EqualTo(2));
+            Assert.That(points.LifetimePoints, Is.EqualTo(2));
         }
 
         [Test]
@@ -65,8 +67,8 @@ namespace InfrastructureApp_Tests.Minigames
             await _service.CompleteGameAsync("user-1", MinigameConstants.TriviaGameKey, date);
 
             var points = await _db.UserPoints.SingleAsync(x => x.UserId == "user-1");
-            Assert.That(points.CurrentPoints, Is.EqualTo(10));
-            Assert.That(points.LifetimePoints, Is.EqualTo(10));
+            Assert.That(points.CurrentPoints, Is.EqualTo(6));
+            Assert.That(points.LifetimePoints, Is.EqualTo(6));
             Assert.That(await _db.MinigamePlays.CountAsync(), Is.EqualTo(2));
         }
 
@@ -94,7 +96,27 @@ namespace InfrastructureApp_Tests.Minigames
         [Test]
         public async Task CompleteGameAsync_PointsAreAddedToCurrentAndLifetimeTotals()
         {
-            await _service.CompleteGameAsync("user-1", MinigameConstants.TriviaGameKey, new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc));
+            await _service.CompleteGameAsync("user-1", MinigameConstants.MatchingGameKey, new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc));
+
+            var points = await _db.UserPoints.SingleAsync(x => x.UserId == "user-1");
+            Assert.That(points.CurrentPoints, Is.EqualTo(1));
+            Assert.That(points.LifetimePoints, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task CompleteGameAsync_MatchingStopsAwardingAfterFiveBoardClearsInOneDay()
+        {
+            var date = new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc);
+
+            MinigameAwardResult result = null!;
+            for (var i = 0; i < 6; i++)
+            {
+                result = await _service.CompleteGameAsync("user-1", MinigameConstants.MatchingGameKey, date.AddMinutes(i));
+            }
+
+            Assert.That(result.AwardedPoints, Is.EqualTo(0));
+            Assert.That(result.DailyPointsEarned, Is.EqualTo(5));
+            Assert.That(result.HasReachedDailyLimit, Is.True);
 
             var points = await _db.UserPoints.SingleAsync(x => x.UserId == "user-1");
             Assert.That(points.CurrentPoints, Is.EqualTo(5));

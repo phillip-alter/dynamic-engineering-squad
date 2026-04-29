@@ -48,10 +48,10 @@ namespace InfrastructureApp.Controllers
                     BuildCard(
                         MinigameConstants.MatchingGameKey,
                         "Image Matching",
-                        "Match hidden roadwork-themed card pairs. Coming soon in the next slice.",
+                        "Clear the board repeatedly to earn up to 5 points per day.",
                         statusMap,
-                        isAvailable: false,
-                        playUrl: null),
+                        isAvailable: true,
+                        playUrl: "/Minigames/Matching"),
                     BuildCard(
                         MinigameConstants.TriviaGameKey,
                         "Infrastructure Trivia",
@@ -101,6 +101,35 @@ namespace InfrastructureApp.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Matching()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized();
+            }
+
+            var statuses = await _minigameService.GetTodayStatusesAsync(userId);
+            var matchingStatus = statuses
+                .FirstOrDefault(status => status.GameKey == MinigameConstants.MatchingGameKey)
+                ?? new MinigameStatus
+                {
+                    GameKey = MinigameConstants.MatchingGameKey,
+                    DailyPointsLimit = MinigameConstants.PointsPerGame
+                };
+
+            var model = new MatchingViewModel
+            {
+                CurrentPoints = await _minigameService.GetCurrentPointsAsync(userId),
+                DailyPointsEarned = matchingStatus.DailyPointsEarned,
+                HasReachedDailyLimit = matchingStatus.HasReachedDailyLimit,
+                PointsAvailable = MinigameConstants.PointsPerGame
+            };
+
+            return View(model);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SpinSlots()
@@ -121,6 +150,34 @@ namespace InfrastructureApp.Controllers
                 Symbols = result.Symbols,
                 IsWinningSpin = result.IsWinningSpin,
                 ResultLabel = result.ResultLabel,
+                DailyPointsEarned = result.DailyPointsEarned,
+                DailyPointsLimit = result.DailyPointsLimit,
+                HasReachedDailyLimit = result.HasReachedDailyLimit
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteGame([FromBody] CompleteGameRequestViewModel request)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized();
+            }
+
+            if (request == null || !MinigameConstants.IsGenericCompletionGameKey(request.GameKey))
+            {
+                return BadRequest(new { message = "Invalid minigame key." });
+            }
+
+            var result = await _minigameService.CompleteGameAsync(userId, request.GameKey);
+
+            return Json(new GameCompletionResultViewModel
+            {
+                GameKey = result.GameKey,
+                AwardedPoints = result.AwardedPoints,
+                CurrentPoints = result.CurrentPoints,
                 DailyPointsEarned = result.DailyPointsEarned,
                 DailyPointsLimit = result.DailyPointsLimit,
                 HasReachedDailyLimit = result.HasReachedDailyLimit

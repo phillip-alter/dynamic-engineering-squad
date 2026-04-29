@@ -47,6 +47,38 @@ namespace InfrastructureApp_Tests.Minigames
             Assert.That(model.Games.Count, Is.EqualTo(4));
             Assert.That(model.Games.Single(game => game.GameKey == MinigameConstants.SlotsGameKey).IsAvailable, Is.True);
             Assert.That(model.Games.Single(game => game.GameKey == MinigameConstants.SlotsGameKey).DailyPointsEarned, Is.EqualTo(2));
+            Assert.That(model.Games.Single(game => game.GameKey == MinigameConstants.MatchingGameKey).IsAvailable, Is.True);
+        }
+
+        [Test]
+        public async Task Matching_ReturnsViewResult_WithMatchingViewModel()
+        {
+            var serviceMock = new Mock<IMinigameService>();
+            serviceMock
+                .Setup(service => service.GetTodayStatusesAsync("user-1", null))
+                .ReturnsAsync(new[]
+                {
+                    new MinigameStatus { GameKey = MinigameConstants.MatchingGameKey, DailyPointsEarned = 0, DailyPointsLimit = 5, HasReachedDailyLimit = false }
+                });
+            serviceMock
+                .Setup(service => service.GetCurrentPointsAsync("user-1"))
+                .ReturnsAsync(31);
+
+            var controller = new MinigamesController(serviceMock.Object, CreateUserManager())
+            {
+                ControllerContext = BuildControllerContext("user-1")
+            };
+
+            var result = await controller.Matching();
+
+            Assert.That(result, Is.TypeOf<ViewResult>());
+
+            var viewResult = (ViewResult)result;
+            Assert.That(viewResult.Model, Is.TypeOf<MatchingViewModel>());
+
+            var model = (MatchingViewModel)viewResult.Model!;
+            Assert.That(model.CurrentPoints, Is.EqualTo(31));
+            Assert.That(model.HasReachedDailyLimit, Is.False);
         }
 
         [Test]
@@ -114,6 +146,74 @@ namespace InfrastructureApp_Tests.Minigames
 
             Assert.That(payload.AwardedPoints, Is.EqualTo(0));
             Assert.That(payload.HasReachedDailyLimit, Is.True);
+        }
+
+        [Test]
+        public async Task CompleteGame_WithInvalidGameKey_ReturnsBadRequest()
+        {
+            var serviceMock = new Mock<IMinigameService>();
+            var controller = new MinigamesController(serviceMock.Object, CreateUserManager())
+            {
+                ControllerContext = BuildControllerContext("user-1")
+            };
+
+            var result = await controller.CompleteGame(new CompleteGameRequestViewModel
+            {
+                GameKey = "not-a-game"
+            });
+
+            Assert.That(result, Is.TypeOf<BadRequestObjectResult>());
+        }
+
+        [Test]
+        public async Task CompleteGame_WithSlotsGameKey_ReturnsBadRequest()
+        {
+            var serviceMock = new Mock<IMinigameService>();
+            var controller = new MinigamesController(serviceMock.Object, CreateUserManager())
+            {
+                ControllerContext = BuildControllerContext("user-1")
+            };
+
+            var result = await controller.CompleteGame(new CompleteGameRequestViewModel
+            {
+                GameKey = MinigameConstants.SlotsGameKey
+            });
+
+            Assert.That(result, Is.TypeOf<BadRequestObjectResult>());
+        }
+
+        [Test]
+        public async Task CompleteGame_ForMatching_ReturnsCompletionPayload()
+        {
+            var serviceMock = new Mock<IMinigameService>();
+            serviceMock
+                .Setup(service => service.CompleteGameAsync("user-1", MinigameConstants.MatchingGameKey, null))
+                .ReturnsAsync(new MinigameAwardResult
+                {
+                    GameKey = MinigameConstants.MatchingGameKey,
+                    AwardedPoints = 1,
+                    CurrentPoints = 36,
+                    DailyPointsEarned = 1,
+                    DailyPointsLimit = 5,
+                    HasReachedDailyLimit = false
+                });
+
+            var controller = new MinigamesController(serviceMock.Object, CreateUserManager())
+            {
+                ControllerContext = BuildControllerContext("user-1")
+            };
+
+            var result = await controller.CompleteGame(new CompleteGameRequestViewModel
+            {
+                GameKey = MinigameConstants.MatchingGameKey
+            });
+
+            Assert.That(result, Is.TypeOf<JsonResult>());
+
+            var payload = (GameCompletionResultViewModel)((JsonResult)result).Value!;
+            Assert.That(payload.GameKey, Is.EqualTo(MinigameConstants.MatchingGameKey));
+            Assert.That(payload.AwardedPoints, Is.EqualTo(1));
+            Assert.That(payload.HasReachedDailyLimit, Is.False);
         }
 
         private static UserManager<Users> CreateUserManager()

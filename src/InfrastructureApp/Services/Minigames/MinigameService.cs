@@ -55,6 +55,11 @@ namespace InfrastructureApp.Services.Minigames
 
         public Task<MinigameAwardResult> CompleteGameAsync(string userId, string gameKey, DateTime? utcNow = null)
         {
+            if (string.Equals(gameKey, MinigameConstants.MatchingGameKey, StringComparison.OrdinalIgnoreCase))
+            {
+                return AwardRepeatableGamePointAsync(userId, MinigameConstants.MatchingGameKey, utcNow);
+            }
+
             return CompleteGameInternalAsync(userId, gameKey, utcNow);
         }
 
@@ -274,6 +279,96 @@ namespace InfrastructureApp.Services.Minigames
                 return new MinigameAwardResult
                 {
                     GameKey = MinigameConstants.SlotsGameKey,
+                    AwardedPoints = 1,
+                    CurrentPoints = userPoints.CurrentPoints,
+                    PlayedOnDate = today,
+                    DailyPointsEarned = existingPlay.PointsAwarded,
+                    DailyPointsLimit = MinigameConstants.PointsPerGame,
+                    HasReachedDailyLimit = existingPlay.PointsAwarded >= MinigameConstants.PointsPerGame
+                };
+            }
+            catch (DbUpdateException)
+            {
+                await tx.RollbackAsync();
+                _db.ChangeTracker.Clear();
+                throw;
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                throw;
+            }
+        }
+
+        private async Task<MinigameAwardResult> AwardRepeatableGamePointAsync(string userId, string gameKey, DateTime? utcNow)
+        {
+            var today = GetPlayedOnDate(utcNow);
+
+            await using var tx = await _db.Database.BeginTransactionAsync();
+
+            try
+            {
+                var existingPlay = await _db.MinigamePlays
+                    .FirstOrDefaultAsync(play =>
+                        play.UserId == userId &&
+                        play.GameKey == gameKey &&
+                        play.PlayedOnDate == today);
+
+                var dailyPointsEarned = existingPlay?.PointsAwarded ?? 0;
+                var hasReachedDailyLimit = dailyPointsEarned >= MinigameConstants.PointsPerGame;
+
+                if (hasReachedDailyLimit)
+                {
+                    await tx.CommitAsync();
+                    return new MinigameAwardResult
+                    {
+                        GameKey = gameKey,
+                        AwardedPoints = 0,
+                        CurrentPoints = await GetCurrentPointsAsync(userId),
+                        PlayedOnDate = today,
+                        DailyPointsEarned = dailyPointsEarned,
+                        DailyPointsLimit = MinigameConstants.PointsPerGame,
+                        HasReachedDailyLimit = true
+                    };
+                }
+
+                var userPoints = await _db.UserPoints.FirstOrDefaultAsync(points => points.UserId == userId);
+                if (userPoints == null)
+                {
+                    userPoints = new UserPoints
+                    {
+                        UserId = userId,
+                        CurrentPoints = 0,
+                        LifetimePoints = 0,
+                        LastUpdated = DateTime.UtcNow
+                    };
+                    _db.UserPoints.Add(userPoints);
+                }
+
+                if (existingPlay == null)
+                {
+                    existingPlay = new MinigamePlay
+                    {
+                        UserId = userId,
+                        GameKey = gameKey,
+                        PlayedOnDate = today,
+                        PointsAwarded = 0,
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    _db.MinigamePlays.Add(existingPlay);
+                }
+
+                existingPlay.PointsAwarded += 1;
+                userPoints.CurrentPoints += 1;
+                userPoints.LifetimePoints += 1;
+                userPoints.LastUpdated = DateTime.UtcNow;
+
+                await _db.SaveChangesAsync();
+                await tx.CommitAsync();
+
+                return new MinigameAwardResult
+                {
+                    GameKey = gameKey,
                     AwardedPoints = 1,
                     CurrentPoints = userPoints.CurrentPoints,
                     PlayedOnDate = today,
