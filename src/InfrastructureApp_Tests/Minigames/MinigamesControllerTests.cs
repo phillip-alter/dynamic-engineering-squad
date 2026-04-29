@@ -48,6 +48,7 @@ namespace InfrastructureApp_Tests.Minigames
             Assert.That(model.Games.Single(game => game.GameKey == MinigameConstants.SlotsGameKey).IsAvailable, Is.True);
             Assert.That(model.Games.Single(game => game.GameKey == MinigameConstants.SlotsGameKey).DailyPointsEarned, Is.EqualTo(2));
             Assert.That(model.Games.Single(game => game.GameKey == MinigameConstants.MatchingGameKey).IsAvailable, Is.True);
+            Assert.That(model.Games.Single(game => game.GameKey == MinigameConstants.TriviaGameKey).IsAvailable, Is.True);
         }
 
         [Test]
@@ -79,6 +80,50 @@ namespace InfrastructureApp_Tests.Minigames
             var model = (MatchingViewModel)viewResult.Model!;
             Assert.That(model.CurrentPoints, Is.EqualTo(31));
             Assert.That(model.HasReachedDailyLimit, Is.False);
+        }
+
+        [Test]
+        public async Task Trivia_ReturnsViewResult_WithTriviaViewModel()
+        {
+            var serviceMock = new Mock<IMinigameService>();
+            serviceMock
+                .Setup(service => service.GetOrStartTriviaRoundAsync("user-1", null))
+                .ReturnsAsync(new TriviaQuestionPromptResult
+                {
+                    CurrentQuestion = new TriviaQuestion
+                    {
+                        QuestionId = "q1",
+                        Prompt = "Question?",
+                        QuestionType = TriviaQuestionTypes.Radio,
+                        CorrectAnswerKey = "a",
+                        Options = new[]
+                        {
+                            new TriviaOption { OptionKey = "a", Label = "Answer A" },
+                            new TriviaOption { OptionKey = "b", Label = "Answer B" }
+                        }
+                    },
+                    CorrectAnswers = 2,
+                    CorrectAnswersToWin = 10,
+                    CurrentPoints = 22,
+                    DailyPointsEarned = 0,
+                    DailyPointsLimit = 5,
+                    HasReachedDailyLimit = false,
+                    IsRoundComplete = false
+                });
+
+            var controller = new MinigamesController(serviceMock.Object, CreateUserManager())
+            {
+                ControllerContext = BuildControllerContext("user-1")
+            };
+
+            var result = await controller.Trivia();
+
+            Assert.That(result, Is.TypeOf<ViewResult>());
+            var model = (TriviaViewModel)((ViewResult)result).Model!;
+            Assert.That(model.CurrentPoints, Is.EqualTo(22));
+            Assert.That(model.CorrectAnswers, Is.EqualTo(2));
+            Assert.That(model.CurrentQuestion, Is.Not.Null);
+            Assert.That(model.CurrentQuestion!.QuestionId, Is.EqualTo("q1"));
         }
 
         [Test]
@@ -216,6 +261,79 @@ namespace InfrastructureApp_Tests.Minigames
             Assert.That(payload.HasReachedDailyLimit, Is.False);
         }
 
+        [Test]
+        public async Task SubmitTrivia_WithInvalidPayload_ReturnsBadRequest()
+        {
+            var serviceMock = new Mock<IMinigameService>();
+            serviceMock
+                .Setup(service => service.SubmitTriviaAnswerAsync("user-1", It.IsAny<TriviaAnswerSubmission>(), null))
+                .ThrowsAsync(new ArgumentException("Trivia answer is incomplete."));
+
+            var controller = new MinigamesController(serviceMock.Object, CreateUserManager())
+            {
+                ControllerContext = BuildControllerContext("user-1")
+            };
+
+            var result = await controller.SubmitTrivia(new SubmitTriviaRequestViewModel());
+
+            Assert.That(result, Is.TypeOf<BadRequestObjectResult>());
+        }
+
+        [Test]
+        public async Task SubmitTrivia_ReturnsTriviaResultPayload()
+        {
+            var serviceMock = new Mock<IMinigameService>();
+            serviceMock
+                .Setup(service => service.SubmitTriviaAnswerAsync(
+                    "user-1",
+                    It.Is<TriviaAnswerSubmission>(answer => answer.QuestionId == "q1" && answer.SelectedOptionKey == "a"),
+                    null))
+                .ReturnsAsync(new TriviaAnswerResult
+                {
+                    WasCorrect = true,
+                    CorrectAnswers = 3,
+                    CorrectAnswersToWin = 10,
+                    IsRoundComplete = false,
+                    AwardedPoints = 0,
+                    CurrentPoints = 50,
+                    DailyPointsEarned = 0,
+                    DailyPointsLimit = 5,
+                    HasReachedDailyLimit = false,
+                    NextQuestion = new TriviaQuestion
+                    {
+                        QuestionId = "q2",
+                        Prompt = "Next?",
+                        QuestionType = TriviaQuestionTypes.Dropdown,
+                        Options = new[]
+                        {
+                            new TriviaOption { OptionKey = "x", Label = "X" },
+                            new TriviaOption { OptionKey = "y", Label = "Y" }
+                        }
+                    }
+                });
+
+            var controller = new MinigamesController(serviceMock.Object, CreateUserManager())
+            {
+                ControllerContext = BuildControllerContext("user-1")
+            };
+
+            var result = await controller.SubmitTrivia(new SubmitTriviaRequestViewModel
+            {
+                QuestionId = "q1",
+                SelectedOptionKey = "a"
+            });
+
+            Assert.That(result, Is.TypeOf<JsonResult>());
+
+            var payload = (GameCompletionResultViewModel)((JsonResult)result).Value!;
+            Assert.That(payload.GameKey, Is.EqualTo(MinigameConstants.TriviaGameKey));
+            Assert.That(payload.WasCorrect, Is.True);
+            Assert.That(payload.CorrectAnswers, Is.EqualTo(3));
+            Assert.That(payload.CorrectAnswersToWin, Is.EqualTo(10));
+            Assert.That(payload.NextQuestion, Is.Not.Null);
+            Assert.That(payload.NextQuestion!.QuestionId, Is.EqualTo("q2"));
+        }
+
         private static UserManager<Users> CreateUserManager()
         {
             var store = new Mock<IUserStore<Users>>();
@@ -243,7 +361,8 @@ namespace InfrastructureApp_Tests.Minigames
             {
                 HttpContext = new DefaultHttpContext
                 {
-                    User = new ClaimsPrincipal(identity)
+                    User = new ClaimsPrincipal(identity),
+                    Session = new TestSession()
                 }
             };
         }

@@ -55,10 +55,10 @@ namespace InfrastructureApp.Controllers
                     BuildCard(
                         MinigameConstants.TriviaGameKey,
                         "Infrastructure Trivia",
-                        "Answer short road-safety questions validated by the server. Coming soon.",
+                        "Answer road-safety questions checked on the server for a daily reward.",
                         statusMap,
-                        isAvailable: false,
-                        playUrl: null),
+                        isAvailable: true,
+                        playUrl: "/Minigames/Trivia"),
                     BuildCard(
                         MinigameConstants.TapRepairGameKey,
                         "Tap Repair",
@@ -130,6 +130,34 @@ namespace InfrastructureApp.Controllers
             return View(model);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Trivia()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized();
+            }
+
+            var triviaRound = await _minigameService.GetOrStartTriviaRoundAsync(userId);
+
+            var model = new TriviaViewModel
+            {
+                CurrentPoints = triviaRound.CurrentPoints,
+                DailyPointsEarned = triviaRound.DailyPointsEarned,
+                HasReachedDailyLimit = triviaRound.HasReachedDailyLimit,
+                PointsAvailable = MinigameConstants.PointsPerGame,
+                CorrectAnswers = triviaRound.CorrectAnswers,
+                CorrectAnswersToWin = triviaRound.CorrectAnswersToWin,
+                IsRoundComplete = triviaRound.IsRoundComplete,
+                CurrentQuestion = triviaRound.CurrentQuestion == null
+                    ? null
+                    : MapTriviaQuestion(triviaRound.CurrentQuestion)
+            };
+
+            return View(model);
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SpinSlots()
@@ -184,6 +212,49 @@ namespace InfrastructureApp.Controllers
             });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SubmitTrivia([FromBody] SubmitTriviaRequestViewModel request)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                var result = await _minigameService.SubmitTriviaAnswerAsync(
+                    userId,
+                    new TriviaAnswerSubmission
+                    {
+                        QuestionId = request?.QuestionId ?? string.Empty,
+                        SelectedOptionKey = request?.SelectedOptionKey ?? string.Empty
+                    });
+
+                return Json(new GameCompletionResultViewModel
+                {
+                    GameKey = MinigameConstants.TriviaGameKey,
+                    AwardedPoints = result.AwardedPoints,
+                    CurrentPoints = result.CurrentPoints,
+                    DailyPointsEarned = result.DailyPointsEarned,
+                    DailyPointsLimit = result.DailyPointsLimit,
+                    HasReachedDailyLimit = result.HasReachedDailyLimit,
+                    WasCorrect = result.WasCorrect,
+                    CorrectAnswers = result.CorrectAnswers,
+                    CorrectAnswersToWin = result.CorrectAnswersToWin,
+                    IsRoundComplete = result.IsRoundComplete,
+                    NextQuestion = result.NextQuestion == null
+                        ? null
+                        : MapTriviaQuestion(result.NextQuestion)
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         private static MinigameCardViewModel BuildCard(
             string gameKey,
             string name,
@@ -210,6 +281,24 @@ namespace InfrastructureApp.Controllers
                 HasReachedDailyLimit = status.HasReachedDailyLimit,
                 IsAvailable = isAvailable,
                 PlayUrl = playUrl
+            };
+        }
+
+        private static TriviaQuestionViewModel MapTriviaQuestion(TriviaQuestion question)
+        {
+            return new TriviaQuestionViewModel
+            {
+                QuestionId = question.QuestionId,
+                Prompt = question.Prompt,
+                QuestionType = question.QuestionType,
+                TextPlaceholder = question.TextPlaceholder,
+                Options = question.Options
+                    .Select(option => new TriviaOptionViewModel
+                    {
+                        OptionKey = option.OptionKey,
+                        Label = option.Label
+                    })
+                    .ToList()
             };
         }
     }

@@ -1,6 +1,7 @@
 using InfrastructureApp.Data;
 using InfrastructureApp.Models;
 using InfrastructureApp.Services.Minigames;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
@@ -10,6 +11,8 @@ namespace InfrastructureApp_Tests.Minigames
     public class MinigameServiceTests
     {
         private ApplicationDbContext _db = null!;
+        private DefaultHttpContext _httpContext = null!;
+        private IHttpContextAccessor _httpContextAccessor = null!;
         private MinigameService _service = null!;
 
         [SetUp]
@@ -21,7 +24,14 @@ namespace InfrastructureApp_Tests.Minigames
                 .Options;
 
             _db = new ApplicationDbContext(options);
-            _service = new MinigameService(_db);
+            _httpContext = new DefaultHttpContext();
+            _httpContext.Session = new TestSession();
+            _httpContextAccessor = new HttpContextAccessor
+            {
+                HttpContext = _httpContext
+            };
+
+            _service = new MinigameService(_db, _httpContextAccessor);
         }
 
         [TearDown]
@@ -86,6 +96,105 @@ namespace InfrastructureApp_Tests.Minigames
         }
 
         [Test]
+        public async Task GetOrStartTriviaRoundAsync_ReturnsOneCurrentQuestion()
+        {
+            var result = await _service.GetOrStartTriviaRoundAsync("user-1", new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc));
+
+            Assert.That(result.CurrentQuestion, Is.Not.Null);
+            Assert.That(result.CurrentQuestion.QuestionId, Is.Not.Empty);
+            Assert.That(result.CorrectAnswers, Is.EqualTo(0));
+            Assert.That(result.CorrectAnswersToWin, Is.EqualTo(10));
+            Assert.That(result.IsRoundComplete, Is.False);
+        }
+
+        [Test]
+        public async Task SubmitTriviaAnswerAsync_CorrectAnswerAdvancesToNextQuestionWithoutAwardingUntilTenCorrect()
+        {
+            var round = await _service.GetOrStartTriviaRoundAsync("user-1", new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc));
+
+            var result = await _service.SubmitTriviaAnswerAsync(
+                "user-1",
+                new TriviaAnswerSubmission
+                {
+                    QuestionId = round.CurrentQuestion.QuestionId,
+                    SelectedOptionKey = round.CurrentQuestion.CorrectAnswerKey
+                },
+                new DateTime(2026, 4, 28, 10, 1, 0, DateTimeKind.Utc));
+
+            Assert.That(result.WasCorrect, Is.True);
+            Assert.That(result.CorrectAnswers, Is.EqualTo(1));
+            Assert.That(result.AwardedPoints, Is.EqualTo(0));
+            Assert.That(result.NextQuestion, Is.Not.Null);
+            Assert.That(result.IsRoundComplete, Is.False);
+        }
+
+        [Test]
+        public async Task SubmitTriviaAnswerAsync_WrongAnswerMovesToNextQuestionWithoutRevealingAnswer()
+        {
+            var round = await _service.GetOrStartTriviaRoundAsync("user-1", new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc));
+            var wrongOption = GetWrongAnswer(round.CurrentQuestion);
+
+            var result = await _service.SubmitTriviaAnswerAsync(
+                "user-1",
+                new TriviaAnswerSubmission
+                {
+                    QuestionId = round.CurrentQuestion.QuestionId,
+                    SelectedOptionKey = wrongOption
+                },
+                new DateTime(2026, 4, 28, 10, 1, 0, DateTimeKind.Utc));
+
+            Assert.That(result.WasCorrect, Is.False);
+            Assert.That(result.CorrectAnswers, Is.EqualTo(0));
+            Assert.That(result.AwardedPoints, Is.EqualTo(0));
+            Assert.That(result.NextQuestion, Is.Not.Null);
+        }
+
+        [Test]
+        public async Task SubmitTriviaAnswerAsync_AwardsFivePointsAfterTenCorrectAnswers()
+        {
+            var date = new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc);
+            TriviaAnswerResult result = null!;
+
+            for (var i = 0; i < 10; i++)
+            {
+                var round = await _service.GetOrStartTriviaRoundAsync("user-1", date.AddMinutes(i));
+                result = await _service.SubmitTriviaAnswerAsync(
+                    "user-1",
+                    new TriviaAnswerSubmission
+                    {
+                        QuestionId = round.CurrentQuestion.QuestionId,
+                        SelectedOptionKey = round.CurrentQuestion.CorrectAnswerKey
+                    },
+                    date.AddMinutes(i));
+            }
+
+            Assert.That(result.WasCorrect, Is.True);
+            Assert.That(result.CorrectAnswers, Is.EqualTo(10));
+            Assert.That(result.IsRoundComplete, Is.True);
+            Assert.That(result.AwardedPoints, Is.EqualTo(5));
+            Assert.That(result.HasReachedDailyLimit, Is.True);
+
+            var points = await _db.UserPoints.SingleAsync(x => x.UserId == "user-1");
+            Assert.That(points.CurrentPoints, Is.EqualTo(5));
+            Assert.That(points.LifetimePoints, Is.EqualTo(5));
+        }
+
+        [Test]
+        public void SubmitTriviaAnswerAsync_InvalidQuestionIsRejected()
+        {
+            Assert.That(
+                async () => await _service.SubmitTriviaAnswerAsync(
+                    "user-1",
+                    new TriviaAnswerSubmission
+                    {
+                        QuestionId = "bad-question",
+                        SelectedOptionKey = "bad-answer"
+                    },
+                    new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc)),
+                Throws.ArgumentException);
+        }
+
+        [Test]
         public void CompleteGameAsync_InvalidGameKeyIsRejected()
         {
             Assert.That(
@@ -138,7 +247,7 @@ namespace InfrastructureApp_Tests.Minigames
         [Test]
         public async Task SpinSlotsAsync_NonWinningSpinAwardsNoPoints()
         {
-            var service = new MinigameService(_db, () => new[] { "cone", "bridge", "pothole" });
+            var service = new MinigameService(_db, _httpContextAccessor, () => new[] { "cone", "bridge", "pothole" });
             var result = await service.SpinSlotsAsync("user-1", new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc));
 
             Assert.That(result.Symbols.Count, Is.EqualTo(3));
@@ -151,7 +260,7 @@ namespace InfrastructureApp_Tests.Minigames
         [Test]
         public async Task SpinSlotsAsync_WinningSpinAwardsOnePoint()
         {
-            var service = new MinigameService(_db, () => new[] { "cone", "cone", "cone" });
+            var service = new MinigameService(_db, _httpContextAccessor, () => new[] { "cone", "cone", "cone" });
             var result = await service.SpinSlotsAsync("user-1", new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc));
 
             Assert.That(result.IsWinningSpin, Is.True);
@@ -166,7 +275,7 @@ namespace InfrastructureApp_Tests.Minigames
         [Test]
         public async Task SpinSlotsAsync_WinningSpinsCapAtFivePointsPerDay()
         {
-            var service = new MinigameService(_db, () => new[] { "bridge", "bridge", "bridge" });
+            var service = new MinigameService(_db, _httpContextAccessor, () => new[] { "bridge", "bridge", "bridge" });
             var date = new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc);
 
             SlotsSpinResult result = null!;
@@ -187,7 +296,7 @@ namespace InfrastructureApp_Tests.Minigames
         [Test]
         public async Task SpinSlotsAsync_WinningSpinAfterDailyCapAwardsNoAdditionalPoints()
         {
-            var service = new MinigameService(_db, () => new[] { "traffic-light", "traffic-light", "traffic-light" });
+            var service = new MinigameService(_db, _httpContextAccessor, () => new[] { "traffic-light", "traffic-light", "traffic-light" });
             var date = new DateTime(2026, 4, 28, 10, 0, 0, DateTimeKind.Utc);
 
             for (var i = 0; i < 5; i++)
@@ -200,6 +309,18 @@ namespace InfrastructureApp_Tests.Minigames
             Assert.That(cappedResult.AwardedPoints, Is.EqualTo(0));
             Assert.That(cappedResult.DailyPointsEarned, Is.EqualTo(5));
             Assert.That(cappedResult.HasReachedDailyLimit, Is.True);
+        }
+
+        private static string GetWrongAnswer(TriviaQuestion question)
+        {
+            if (question.QuestionType == TriviaQuestionTypes.Text)
+            {
+                return "wrong-answer";
+            }
+
+            return question.Options
+                .Select(option => option.OptionKey)
+                .First(optionKey => !optionKey.Equals(question.CorrectAnswerKey, StringComparison.OrdinalIgnoreCase));
         }
     }
 }

@@ -13,5 +13,9 @@ namespace InfrastructureApp.Services.Minigames
         Task<MinigameAwardResult> CompleteGameAsync(string userId, string gameKey, DateTime? utcNow = null);
 
         Task<SlotsSpinResult> SpinSlotsAsync(string userId, DateTime? utcNow = null);
+
+        Task<TriviaQuestionPromptResult> GetOrStartTriviaRoundAsync(string userId, DateTime? utcNow = null);
+
+        Task<TriviaAnswerResult> SubmitTriviaAnswerAsync(string userId, TriviaAnswerSubmission answer, DateTime? utcNow = null);
     }
 }

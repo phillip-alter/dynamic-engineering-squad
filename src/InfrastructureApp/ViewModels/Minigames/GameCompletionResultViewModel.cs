@@ -22,5 +22,17 @@ namespace InfrastructureApp.ViewModels.Minigames
         public int DailyPointsLimit { get; init; }
 
         public bool HasReachedDailyLimit { get; init; }
+
+        public int CorrectAnswers { get; init; }
+
+        public int TotalQuestions { get; init; }
+
+        public int CorrectAnswersToWin { get; init; }
+
+        public bool WasCorrect { get; init; }
+
+        public bool IsRoundComplete { get; init; }
+
+        public TriviaQuestionViewModel? NextQuestion { get; init; }
     }
 }

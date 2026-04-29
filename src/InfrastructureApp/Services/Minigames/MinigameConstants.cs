@@ -20,7 +20,6 @@ namespace InfrastructureApp.Services.Minigames
         public static readonly string[] GenericCompletionGameKeys =
         {
             MatchingGameKey,
-            TriviaGameKey,
             TapRepairGameKey
         };
 
