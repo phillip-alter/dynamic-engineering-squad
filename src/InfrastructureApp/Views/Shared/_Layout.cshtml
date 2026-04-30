@@ -9,6 +9,17 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - PatchNotes</title>
+    @if (ViewData["OgUrl"] != null)
+    {
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="@ViewData["OgUrl"]" />
+        <meta property="og:title" content="@ViewData["OgTitle"]" />
+        <meta property="og:description" content="@ViewData["OgDescription"]" />
+        @if (ViewData["OgImage"] != null)
+        {
+            <meta property="og:image" content="@ViewData["OgImage"]" />
+        }
+    }
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
@@ -132,6 +143,11 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="PointsShop" asp-action="Index">
                                     <i class="fa-solid fa-store"></i> Points Shop
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Minigames" asp-action="Index">
+                                    <i class="fa-solid fa-gamepad"></i> Minigames
                                 </a>
                             </li>
                          @* <li class="nav-item">
