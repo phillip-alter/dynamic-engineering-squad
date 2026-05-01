@@ -27,36 +27,40 @@ namespace InfrastructureApp_Tests.StepDefinitions
         {
             using var scope = ServerHost!.Services.CreateScope();
             var userManager = scope.ServiceProvider.GetRequiredService<UserManager<Users>>();
-            var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             
             var user = await userManager.FindByNameAsync(username);
-            Assert.That(user, Is.Not.Null);
+            Assert.That(user, Is.Not.Null, $"User {username} not found in DB.");
 
             user.IsBanned = true;
             user.BanReason = reason;
-            await userManager.UpdateAsync(user);
+            // Update security stamp to invalidate sessions
+            await userManager.UpdateSecurityStampAsync(user);
+            var result = await userManager.UpdateAsync(user);
+            Assert.That(result.Succeeded, Is.True, $"Failed to ban user {username} in DB.");
         }
 
         [Then(@"I should see a ""Ban"" button for user ""(.*)""")]
         public void ThenIShouldSeeABanButtonForUser(string username)
         {
             EnsureUserIsVisibleOnAdminPage(username);
-            var banButtons = Driver.FindElements(By.XPath($"//tr[td[contains(normalize-space(), '{username}')]]//button[contains(normalize-space(), 'Ban')]"));
-            Assert.That(banButtons.Count, Is.GreaterThan(0), $"Ban button for user {username} not found.");
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var banButton = wait.Until(d => d.FindElement(By.XPath($"//button[@data-username='{username}' and contains(normalize-space(), 'Ban')]")));
+            Assert.That(banButton.Displayed, Is.True, $"Ban button for user {username} is not displayed.");
         }
 
         [When(@"I click ""Ban"" for user ""(.*)""")]
         public void WhenIClickBanForUser(string username)
         {
             EnsureUserIsVisibleOnAdminPage(username);
-            var banButton = Driver.FindElement(By.XPath($"//tr[td[contains(normalize-space(), '{username}')]]//button[contains(normalize-space(), 'Ban')]"));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var banButton = wait.Until(d => d.FindElement(By.XPath($"//button[@data-username='{username}' and contains(normalize-space(), 'Ban')]")));
             ScrollAndClick(banButton);
         }
 
         [Then(@"I should see a ban confirmation modal for ""(.*)""")]
         public void ThenIShouldSeeABanConfirmationModalFor(string username)
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(45));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
             var modal = wait.Until(d => {
                 var m = d.FindElement(By.Id("banModal"));
                 return m.Displayed ? m : null;
@@ -67,7 +71,9 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [When(@"I enter ""(.*)"" as the ban reason")]
         public void WhenIEnterAsTheBanReason(string reason)
         {
-            var reasonInput = Driver.FindElement(By.Id("BanReason"));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var reasonInput = wait.Until(d => d.FindElement(By.Id("BanReason")));
+            reasonInput.Clear();
             reasonInput.SendKeys(reason);
         }
 
@@ -76,16 +82,31 @@ namespace InfrastructureApp_Tests.StepDefinitions
         {
             var confirmButton = Driver.FindElement(By.Id("confirmBanButton"));
             confirmButton.Click();
+            
+            // Wait for modal to close or page to navigate away
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            wait.Until(d => {
+                try {
+                    var m = d.FindElement(By.Id("banModal"));
+                    return !m.Displayed;
+                } catch (NoSuchElementException) {
+                    return true;
+                } catch (StaleElementReferenceException) {
+                    return true;
+                }
+            });
         }
 
         [Then(@"I should see ""Unban"" instead of ""Ban"" for user ""(.*)""")]
         public void ThenIShouldSeeUnbanInsteadOfBanForUser(string username)
         {
             EnsureUserIsVisibleOnAdminPage(username);
-            var unbanButtons = Driver.FindElements(By.XPath($"//tr[td[contains(normalize-space(), '{username}')]]//button[contains(normalize-space(), 'Unban')]"));
-            Assert.That(unbanButtons.Count, Is.GreaterThan(0), $"Unban button for user {username} not found.");
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
             
-            var banButtons = Driver.FindElements(By.XPath($"//tr[td[contains(normalize-space(), '{username}')]]//button[contains(normalize-space(), 'Ban')]"));
+            var unbanButton = wait.Until(d => d.FindElement(By.XPath($"//button[@data-username='{username}' and contains(normalize-space(), 'Unban')]")));
+            Assert.That(unbanButton.Displayed, Is.True, $"Unban button for user {username} not found.");
+            
+            var banButtons = Driver.FindElements(By.XPath($"//button[@data-username='{username}' and normalize-space()='Ban']"));
             Assert.That(banButtons.Count, Is.EqualTo(0), $"Ban button for user {username} should not be present.");
         }
 
@@ -109,7 +130,8 @@ namespace InfrastructureApp_Tests.StepDefinitions
         public void WhenIClickUnbanForUser(string username)
         {
             EnsureUserIsVisibleOnAdminPage(username);
-            var unbanButton = Driver.FindElement(By.XPath($"//tr[td[contains(normalize-space(), '{username}')]]//button[contains(normalize-space(), 'Unban')]"));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var unbanButton = wait.Until(d => d.FindElement(By.XPath($"//button[@data-username='{username}' and contains(normalize-space(), 'Unban')]")));
             ScrollAndClick(unbanButton);
         }
 
@@ -117,10 +139,16 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Ban User")]
         public void ThenIShouldSeeAnErrorMessage(string expectedMessage)
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(45));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
             try
             {
-                wait.Until(d => d.FindElement(By.TagName("body")).Text.Contains(expectedMessage));
+                wait.Until(d => {
+                    try {
+                        return d.FindElement(By.TagName("body")).Text.Contains(expectedMessage);
+                    } catch (StaleElementReferenceException) {
+                        return false;
+                    }
+                });
             }
             catch (WebDriverTimeoutException)
             {
@@ -135,31 +163,58 @@ namespace InfrastructureApp_Tests.StepDefinitions
 
         [Then(@"a moderation action should be logged for ""(.*)"" ""(.*)""")]
         [Scope(Feature = "Ban User")]
-        public async Task ThenAModerationActionShouldBeLoggedFor(string action, string username)
+        public void ThenAModerationActionShouldBeLoggedFor(string action, string username)
         {
-             var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(45));
-             wait.Until(async d => {
+             var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
+             wait.Until(d => {
                  using var scope = ServerHost!.Services.CreateScope();
                  var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                 return await db.ModerationActionLogs.AnyAsync(l => l.Action == action && l.TargetContentSnapshot.Contains(username));
+                 return db.ModerationActionLogs.Any(l => l.Action == action && l.TargetContentSnapshot.Contains(username));
              });
         }
 
         private void EnsureUserIsVisibleOnAdminPage(string username)
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(45));
-            while (true)
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
+            
+            // Wait for any element that indicates the page has loaded (either table or access denied)
+            wait.Until(d => d.FindElements(By.TagName("table")).Count > 0 || d.PageSource.Contains("Access Denied"));
+
+            if (Driver.PageSource.Contains("Access Denied"))
+            {
+                Assert.Fail("Access Denied to Admin page.");
+            }
+
+            int maxPages = 20; 
+            int currentPage = 1;
+
+            while (currentPage <= maxPages)
             {
                 var userRows = Driver.FindElements(By.XPath($"//tr[td[contains(normalize-space(), '{username}')]]"));
                 if (userRows.Count > 0) return;
 
-                var nextButtons = Driver.FindElements(By.XPath("//li[contains(@class, 'page-item') and not(contains(@class, 'disabled'))]/a[contains(text(), 'Next')]"));
+                var nextButtons = Driver.FindElements(By.XPath("//li[contains(@class, 'page-item') and not(contains(@class, 'disabled'))]/a[contains(normalize-space(), 'Next')]"));
                 if (nextButtons.Count == 0)
                 {
                     break;
                 }
+                
+                var oldTable = Driver.FindElement(By.TagName("table"));
                 ScrollAndClick(nextButtons[0]);
-                Thread.Sleep(500); // Wait for page load
+                
+                // Wait for the table to be replaced or content to change
+                wait.Until(d => {
+                    try {
+                        var newTable = d.FindElement(By.TagName("table"));
+                        return !newTable.Equals(oldTable);
+                    } catch (StaleElementReferenceException) {
+                        return true;
+                    } catch {
+                        return false;
+                    }
+                });
+                
+                currentPage++;
             }
         }
     }

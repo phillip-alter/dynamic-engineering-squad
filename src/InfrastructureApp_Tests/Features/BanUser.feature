@@ -11,11 +11,13 @@ Feature: Ban User
 
   Scenario: Admin can see the Ban button for an active user
     When I log in with username "adminuser" and password "AdminPassword123!"
+    And I am authenticated
     And I navigate to the Admin page
     Then I should see a "Ban" button for user "malicioususer"
 
   Scenario: Admin can successfully ban a user with a reason
     When I log in with username "adminuser" and password "AdminPassword123!"
+    And I am authenticated
     And I navigate to the Admin page
     And I click "Ban" for user "malicioususer"
     Then I should see a ban confirmation modal for "malicioususer"
@@ -43,6 +45,7 @@ Feature: Ban User
   Scenario: Admin can unban a banned user
     Given "malicioususer" is banned for "Mistake"
     When I log in with username "adminuser" and password "AdminPassword123!"
+    And I am authenticated
     And I navigate to the Admin page
     And I click "Unban" for user "malicioususer"
     Then I should see a "Ban" button for user "malicioususer"

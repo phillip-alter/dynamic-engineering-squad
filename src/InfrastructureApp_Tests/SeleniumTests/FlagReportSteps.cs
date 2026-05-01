@@ -149,16 +149,9 @@ namespace InfrastructureApp_Tests.StepDefinitions
                 var button = d.FindElement(By.Id("flagBtn"));
                 return button.Displayed && button.Enabled ? button : null;
             });
+            
             ScrollAndClick(flagBtn);
             
-            wait.Until(d => {
-                var modal = d.FindElement(By.Id("flagModal"));
-                var modalClass = modal.GetAttribute("class") ?? string.Empty;
-                return modal.Displayed && modalClass.Contains("show");
-            });
-
-            ScrollAndClick(flagBtn);
-
             WaitForVisibleModal(By.Id("flagModal"));
         }
 

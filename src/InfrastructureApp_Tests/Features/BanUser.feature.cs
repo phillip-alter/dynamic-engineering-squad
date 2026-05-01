@@ -146,9 +146,12 @@ namespace InfrastructureApp_Tests.Features
     await testRunner.WhenAsync("I log in with username \"adminuser\" and password \"AdminPassword123!\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 14
-    await testRunner.AndAsync("I navigate to the Admin page", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("I am authenticated", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 15
+    await testRunner.AndAsync("I navigate to the Admin page", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 16
     await testRunner.ThenAsync("I should see a \"Ban\" button for user \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
             }
@@ -162,7 +165,7 @@ namespace InfrastructureApp_Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Admin can successfully ban a user with a reason", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 17
+#line 18
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -175,28 +178,31 @@ namespace InfrastructureApp_Tests.Features
 #line 6
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 18
+#line 19
     await testRunner.WhenAsync("I log in with username \"adminuser\" and password \"AdminPassword123!\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 19
-    await testRunner.AndAsync("I navigate to the Admin page", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
 #line 20
-    await testRunner.AndAsync("I click \"Ban\" for user \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("I am authenticated", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 21
-    await testRunner.ThenAsync("I should see a ban confirmation modal for \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.AndAsync("I navigate to the Admin page", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 22
-    await testRunner.WhenAsync("I enter \"Spamming the system\" as the ban reason", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.AndAsync("I click \"Ban\" for user \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 23
-    await testRunner.AndAsync("I confirm the ban", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.ThenAsync("I should see a ban confirmation modal for \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 24
-    await testRunner.ThenAsync("I should see \"Unban\" instead of \"Ban\" for user \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.WhenAsync("I enter \"Spamming the system\" as the ban reason", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 25
+    await testRunner.AndAsync("I confirm the ban", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 26
+    await testRunner.ThenAsync("I should see \"Unban\" instead of \"Ban\" for user \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 27
     await testRunner.AndAsync("a moderation action should be logged for \"Banned\" \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -210,7 +216,7 @@ namespace InfrastructureApp_Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Banned user cannot log in and sees specific error message", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 27
+#line 29
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -223,16 +229,16 @@ namespace InfrastructureApp_Tests.Features
 #line 6
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 28
+#line 30
     await testRunner.GivenAsync("\"malicioususer\" is banned for \"Rules violation\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 29
+#line 31
     await testRunner.WhenAsync("I log in with username \"malicioususer\" and password \"BadPassword123!\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 30
+#line 32
     await testRunner.ThenAsync("I should see an error message \"Account Suspended\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
-#line 31
+#line 33
     await testRunner.AndAsync("I should not be authenticated", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -246,7 +252,7 @@ namespace InfrastructureApp_Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Banned user session is invalidated", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 33
+#line 35
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -259,28 +265,28 @@ namespace InfrastructureApp_Tests.Features
 #line 6
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 34
-    await testRunner.WhenAsync("I log in with username \"malicioususer\" and password \"BadPassword123!\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
-#line hidden
-#line 35
-    await testRunner.AndAsync("I am authenticated", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
 #line 36
-    await testRunner.AndAsync("\"adminuser\" bans \"malicioususer\" for \"Policy violation\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.WhenAsync("I log in with username \"malicioususer\" and password \"BadPassword123!\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
 #line 37
-    await testRunner.AndAsync("I navigate to the Dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+    await testRunner.AndAsync("I am authenticated", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 38
-    await testRunner.ThenAsync("I should be redirected to the Login page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.AndAsync("\"adminuser\" bans \"malicioususer\" for \"Policy violation\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 39
-    await testRunner.WhenAsync("I log in with username \"malicioususer\" and password \"BadPassword123!\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+    await testRunner.AndAsync("I navigate to the Dashboard page", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 40
-    await testRunner.ThenAsync("I should see an error message \"Account Suspended\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.ThenAsync("I should be redirected to the Login page", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
 #line hidden
 #line 41
+    await testRunner.WhenAsync("I log in with username \"malicioususer\" and password \"BadPassword123!\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
+#line hidden
+#line 42
+    await testRunner.ThenAsync("I should see an error message \"Account Suspended\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 43
     await testRunner.AndAsync("I should not be authenticated", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }
@@ -294,7 +300,7 @@ namespace InfrastructureApp_Tests.Features
             string[] tagsOfScenario = ((string[])(null));
             global::System.Collections.Specialized.OrderedDictionary argumentsOfScenario = new global::System.Collections.Specialized.OrderedDictionary();
             global::Reqnroll.ScenarioInfo scenarioInfo = new global::Reqnroll.ScenarioInfo("Admin can unban a banned user", null, tagsOfScenario, argumentsOfScenario, featureTags);
-#line 43
+#line 45
   this.ScenarioInitialize(scenarioInfo);
 #line hidden
             if ((global::Reqnroll.TagHelper.ContainsIgnoreTag(scenarioInfo.CombinedTags) || global::Reqnroll.TagHelper.ContainsIgnoreTag(featureTags)))
@@ -307,22 +313,25 @@ namespace InfrastructureApp_Tests.Features
 #line 6
   await this.FeatureBackgroundAsync();
 #line hidden
-#line 44
+#line 46
     await testRunner.GivenAsync("\"malicioususer\" is banned for \"Mistake\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Given ");
 #line hidden
-#line 45
+#line 47
     await testRunner.WhenAsync("I log in with username \"adminuser\" and password \"AdminPassword123!\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "When ");
 #line hidden
-#line 46
-    await testRunner.AndAsync("I navigate to the Admin page", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
-#line 47
-    await testRunner.AndAsync("I click \"Unban\" for user \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
-#line hidden
 #line 48
-    await testRunner.ThenAsync("I should see a \"Ban\" button for user \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+    await testRunner.AndAsync("I am authenticated", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
 #line 49
+    await testRunner.AndAsync("I navigate to the Admin page", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 50
+    await testRunner.AndAsync("I click \"Unban\" for user \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
+#line hidden
+#line 51
+    await testRunner.ThenAsync("I should see a \"Ban\" button for user \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "Then ");
+#line hidden
+#line 52
     await testRunner.AndAsync("a moderation action should be logged for \"Unbanned\" \"malicioususer\"", ((string)(null)), ((global::Reqnroll.Table)(null)), "And ");
 #line hidden
             }

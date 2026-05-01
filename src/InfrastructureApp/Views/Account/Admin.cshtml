@@ -49,7 +49,7 @@
                     {
                         <form asp-action="UnbanUser" asp-controller="Account" method="post" class="d-inline">
                             <input type="hidden" name="userId" value="@user.Id" />
-                            <button type="submit" class="btn btn-sm btn-warning">Unban</button>
+                            <button type="submit" class="btn btn-sm btn-warning" data-username="@user.UserName">Unban</button>
                         </form>
                     }
                     else
