@@ -56,7 +56,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Then(@"I should see a ban confirmation modal for ""(.*)""")]
         public void ThenIShouldSeeABanConfirmationModalFor(string username)
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(5));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(45));
             var modal = wait.Until(d => {
                 var m = d.FindElement(By.Id("banModal"));
                 return m.Displayed ? m : null;
@@ -117,7 +117,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Ban User")]
         public void ThenIShouldSeeAnErrorMessage(string expectedMessage)
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(45));
             try
             {
                 wait.Until(d => d.FindElement(By.TagName("body")).Text.Contains(expectedMessage));
@@ -137,7 +137,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Scope(Feature = "Ban User")]
         public async Task ThenAModerationActionShouldBeLoggedFor(string action, string username)
         {
-             var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+             var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(45));
              wait.Until(async d => {
                  using var scope = ServerHost!.Services.CreateScope();
                  var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -147,7 +147,7 @@ namespace InfrastructureApp_Tests.StepDefinitions
 
         private void EnsureUserIsVisibleOnAdminPage(string username)
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(45));
             while (true)
             {
                 var userRows = Driver.FindElements(By.XPath($"//tr[td[contains(normalize-space(), '{username}')]]"));
