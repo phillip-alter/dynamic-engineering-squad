@@ -9,12 +9,15 @@ public class UserService : IUserService
 {
     private readonly UserManager<Users> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly ApplicationDbContext _context;
 
     public UserService(UserManager<Users> userManager,
-        RoleManager<IdentityRole> roleManager)
+        RoleManager<IdentityRole> roleManager,
+        ApplicationDbContext context)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _context = context;
     } 
 
     public async Task<PaginatedList<Users>> GetUsersWithRolesAsync(int page, int pageSize)
@@ -23,7 +26,8 @@ public class UserService : IUserService
         {
             Id = u.Id,
             UserName = u.UserName,
-            Email = u.Email
+            Email = u.Email,
+            IsBanned = u.IsBanned
         });
 
         var pagedUsers = await PaginatedList<Users>.CreateAsync(query, page, pageSize);
@@ -121,5 +125,66 @@ public class UserService : IUserService
 
         await _userManager.UpdateSecurityStampAsync(user);
         return await _userManager.DeleteAsync(user);
+    }
+
+    public async Task<IdentityResult> BanUserAsync(string userId, string adminId, string reason)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+        if (user.Id == adminId)
+        {
+            return IdentityResult.Failed(new IdentityError
+            {
+                Description = "You cannot ban your own account."
+            });
+        }
+
+        user.IsBanned = true;
+        user.BanReason = reason;
+
+        // Immediately terminate any of that user's active sessions.
+        await _userManager.UpdateSecurityStampAsync(user);
+        
+        var result = await _userManager.UpdateAsync(user);
+
+        if (result.Succeeded)
+        {
+            _context.ModerationActionLogs.Add(new ModerationActionLog
+            {
+                ModeratorId = adminId,
+                Action = "Banned",
+                TargetContentSnapshot = $"User {user.UserName} banned. Reason: {reason}",
+                Timestamp = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+        }
+
+        return result;
+    }
+
+    public async Task<IdentityResult> UnbanUserAsync(string userId, string adminId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null) return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+        user.IsBanned = false;
+        user.BanReason = null;
+
+        var result = await _userManager.UpdateAsync(user);
+
+        if (result.Succeeded)
+        {
+            _context.ModerationActionLogs.Add(new ModerationActionLog
+            {
+                ModeratorId = adminId,
+                Action = "Unbanned",
+                TargetContentSnapshot = $"User {user.UserName} unbanned.",
+                Timestamp = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
+        }
+
+        return result;
     }
 }
