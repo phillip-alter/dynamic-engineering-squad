@@ -1,5 +1,6 @@
 ﻿using InfrastructureApp.Models;
 using InfrastructureApp.ViewModels.Account;
+using InfrastructureApp.Data;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -22,20 +23,13 @@ public class UserService : IUserService
 
     public async Task<PaginatedList<Users>> GetUsersWithRolesAsync(int page, int pageSize)
     {
-        var query = _userManager.Users.Select(u => new Users
-        {
-            Id = u.Id,
-            UserName = u.UserName,
-            Email = u.Email,
-            IsBanned = u.IsBanned
-        });
+        var query = _userManager.Users.OrderBy(u => u.UserName);
 
         var pagedUsers = await PaginatedList<Users>.CreateAsync(query, page, pageSize);
         
         foreach (var user in pagedUsers)
         {
-            var identityUser = await _userManager.FindByIdAsync(user.Id);
-            user.Roles = (await _userManager.GetRolesAsync(identityUser)).ToList();
+            user.Roles = (await _userManager.GetRolesAsync(user)).ToList();
         }
 
         return pagedUsers;

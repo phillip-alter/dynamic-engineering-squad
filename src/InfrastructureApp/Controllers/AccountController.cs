@@ -60,7 +60,6 @@ namespace InfrastructureApp.Controllers
 
             if (result.IsNotAllowed)
             {
-                var user = await _userManager.FindByNameAsync(model.UserName);
                 if (user != null && !await _userManager.IsEmailConfirmedAsync(user))
                 {
                     ModelState.AddModelError(string.Empty, "You must confirm your email before logging in.");
