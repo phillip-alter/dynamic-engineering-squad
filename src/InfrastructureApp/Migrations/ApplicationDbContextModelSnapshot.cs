@@ -17,7 +17,7 @@ namespace InfrastructureApp.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.15")
+                .HasAnnotation("ProductVersion", "9.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -604,6 +604,17 @@ namespace InfrastructureApp.Migrations
                         .IsRequired();
 
                     b.Navigation("ReportIssue");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("InfrastructureApp.Models.ReportIssue", b =>
+                {
+                    b.HasOne("InfrastructureApp.Models.Users", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });
