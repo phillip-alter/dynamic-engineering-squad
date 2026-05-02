@@ -45,6 +45,21 @@
                 <a asp-action="EditRoles" asp-controller="Account" asp-route-userId="@user.Id" class="btn btn-sm btn-primary">Edit</a>
                 @if (user.Id != currentUserId)
                 {
+                    if (user.IsBanned)
+                    {
+                        <form asp-action="UnbanUser" asp-controller="Account" method="post" class="d-inline">
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <button type="submit" class="btn btn-sm btn-warning" data-username="@user.UserName">Unban</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-warning ban-user-btn" 
+                                data-userid="@user.Id" data-username="@user.UserName"
+                                data-bs-toggle="modal" data-bs-target="#banModal">
+                            Ban
+                        </button>
+                    }
                     <button type="button" class="btn btn-sm btn-danger delete-user-btn" 
                             data-userid="@user.Id" data-username="@user.UserName"
                             data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
@@ -79,7 +94,33 @@
     </div>
 </div>
 
+<!-- Ban Modal -->
+<div class="modal fade" id="banModal" tabindex="-1" aria-labelledby="banModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="banModalLabel">Ban <span id="banUserName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="BanUser" asp-controller="Account" method="post">
+                <div class="modal-body">
+                    <input type="hidden" name="userId" id="banUserId" value="" />
+                    <div class="mb-3">
+                        <label for="BanReason" class="form-label">Reason for Ban</label>
+                        <textarea class="form-control" id="BanReason" name="reason" rows="3" required placeholder="Enter the reason for banning this user..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning" id="confirmBanButton">Confirm Ban</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <nav aria-label="User pagination">
+
     <ul class="pagination">
         @* Previous Button *@
         <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
@@ -116,6 +157,23 @@
 
                     modalUserName.textContent = userName;
                     modalUserIdInput.value = userId;
+                });
+            }
+
+            const banModal = document.getElementById('banModal');
+            if (banModal) {
+                banModal.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    const userId = button.getAttribute('data-userid');
+                    const userName = button.getAttribute('data-username');
+
+                    const modalUserName = banModal.querySelector('#banUserName');
+                    const modalUserIdInput = banModal.querySelector('#banUserId');
+                    const reasonInput = banModal.querySelector('#BanReason');
+
+                    modalUserName.textContent = userName;
+                    modalUserIdInput.value = userId;
+                    reasonInput.value = '';
                 });
             }
         });
