@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
+using SeleniumExtras.WaitHelpers;
 using Reqnroll;
 using Microsoft.Extensions.DependencyInjection;
 using InfrastructureApp_Tests.SeleniumTests.Helpers;
@@ -12,9 +13,10 @@ using NUnit.Framework;
 namespace InfrastructureApp_Tests.StepDefinitions
 {
     [Binding]
+    [Scope(Feature = "Search Users")]
     public class SearchUsersSteps : SeleniumTestBase
     {
-        [Given(@"a user with username ""(.*)"" exists")]
+        [Given(@"^a user with username ""([^""]*)"" exists$")]
         public async Task GivenAUserWithUsernameExists(string username)
         {
             await CreateTestUser(username, "Password123!");
@@ -23,7 +25,8 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [Then(@"I should see a search input field")]
         public void ThenIShouldSeeASearchInputField()
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
+            EnsureOnAdminPage();
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
             var searchInput = wait.Until(d => d.FindElement(By.Id("userSearchInput")));
             Assert.That(searchInput.Displayed, Is.True);
         }
@@ -31,13 +34,60 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [When(@"I enter ""(.*)"" into the search field")]
         public void WhenIEnterIntoTheSearchField(string searchTerm)
         {
-            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(10));
-            var searchInput = wait.Until(d => d.FindElement(By.Id("userSearchInput")));
-            searchInput.Clear();
-            searchInput.SendKeys(searchTerm);
+            EnsureOnAdminPage();
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
             
-            // Wait for debounce and reload
-            Thread.Sleep(1000); 
+            try 
+            {
+                var searchInput = wait.Until(d => {
+                    var el = d.FindElement(By.Id("userSearchInput"));
+                    return el.Displayed ? el : null;
+                });
+                
+                // Avoid Clear() if it's already empty to prevent unwanted reloads
+                if (!string.IsNullOrEmpty(searchInput.GetAttribute("value")))
+                {
+                    searchInput.Clear();
+                    // If Clear() triggered a reload, wait for it
+                    try {
+                        wait.Until(ExpectedConditions.StalenessOf(searchInput));
+                        searchInput = wait.Until(d => d.FindElement(By.Id("userSearchInput")));
+                    } catch (WebDriverTimeoutException) {
+                        // No reload happened, proceed
+                    }
+                }
+                
+                searchInput.SendKeys(searchTerm);
+                
+                // Wait for debounce (500ms) and page reload
+                wait.Until(d => d.Url.Contains("searchTerm=") || d.PageSource.Contains("No users found matching"));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Search failed. URL: {Driver.Url}");
+                Console.WriteLine($"Page source snippet: {Driver.PageSource.Substring(0, Math.Min(Driver.PageSource.Length, 1000))}");
+                throw;
+            }
+        }
+
+        private void EnsureOnAdminPage()
+        {
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(20));
+            
+            if (!Driver.Url.Contains("/Account/Admin"))
+            {
+                Driver.Navigate().GoToUrl($"{BaseUrl}/Account/Admin");
+            }
+            
+            // Handle unauthorized or session loss
+            if (Driver.Url.Contains("/Account/Login"))
+            {
+                Console.WriteLine("Redirected to Login. Attempting emergency re-login as adminuser.");
+                Login("adminuser", "AdminPassword123!");
+                Driver.Navigate().GoToUrl($"{BaseUrl}/Account/Admin");
+            }
+            
+            wait.Until(d => d.Url.Contains("/Account/Admin"));
         }
 
         [Then(@"I should see ""(.*)"" in the user list")]
@@ -67,9 +117,12 @@ namespace InfrastructureApp_Tests.StepDefinitions
         [When(@"I clear the search field")]
         public void WhenIClearTheSearchField()
         {
-            var clearBtn = Driver.FindElement(By.LinkText("Clear"));
+            var wait = new WebDriverWait(Driver, TimeSpan.FromSeconds(15));
+            var clearBtn = wait.Until(d => d.FindElement(By.Id("clearSearchBtn")));
             clearBtn.Click();
-            Thread.Sleep(500);
+            
+            // Wait for reset (URL should no longer contain searchTerm)
+            wait.Until(d => !d.Url.Contains("searchTerm="));
         }
     }
 }

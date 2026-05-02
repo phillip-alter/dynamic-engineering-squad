@@ -17,7 +17,7 @@
                        placeholder="Search by username..." value="@ViewBag.SearchTerm">
                 @if (!string.IsNullOrEmpty(ViewBag.SearchTerm))
                 {
-                    <a asp-action="Admin" class="btn btn-outline-secondary">Clear</a>
+                    <a asp-action="Admin" id="clearSearchBtn" class="btn btn-outline-secondary">Clear</a>
                 }
                 <button type="submit" class="btn btn-primary">Search</button>
             </div>
