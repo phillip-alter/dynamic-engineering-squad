@@ -18,7 +18,7 @@ Feature: Search Users
   Scenario: Admin searches for a user by partial username
     When I log in with username "adminuser" and password "AdminPassword123!"
     And I navigate to the Admin page
-    And I enter "li" into the search field
+    And I enter "ali" into the search field
     Then I should see "alice" in the user list
     And I should not see "bob" in the user list
     And I should not see "charlie" in the user list
