@@ -9,6 +9,22 @@
 
 <h1>Admin Panel</h1>
 
+<div class="row mb-3">
+    <div class="col-md-6">
+        <form asp-action="Admin" method="get" id="searchForm">
+            <div class="input-group">
+                <input type="text" name="searchTerm" id="userSearchInput" class="form-control" 
+                       placeholder="Search by username..." value="@ViewBag.SearchTerm">
+                @if (!string.IsNullOrEmpty(ViewBag.SearchTerm))
+                {
+                    <a asp-action="Admin" class="btn btn-outline-secondary">Clear</a>
+                }
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -25,52 +41,68 @@
     </div>
 }
 
-<table class="table table-striped">
-    <thead>
-    <tr>
-        <th>Username</th>
-        <th>Email</th>
-        <th>Roles</th>
-        <th>Action</th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach (var user in Model)
-    {
+@if (Model.Any())
+{
+    <table class="table table-striped">
+        <thead>
         <tr>
-            <td>@user.UserName</td>
-            <td>@user.Email</td>
-            <td>@(user.Roles != null ? string.Join(", ", user.Roles) : "No Roles")</td>
-            <td>
-                <a asp-action="EditRoles" asp-controller="Account" asp-route-userId="@user.Id" class="btn btn-sm btn-primary">Edit</a>
-                @if (user.Id != currentUserId)
-                {
-                    if (user.IsBanned)
+            <th>Username</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var user in Model)
+        {
+            <tr>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>@(user.Roles != null ? string.Join(", ", user.Roles) : "No Roles")</td>
+                <td>
+                    <a asp-action="EditRoles" asp-controller="Account" asp-route-userId="@user.Id" class="btn btn-sm btn-primary">Edit</a>
+                    @if (user.Id != currentUserId)
                     {
-                        <form asp-action="UnbanUser" asp-controller="Account" method="post" class="d-inline">
-                            <input type="hidden" name="userId" value="@user.Id" />
-                            <button type="submit" class="btn btn-sm btn-warning" data-username="@user.UserName">Unban</button>
-                        </form>
-                    }
-                    else
-                    {
-                        <button type="button" class="btn btn-sm btn-outline-warning ban-user-btn" 
+                        if (user.IsBanned)
+                        {
+                            <form asp-action="UnbanUser" asp-controller="Account" method="post" class="d-inline">
+                                <input type="hidden" name="userId" value="@user.Id" />
+                                <button type="submit" class="btn btn-sm btn-warning" data-username="@user.UserName">Unban</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-sm btn-outline-warning ban-user-btn" 
+                                    data-userid="@user.Id" data-username="@user.UserName"
+                                    data-bs-toggle="modal" data-bs-target="#banModal">
+                                Ban
+                            </button>
+                        }
+                        <button type="button" class="btn btn-sm btn-danger delete-user-btn" 
                                 data-userid="@user.Id" data-username="@user.UserName"
-                                data-bs-toggle="modal" data-bs-target="#banModal">
-                            Ban
+                                data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
+                            Remove
                         </button>
                     }
-                    <button type="button" class="btn btn-sm btn-danger delete-user-btn" 
-                            data-userid="@user.Id" data-username="@user.UserName"
-                            data-bs-toggle="modal" data-bs-target="#confirmDeleteModal">
-                        Remove
-                    </button>
-                }
-            </td>
-        </tr>
-    }
-    </tbody>
-</table>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="alert alert-info">
+        @if (!string.IsNullOrEmpty(ViewBag.SearchTerm))
+        {
+            <span>No users found matching '@ViewBag.SearchTerm'</span>
+        }
+        else
+        {
+            <span>No users found.</span>
+        }
+    </div>
+}
 
 <!-- Confirmation Modal -->
 <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
@@ -124,20 +156,20 @@
     <ul class="pagination">
         @* Previous Button *@
         <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
-            <a class="page-link" asp-action="Admin" asp-route-page="@(Model.PageIndex - 1)">Previous</a>
+            <a class="page-link" asp-action="Admin" asp-route-page="@(Model.PageIndex - 1)" asp-route-searchTerm="@ViewBag.SearchTerm">Previous</a>
         </li>
 
         @* Page Numbers *@
         @for (int i = 1; i <= Model.TotalPages; i++)
         {
             <li class="page-item @(i == Model.PageIndex ? "active" : "")">
-                <a class="page-link" asp-action="Admin" asp-route-page="@i">@i</a>
+                <a class="page-link" asp-action="Admin" asp-route-page="@i" asp-route-searchTerm="@ViewBag.SearchTerm">@i</a>
             </li>
         }
 
         @* Next Button *@
         <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
-            <a class="page-link" asp-action="Admin" asp-route-page="@(Model.PageIndex + 1)">Next</a>
+            <a class="page-link" asp-action="Admin" asp-route-page="@(Model.PageIndex + 1)" asp-route-searchTerm="@ViewBag.SearchTerm">Next</a>
         </li>
     </ul>
 </nav>
@@ -175,6 +207,26 @@
                     modalUserIdInput.value = userId;
                     reasonInput.value = '';
                 });
+            }
+
+            // Debounce logic for search
+            const searchInput = document.getElementById('userSearchInput');
+            const searchForm = document.getElementById('searchForm');
+            let timeout = null;
+
+            if (searchInput) {
+                searchInput.addEventListener('input', function () {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(function () {
+                        searchForm.submit();
+                    }, 500); // 500ms delay
+                });
+
+                // Move cursor to end of text on focus/load
+                const val = searchInput.value;
+                searchInput.value = '';
+                searchInput.value = val;
+                searchInput.focus();
             }
         });
     </script>
