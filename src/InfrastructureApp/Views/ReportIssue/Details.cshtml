@@ -69,6 +69,7 @@
             </p>
         }
         <p><strong>Created:</strong> @Model.CreatedAt</p>
+        <p><strong>Reported by:</strong> @(string.IsNullOrWhiteSpace(Model.User?.UserName) ? "Unknown user" : Model.User.UserName)</p>
         <p>
             <strong>Description:</strong><br />
             <span class="report-text-wrap text-break">@Model.Description</span>
