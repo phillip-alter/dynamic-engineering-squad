@@ -17,9 +17,9 @@ using InfrastructureApp.Services.ReportAssist;
 using InfrastructureApp.Services.ImageSeverity;
 using InfrastructureApp_Tests.TestDoubles;
 
-
 namespace InfrastructureApp_Tests.SeleniumTests.Helpers
 {
+    [NonParallelizable]
     public abstract class SeleniumTestBase
     {
         protected static IWebDriver Driver = null!;
@@ -126,10 +126,11 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
         public async Task SetUpDriver()
         {
             var options = new ChromeOptions();
-            options.AddArgument("--headless");
+            options.AddArgument("--headless=new");
             options.AddArgument("--no-sandbox");
             options.AddArgument("--disable-dev-shm-usage");
-            options.AddArgument("--window-size=1280,900");
+            options.AddArgument("--disable-gpu");
+            options.AddArgument("--window-size=1920,1080");
 
             Driver = new ChromeDriver(options);
             Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);

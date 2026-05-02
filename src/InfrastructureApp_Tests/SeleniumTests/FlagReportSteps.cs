@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Microsoft.AspNetCore.Identity;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using Reqnroll;
 using System.IO;
@@ -286,6 +287,10 @@ namespace InfrastructureApp_Tests.StepDefinitions
             TestContext.WriteLine($"Timed out waiting for {modalDescription}.");
             TestContext.WriteLine($"Current URL: {Driver.Url}");
             TestContext.WriteLine($"Selector: {by}");
+            TestContext.WriteLine($"window.bootstrap type: {ExecuteScript("return typeof window.bootstrap;")}");
+            TestContext.WriteLine($"#flagModal exists: {ExecuteScript("return !!document.querySelector('#flagModal');")}");
+            TestContext.WriteLine($"#reportModal exists: {ExecuteScript("return !!document.querySelector('#reportModal');")}");
+            TestContext.WriteLine($"Visible modal count: {ExecuteScript("return document.querySelectorAll('.modal.show').length;")}");
 
             try
             {
@@ -314,6 +319,21 @@ namespace InfrastructureApp_Tests.StepDefinitions
             {
                 TestContext.WriteLine($"Could not capture screenshot: {screenshotEx.Message}");
             }
+
+            try
+            {
+                if (Driver is ChromeDriver chromeDriver)
+                {
+                    foreach (var entry in chromeDriver.Manage().Logs.GetLog(LogType.Browser))
+                    {
+                        TestContext.WriteLine($"Browser console [{entry.Level}]: {entry.Message}");
+                    }
+                }
+            }
+            catch (Exception browserLogEx)
+            {
+                TestContext.WriteLine($"Could not capture browser console logs: {browserLogEx.Message}");
+            }
         }
 
         private string BuildPageSourceSnippet(params string[] markers)
@@ -335,6 +355,13 @@ namespace InfrastructureApp_Tests.StepDefinitions
             return pageSource.Length <= 1200
                 ? pageSource
                 : pageSource.Substring(0, 1200);
+        }
+
+        private object? ExecuteScript(string script)
+        {
+            return Driver is IJavaScriptExecutor executor
+                ? executor.ExecuteScript(script)
+                : null;
         }
     }
 }
