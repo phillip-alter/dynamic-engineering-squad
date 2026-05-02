@@ -176,10 +176,11 @@ namespace InfrastructureApp.Controllers
 
         [HttpGet]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> Admin(int page = 1)
+        public async Task<IActionResult> Admin(string? searchTerm, int page = 1)
         {
             var pageSize = 10;
-            var model = await _userService.GetUsersWithRolesAsync(page, pageSize);
+            var model = await _userService.GetUsersWithRolesAsync(page, pageSize, searchTerm);
+            ViewBag.SearchTerm = searchTerm;
             return View(model);
         }
         

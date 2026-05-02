@@ -21,9 +21,17 @@ public class UserService : IUserService
         _context = context;
     } 
 
-    public async Task<PaginatedList<Users>> GetUsersWithRolesAsync(int page, int pageSize)
+    public async Task<PaginatedList<Users>> GetUsersWithRolesAsync(int page, int pageSize, string? searchTerm = null)
     {
-        var query = _userManager.Users.OrderBy(u => u.UserName);
+        var query = _userManager.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            searchTerm = searchTerm.Trim().ToLower();
+            query = query.Where(u => u.UserName != null && u.UserName.ToLower().Contains(searchTerm));
+        }
+
+        query = query.OrderBy(u => u.UserName);
 
         var pagedUsers = await PaginatedList<Users>.CreateAsync(query, page, pageSize);
         
