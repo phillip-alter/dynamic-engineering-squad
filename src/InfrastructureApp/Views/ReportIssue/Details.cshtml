@@ -8,6 +8,11 @@
 @model InfrastructureApp.Models.ReportIssue
 @{
     ViewData["Title"] = "Report Submitted";
+    var reporterDisplay = !string.IsNullOrWhiteSpace(Model.User?.UserName)
+        ? Model.User!.UserName
+        : !string.IsNullOrWhiteSpace(Model.User?.Email)
+            ? Model.User!.Email
+            : "Unknown user";
 
     if (Model.Status == "Approved")
     {
@@ -69,7 +74,7 @@
             </p>
         }
         <p><strong>Created:</strong> @Model.CreatedAt</p>
-        <p><strong>Reported by:</strong> @(string.IsNullOrWhiteSpace(Model.User?.UserName) ? "Unknown user" : Model.User.UserName)</p>
+        <p><strong>Reported by:</strong> @reporterDisplay</p>
         <p>
             <strong>Description:</strong><br />
             <span class="report-text-wrap text-break">@Model.Description</span>
@@ -204,8 +209,12 @@
     <div class="mt-3">
         @if (User.Identity?.IsAuthenticated == true)
         {
-            <button id="flagBtn"
+            <button type="button"
+                    id="flagBtn"
                     data-testid="flag-button"
+                    data-bs-toggle="modal"
+                    data-bs-target="#flagModal"
+                    aria-controls="flagModal"
                     onclick="window.showFlagModalFromButton?.(this)"
                     class="btn @(ViewBag.UserHasFlagged ? "btn-secondary" : "btn-outline-danger") fw-bold"
                     data-report-id="@Model.Id"

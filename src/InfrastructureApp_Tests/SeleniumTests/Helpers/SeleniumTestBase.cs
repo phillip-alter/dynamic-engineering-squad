@@ -38,7 +38,7 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
                 SqliteConnection = new SqliteConnection("DataSource=:memory:");
                 SqliteConnection.Open();
 
-                var contentRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "InfrastructureApp"));
+                var contentRoot = FindInfrastructureAppContentRoot();
                 var builder = WebApplication.CreateBuilder(new WebApplicationOptions
                 {
                     Args = new string[] { "--environment", "Testing" },
@@ -213,6 +213,25 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
             Driver.FindElement(By.CssSelector("input[type='submit']")).Click();
 
             wait.Until(d => !d.Url.Contains("/Account/Login"));
+        }
+
+        private static string FindInfrastructureAppContentRoot()
+        {
+            var current = new DirectoryInfo(AppContext.BaseDirectory);
+
+            while (current != null)
+            {
+                var candidate = Path.Combine(current.FullName, "src", "InfrastructureApp");
+                if (Directory.Exists(candidate))
+                {
+                    return candidate;
+                }
+
+                current = current.Parent;
+            }
+
+            throw new DirectoryNotFoundException(
+                $"Could not locate the InfrastructureApp content root from '{AppContext.BaseDirectory}'.");
         }
     }
 }
