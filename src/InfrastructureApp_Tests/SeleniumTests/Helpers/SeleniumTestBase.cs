@@ -132,8 +132,9 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
             options.AddArgument("--disable-dev-shm-usage");
             options.AddArgument("--disable-gpu");
             options.AddArgument("--window-size=1920,1080");
+            options.AddArgument($"--user-data-dir={Path.Combine(Path.GetTempPath(), "chrome-test-" + Guid.NewGuid())}");
 
-            Driver = new ChromeDriver(options);
+            Driver = new ChromeDriver(ChromeDriverService.CreateDefaultService(), options, TimeSpan.FromSeconds(60));
             Driver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(10);
 
             // Create default test user for all tests
