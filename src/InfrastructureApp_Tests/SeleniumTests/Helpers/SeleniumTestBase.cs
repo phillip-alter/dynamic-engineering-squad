@@ -77,6 +77,7 @@ namespace InfrastructureApp_Tests.SeleniumTests.Helpers
                 builder.Services.AddScoped<ILeaderboardRepository, LeaderboardRepositoryEf>();
                 builder.Services.AddScoped<IUserService, UserService>();
                 builder.Services.AddScoped<IVoteService, VoteService>();
+                builder.Services.AddScoped<IIssueNameService, IssueNameService>();
                 builder.Services.AddScoped<IVerifyFixService, VerifyFixService>();
                 builder.Services.AddScoped<IFlagService, FlagService>();
                 builder.Services.AddScoped<IPointsShopService, PointsShopService>();
